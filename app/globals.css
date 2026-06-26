@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #0A0A0A;
-  --bg-surface: #0D0D0D;
-  --bg-card: #111111;
-  --accent-cyan: #00D4FF;
+  --bg-base: #1A1A1A;
+  --bg-surface: #242424;
+  --bg-card: #242424;
   --accent-amber: #FF9500;
-  --text-primary: #FFFFFF;
-  --text-secondary: #8B8B8B;
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  --accent-amber-dark: #E8850A;
+  --accent-cyan: #00D4FF;
+  --text-primary: #F5F5F5;
+  --text-secondary: #A0A0A0;
+  --border-color: #333333;
 }
 
 @theme inline {
@@ -32,24 +33,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scan line sweeping down the hero */
-@keyframes scanDown {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  3% {
-    opacity: 1;
-  }
-  92% {
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-
 /* Gentle float for the SVG garage scene */
 @keyframes floatY {
   0%,
@@ -61,15 +44,66 @@ body {
   }
 }
 
-.scan-line-anim {
-  animation: scanDown 8s linear infinite;
+/* Dust particle rising */
+@keyframes dustRise {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  70% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-120px) translateX(var(--drift, 12px)) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* Amber light flicker */
+@keyframes lightFlicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.85; }
+  97% { opacity: 1; }
+  98% { opacity: 0.9; }
+}
+
+/* Lift arm pulse glow */
+@keyframes liftGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255,149,0,0.3)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255,149,0,0.6)); }
 }
 
 .svg-float {
   animation: floatY 5s ease-in-out infinite;
 }
 
+.light-flicker {
+  animation: lightFlicker 8s ease-in-out infinite;
+}
+
+.lift-glow {
+  animation: liftGlow 3s ease-in-out infinite;
+}
+
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF9500;
 }

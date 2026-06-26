@@ -18,57 +18,58 @@ import type { LucideIcon } from 'lucide-react'
 interface Service {
   icon: LucideIcon
   name: string
+  time: string
   description: string
 }
 
 const services: Service[] = [
   {
     icon: Wrench,
-    name: 'Maintenance & Tune-ups',
-    description:
-      'Oil changes, filters, brake service, and full scheduled maintenance to keep you on the road.',
+    name: 'Oil Change',
+    time: 'Est. 30 min',
+    description: 'Full synthetic or conventional oil changes with filter replacement and fluid top-up.',
+  },
+  {
+    icon: Activity,
+    name: 'Brake Service',
+    time: 'Est. 2 hrs',
+    description: 'Pads, rotors, calipers, and brake fluid flush. We inspect the full brake system.',
   },
   {
     icon: Settings,
     name: 'Engine & Transmission',
-    description:
-      'Complete engine diagnostics, repair, and full transmission service by certified technicians.',
+    time: 'Est. 1–2 days',
+    description: 'Complete engine diagnostics, repair, and full transmission service by certified technicians.',
   },
   {
     icon: Thermometer,
     name: 'Heating & A/C',
-    description:
-      'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',
+    time: 'Est. 3 hrs',
+    description: 'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',
   },
   {
     icon: Zap,
-    name: 'Electrical Systems',
-    description:
-      'Starter, alternator, ignition, lighting, and complete electrical diagnostics with precision tools.',
+    name: 'Electrical & Diagnostics',
+    time: 'Est. 1–2 hrs',
+    description: 'OBD-II scanning, starter, alternator, ignition, and complete electrical diagnostics.',
   },
   {
     icon: RotateCcw,
     name: 'Tire Services',
-    description:
-      'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',
+    time: 'Est. 1 hr',
+    description: 'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',
   },
   {
     icon: ShieldCheck,
     name: 'Safety Certification',
-    description:
-      'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',
+    time: 'Est. 2 hrs',
+    description: 'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',
   },
   {
     icon: Layers,
     name: 'Body & Rust Work',
-    description:
-      'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',
-  },
-  {
-    icon: Activity,
-    name: 'Diagnostics',
-    description:
-      'Advanced OBD-II scanning and computer diagnostics to identify issues before they become expensive.',
+    time: 'Est. varies',
+    description: 'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',
   },
 ]
 
@@ -98,19 +99,17 @@ export default function ServicesGrid() {
   }, [])
 
   return (
-    <section id="services" className="px-6 py-24">
+    <section id="services" style={{ background: '#1A1A1A' }} className="px-6 py-24">
       <div className="mx-auto max-w-7xl">
         {/* Heading */}
         <div className="mb-16 text-center">
-          <span
-            className="mb-3 block font-mono text-xs tracking-[0.3em] uppercase"
-            style={{ color: '#00D4FF' }}
-          >
-            Full Service Auto Repair
-          </span>
-          <h2 className="text-5xl font-bold tracking-tight" style={{ color: '#FFFFFF' }}>
-            WHAT WE DO
+          <h2 className="text-5xl font-bold tracking-tight" style={{ color: '#F5F5F5' }}>
+            OUR SERVICES
           </h2>
+          <div
+            className="mx-auto mt-4 h-1 w-16"
+            style={{ background: '#FF9500', borderRadius: '1px' }}
+          />
         </div>
 
         {/* Grid */}
@@ -122,35 +121,41 @@ export default function ServicesGrid() {
                 key={i}
                 className="service-card group relative cursor-default p-6 transition-all duration-300"
                 style={{
-                  background: '#111111',
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  background: '#242424',
+                  border: '1px solid #333333',
                   borderRadius: '2px',
                 }}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLDivElement
-                  el.style.borderColor = 'rgba(0,212,255,0.35)'
-                  el.style.background = '#141414'
-                  el.style.boxShadow = '0 0 28px rgba(0,212,255,0.1)'
+                  el.style.borderColor = 'rgba(255,149,0,0.5)'
+                  el.style.background = '#292929'
+                  el.style.boxShadow = '0 0 28px rgba(255,149,0,0.12)'
                   el.style.transform = 'translateY(-2px)'
                 }}
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLDivElement
-                  el.style.borderColor = 'rgba(255,255,255,0.05)'
-                  el.style.background = '#111111'
+                  el.style.borderColor = '#333333'
+                  el.style.background = '#242424'
                   el.style.boxShadow = 'none'
                   el.style.transform = 'translateY(0)'
                 }}
               >
-                <div className="mb-4" style={{ color: '#00D4FF' }}>
+                <div className="mb-3" style={{ color: '#FF9500' }}>
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 <h3
-                  className="mb-2 text-sm font-semibold leading-tight"
-                  style={{ color: '#FFFFFF' }}
+                  className="mb-1 text-sm font-semibold leading-tight"
+                  style={{ color: '#F5F5F5' }}
                 >
                   {service.name}
                 </h3>
-                <p className="text-xs leading-relaxed" style={{ color: '#8B8B8B' }}>
+                <p
+                  className="mb-3 text-xs font-medium"
+                  style={{ color: '#FF9500', opacity: 0.8 }}
+                >
+                  {service.time}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: '#A0A0A0' }}>
                   {service.description}
                 </p>
               </div>

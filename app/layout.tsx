@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FixRight Auto | London's Trusted Auto Repair",
+  title: "FixRight Automotive | London Ontario's Most Trusted Independent Garage",
   description:
     "28 years of honest, expert auto repair in London, Ontario. Safety certifications, engine repair, electrical diagnostics, and more. No surprises — fair pricing.",
 };
@@ -28,7 +29,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col" style={{ paddingTop: '64px' }}>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

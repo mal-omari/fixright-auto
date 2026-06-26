@@ -42,53 +42,59 @@ export default function About() {
       ref={sectionRef}
       className="px-6 py-24"
       style={{
-        background: '#0D0D0D',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
+        background: '#242424',
+        borderTop: '1px solid #333333',
       }}
     >
       <div className="mx-auto grid max-w-6xl items-center gap-16 md:grid-cols-2">
         {/* Text column */}
         <div className="about-text">
           <span
-            className="mb-4 block font-mono text-xs tracking-[0.3em] uppercase"
-            style={{ color: '#00D4FF' }}
+            className="mb-4 block text-xs tracking-[0.3em] uppercase"
+            style={{ color: '#FF9500', fontFamily: 'monospace' }}
           >
             Our Story
           </span>
           <h2
             className="mb-8 text-5xl font-bold leading-none tracking-tight"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: '#F5F5F5' }}
           >
-            ABOUT
+            MEET YOUR
             <br />
-            FIXRIGHT
+            MECHANIC
           </h2>
-          <div className="space-y-5 text-base leading-relaxed" style={{ color: '#8B8B8B' }}>
+          <div className="space-y-5 text-base leading-relaxed" style={{ color: '#A0A0A0' }}>
             <p>
-              Omar has been turning wrenches for over 28 years — with 19 of them dedicated
-              to the families and drivers of London, Ontario. FixRight Auto isn't a franchise
-              or a chain. It's a real garage, run by a real mechanic who takes genuine pride
-              in every vehicle that comes through the door.
+              Hi, I'm Omar — owner of FixRight Automotive. With over 28 years of combined
+              experience, our team treats every vehicle like it's our own. We built this garage
+              on a simple promise: honest work, fair prices, and respect for our customers.
             </p>
             <p>
-              No upsells. No scare tactics. Just honest diagnostics, transparent pricing, and
-              work done right the first time. Whether you need a safety certification, an
-              engine rebuild, or a simple oil change — you'll get the same level of attention
-              and care.
+              No pressure. No runaround. Just results you can count on.
             </p>
+            <p style={{ color: '#F5F5F5', fontWeight: 500 }}>
+              Currently serving London, Ontario for 19 years and counting.
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-center gap-2">
+            <span style={{ color: '#FF9500', fontSize: '16px' }}>★★★★★</span>
+            <span className="text-sm" style={{ color: '#A0A0A0' }}>
+              Trusted by 6,000+ London families
+            </span>
           </div>
 
           <div className="mt-10 flex gap-10">
             <div className="flex gap-3">
               <div
                 className="mt-1 w-0.5"
-                style={{ background: '#00D4FF', minHeight: '42px', alignSelf: 'stretch' }}
+                style={{ background: '#FF9500', minHeight: '42px', alignSelf: 'stretch' }}
               />
               <div>
-                <div className="font-semibold" style={{ color: '#FFFFFF' }}>
+                <div className="font-semibold" style={{ color: '#F5F5F5' }}>
                   Ontario Certified
                 </div>
-                <div className="text-sm" style={{ color: '#8B8B8B' }}>
+                <div className="text-sm" style={{ color: '#A0A0A0' }}>
                   MTO Safety Inspections
                 </div>
               </div>
@@ -99,10 +105,10 @@ export default function About() {
                 style={{ background: '#FF9500', minHeight: '42px', alignSelf: 'stretch' }}
               />
               <div>
-                <div className="font-semibold" style={{ color: '#FFFFFF' }}>
+                <div className="font-semibold" style={{ color: '#F5F5F5' }}>
                   Fair & Transparent
                 </div>
-                <div className="text-sm" style={{ color: '#8B8B8B' }}>
+                <div className="text-sm" style={{ color: '#A0A0A0' }}>
                   No surprise charges
                 </div>
               </div>
