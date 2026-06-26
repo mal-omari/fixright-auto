@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #1A1A1A;
-  --bg-surface: #242424;
-  --bg-card: #242424;
-  --accent-amber: #FF9500;
-  --accent-amber-dark: #E8850A;
-  --accent-cyan: #00D4FF;
-  --text-primary: #F5F5F5;
-  --text-secondary: #A0A0A0;
-  --border-color: #333333;
+  --color-bg-primary: #1E1A16;
+  --color-bg-surface: #2A2420;
+  --color-bg-alternate: #242424;
+  --color-accent-amber: #FF9500;
+  --color-accent-gold: #E8C547;
+  --color-accent-cyan: #00D4FF;
+  --color-text-primary: #F0EDE8;
+  --color-text-secondary: #9A8E82;
+  --color-border: #3A3430;
+  --color-glow-amber: rgba(255, 149, 0, 0.15);
 }
 
 @theme inline {
-  --color-background: var(--bg-base);
-  --color-foreground: var(--text-primary);
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -26,22 +27,17 @@
 }
 
 body {
-  background: var(--bg-base);
-  color: var(--text-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Gentle float for the SVG garage scene */
+/* Float for SVG garage scene */
 @keyframes floatY {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 /* Dust particle rising */
@@ -50,14 +46,10 @@ body {
     transform: translateY(0) translateX(0) scale(1);
     opacity: 0;
   }
-  15% {
-    opacity: 0.6;
-  }
-  70% {
-    opacity: 0.3;
-  }
+  15% { opacity: 0.3; }
+  70% { opacity: 0.15; }
   100% {
-    transform: translateY(-120px) translateX(var(--drift, 12px)) scale(0.4);
+    transform: translateY(-200px) translateX(var(--drift, 12px)) scale(0.4);
     opacity: 0;
   }
 }
@@ -76,34 +68,45 @@ body {
   50% { filter: drop-shadow(0 0 10px rgba(255,149,0,0.6)); }
 }
 
-.svg-float {
-  animation: floatY 5s ease-in-out infinite;
+/* HUD blink */
+@keyframes hudBlink {
+  0%, 49%, 51%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.light-flicker {
-  animation: lightFlicker 8s ease-in-out infinite;
+/* Scan line sweep */
+@keyframes scanLine {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
 }
 
-.lift-glow {
-  animation: liftGlow 3s ease-in-out infinite;
+/* Service card engine rumble */
+@keyframes rumble {
+  0%   { transform: perspective(1000px) translateX(0)   translateY(0); }
+  14%  { transform: perspective(1000px) translateX(-1px) translateY(1px); }
+  28%  { transform: perspective(1000px) translateX(1px)  translateY(-1px); }
+  42%  { transform: perspective(1000px) translateX(-1px) translateY(0); }
+  57%  { transform: perspective(1000px) translateX(1px)  translateY(1px); }
+  71%  { transform: perspective(1000px) translateX(-1px) translateY(-1px); }
+  85%  { transform: perspective(1000px) translateX(1px)  translateY(0); }
+  100% { transform: perspective(1000px) translateX(0)   translateY(0); }
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
+/* HUD element fade in/out */
+@keyframes hudFade {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #1A1A1A;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #FF9500;
-}
+.svg-float { animation: floatY 5s ease-in-out infinite; }
+.light-flicker { animation: lightFlicker 8s ease-in-out infinite; }
+.lift-glow { animation: liftGlow 3s ease-in-out infinite; }
+.hud-blink { animation: hudBlink 1s step-end infinite; }
+.hud-pulse { animation: hudFade 3s ease-in-out infinite; }
+
+html { scroll-behavior: smooth; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent-amber); }

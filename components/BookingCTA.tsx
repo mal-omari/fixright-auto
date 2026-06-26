@@ -7,57 +7,44 @@ export default function BookingCTA() {
   return (
     <section
       style={{
-        background: 'linear-gradient(135deg, #FF9500 0%, #E8850A 100%)',
-        borderTop: '1px solid #333333',
+        background: 'linear-gradient(135deg, #FF9500 0%, #E08400 100%)',
+        borderTop: '1px solid #3A3430',
       }}
       className="px-6 py-20"
     >
       <div className="mx-auto max-w-3xl text-center">
-        <h2
-          className="mb-4 text-4xl font-bold tracking-tight"
-          style={{ color: '#111111' }}
-        >
+        <h2 className="mb-4 text-4xl font-bold tracking-tight" style={{ color: '#111008' }}>
           READY TO BOOK?
         </h2>
-        <p
-          className="mx-auto mb-10 max-w-md text-base"
-          style={{ color: 'rgba(0,0,0,0.7)' }}
-        >
+        <p className="mx-auto mb-10 max-w-md text-base" style={{ color: 'rgba(0,0,0,0.7)' }}>
           Tell us what your car needs. We&apos;ll get back to you within the hour.
         </p>
-
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/book"
             style={{
               display: 'inline-block',
-              background: '#111111',
-              color: '#F5F5F5',
+              background: '#111008',
+              color: '#F0EDE8',
               padding: '14px 36px',
               fontSize: '13px',
               fontWeight: 700,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
               textDecoration: 'none',
-              borderRadius: '2px',
+              borderRadius: '3px',
               transition: 'background 0.2s',
             }}
             onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#000')}
-            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#111111')}
+            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#111008')}
           >
             Book Online
           </Link>
-
           <a
             href="tel:5194719462"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#111111',
-              textDecoration: 'none',
-              fontSize: '15px',
-              fontWeight: 600,
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              color: '#111008', textDecoration: 'none', fontSize: '15px', fontWeight: 600,
             }}
           >
             <Phone size={18} />

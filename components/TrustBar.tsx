@@ -8,7 +8,7 @@ const stats = [
   { value: 28, suffix: '', label: 'Years Experience' },
   { value: 6000, suffix: '+', label: 'Vehicles Serviced' },
   { value: 3, suffix: '', label: 'Certified Mechanics' },
-  { value: null, display: 'CERTIFIED', label: 'Ontario Safety' },
+  { value: 19, suffix: '', label: 'Years in London' },
   { value: null, display: 'FAMILY', label: 'Owned & Operated' },
 ]
 
@@ -24,13 +24,12 @@ export default function TrustBar() {
         const el = countRefs.current[i]
         if (!el) return
         const obj = { n: 0 }
-        const { suffix } = stat
         gsap.to(obj, {
           n: stat.value,
           duration: 2.5,
           ease: 'power2.out',
           onUpdate() {
-            el.textContent = Math.round(obj.n).toLocaleString() + (suffix ?? '')
+            el.textContent = Math.round(obj.n).toLocaleString() + (stat.suffix ?? '')
           },
           scrollTrigger: {
             trigger: barRef.current,
@@ -47,9 +46,9 @@ export default function TrustBar() {
     <div
       ref={barRef}
       style={{
-        background: '#242424',
-        borderTop: '1px solid #333333',
-        borderBottom: '1px solid #333333',
+        background: '#2A2420',
+        borderTop: '1px solid #3A3430',
+        borderBottom: '1px solid #3A3430',
       }}
     >
       <div className="mx-auto max-w-6xl px-6 py-12">
@@ -57,18 +56,13 @@ export default function TrustBar() {
           {stats.map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-2 text-center">
               <span
-                ref={el => {
-                  countRefs.current[i] = el
-                }}
+                ref={el => { countRefs.current[i] = el }}
                 className="text-3xl font-bold md:text-4xl"
                 style={{ color: '#FF9500', fontVariantNumeric: 'tabular-nums' }}
               >
                 {stat.value !== null ? `0${stat.suffix ?? ''}` : (stat.display ?? '')}
               </span>
-              <span
-                className="text-xs tracking-[0.18em] uppercase"
-                style={{ color: '#A0A0A0' }}
-              >
+              <span className="text-xs tracking-[0.18em] uppercase" style={{ color: '#9A8E82' }}>
                 {stat.label}
               </span>
             </div>

@@ -2,23 +2,27 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Phone, Menu, X } from 'lucide-react'
 
 const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '/#services' },
+  { label: 'Services', href: '/services' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ]
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const lastScrollY = useRef(0)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY
       const delta = currentY - lastScrollY.current
-      if (currentY < 80) {
+      if (currentY < 100) {
         setVisible(true)
       } else if (delta > 8) {
         setVisible(false)
@@ -33,13 +37,13 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
 
   return (
     <>
@@ -49,9 +53,11 @@ export default function Navbar() {
           top: 0,
           left: 0,
           right: 0,
-          zIndex: 50,
-          background: '#1A1A1A',
-          borderBottom: '1px solid #333333',
+          zIndex: 100,
+          background: 'rgba(30,26,22,0.95)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          borderBottom: '1px solid #3A3430',
           transform: visible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.3s ease',
         }}
@@ -67,82 +73,66 @@ export default function Navbar() {
             justifyContent: 'space-between',
           }}
         >
-          {/* Logo */}
+          {/* Wordmark */}
           <Link
             href="/"
-            style={{ display: 'flex', alignItems: 'baseline', gap: '8px', textDecoration: 'none' }}
+            style={{ display: 'flex', alignItems: 'baseline', gap: '6px', textDecoration: 'none' }}
           >
-            <span
-              style={{
-                fontSize: '20px',
-                fontWeight: 800,
-                letterSpacing: '0.05em',
-                color: '#FF9500',
-                lineHeight: 1,
-              }}
-            >
+            <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '0.05em', color: '#FF9500', lineHeight: 1 }}>
               FIXRIGHT
             </span>
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                color: '#F5F5F5',
-                lineHeight: 1,
-              }}
-            >
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em', color: '#F0EDE8', lineHeight: 1 }}>
               AUTOMOTIVE
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '32px',
-            }}
-            className="hidden md:flex"
-          >
+          {/* Desktop center nav */}
+          <nav className="hidden md:flex" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            {navLinks.map(link => {
+              const active = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    color: active ? '#F0EDE8' : '#9A8E82',
+                    textDecoration: 'none',
+                    fontSize: '13px',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    transition: 'color 0.2s',
+                    position: 'relative',
+                    paddingBottom: '2px',
+                    borderBottom: active ? '2px solid #FF9500' : '2px solid transparent',
+                  }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#F0EDE8' }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#9A8E82' }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Desktop right */}
+          <div className="hidden md:flex" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <a
               href="tel:5194719462"
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                color: '#A0A0A0',
+                gap: '5px',
+                color: '#FF9500',
                 textDecoration: 'none',
-                fontSize: '13px',
-                letterSpacing: '0.05em',
-                transition: 'color 0.2s',
+                fontSize: '12px',
+                letterSpacing: '0.06em',
+                fontWeight: 600,
               }}
-              onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#F5F5F5')}
-              onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#A0A0A0')}
             >
-              <Phone size={14} />
+              <Phone size={13} />
               519.471.9462
             </a>
-
-            {navLinks.map(link => (
-              <a
-                key={link.href}
-                href={link.href}
-                style={{
-                  color: '#A0A0A0',
-                  textDecoration: 'none',
-                  fontSize: '13px',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#F5F5F5')}
-                onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#A0A0A0')}
-              >
-                {link.label}
-              </a>
-            ))}
-
+            <div style={{ width: '1px', height: '18px', background: '#3A3430' }} />
             <Link
               href="/book"
               style={{
@@ -154,29 +144,21 @@ export default function Navbar() {
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 textDecoration: 'none',
-                borderRadius: '2px',
+                borderRadius: '3px',
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FFa930')}
+              onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#E08400')}
               onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FF9500')}
             >
               Book Now
             </Link>
-          </nav>
+          </div>
 
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(v => !v)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#F5F5F5',
-              cursor: 'pointer',
-              padding: '8px',
-              display: 'flex',
-              alignItems: 'center',
-            }}
             className="flex md:hidden"
+            style={{ background: 'none', border: 'none', color: '#F0EDE8', cursor: 'pointer', padding: '8px' }}
             aria-label="Toggle menu"
           >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -184,90 +166,71 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile full-screen overlay */}
-      {menuOpen && (
-        <div
+      {/* Mobile overlay */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99,
+          background: 'rgba(30,26,22,0.98)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '36px',
+          opacity: menuOpen ? 1 : 0,
+          pointerEvents: menuOpen ? 'auto' : 'none',
+          transition: 'opacity 0.3s ease',
+        }}
+      >
+        <Link href="/" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', textDecoration: 'none', marginBottom: '8px' }}>
+          <span style={{ fontSize: '24px', fontWeight: 800, color: '#FF9500' }}>FIXRIGHT</span>
+          <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: '#F0EDE8' }}>AUTOMOTIVE</span>
+        </Link>
+
+        {navLinks.map(link => (
+          <Link
+            key={link.href}
+            href={link.href}
+            style={{
+              color: pathname === link.href ? '#FF9500' : '#F0EDE8',
+              textDecoration: 'none',
+              fontSize: '26px',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {link.label}
+          </Link>
+        ))}
+
+        <Link
+          href="/book"
           style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 49,
-            background: '#1A1A1A',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '40px',
+            background: '#FF9500',
+            color: '#111111',
+            padding: '14px 48px',
+            fontSize: '14px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            textDecoration: 'none',
+            borderRadius: '3px',
+            marginTop: '8px',
           }}
         >
-          <Link
-            href="/"
-            onClick={() => setMenuOpen(false)}
-            style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '8px',
-              textDecoration: 'none',
-              marginBottom: '16px',
-            }}
-          >
-            <span style={{ fontSize: '24px', fontWeight: 800, color: '#FF9500' }}>FIXRIGHT</span>
-            <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: '#F5F5F5' }}>
-              AUTOMOTIVE
-            </span>
-          </Link>
+          Book Now
+        </Link>
 
-          {navLinks.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                color: '#F5F5F5',
-                textDecoration: 'none',
-                fontSize: '24px',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          <Link
-            href="/book"
-            onClick={() => setMenuOpen(false)}
-            style={{
-              background: '#FF9500',
-              color: '#111111',
-              padding: '14px 40px',
-              fontSize: '14px',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            Book Now
-          </Link>
-
-          <a
-            href="tel:5194719462"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#A0A0A0',
-              textDecoration: 'none',
-              fontSize: '16px',
-            }}
-          >
-            <Phone size={16} />
-            519.471.9462
-          </a>
-        </div>
-      )}
+        <a
+          href="tel:5194719462"
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9A8E82', textDecoration: 'none', fontSize: '16px' }}
+        >
+          <Phone size={16} />
+          519.471.9462
+        </a>
+      </div>
     </>
   )
 }
