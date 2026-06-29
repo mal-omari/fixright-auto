@@ -4,45 +4,54 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { StatusBadge } from '@/components/admin/StatusBadge'
-import { ArrowLeft, Save, Trash2, FileText } from 'lucide-react'
+import { ArrowLeft, Car, User, FileText } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
 type Booking = Tables<'bookings'>
 type Mechanic = Tables<'mechanics'>
+type Service = Tables<'services'>
 
-const STATUSES = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']
+const STATUS_OPTIONS = [
+  { value: 'pending',     label: 'Pending',     color: '#FFC107' },
+  { value: 'confirmed',   label: 'Confirmed',   color: '#4A9EFF' },
+  { value: 'in_progress', label: 'In Progress', color: '#FF9500' },
+  { value: 'completed',   label: 'Completed',   color: '#28C850' },
+  { value: 'cancelled',   label: 'Cancelled',   color: '#FF4444' },
+]
 
-const input: React.CSSProperties = {
-  width: '100%', background: '#1A1714', border: '1px solid #2A2420',
-  borderRadius: '3px', color: '#F0EDE8', padding: '9px 12px',
+function initials(name: string) {
+  return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', background: '#141210', border: '1px solid #2A2420',
+  borderRadius: 8, color: '#F0EDE8', padding: '10px 12px',
   fontSize: '13px', outline: 'none', fontFamily: 'inherit',
 }
-const label: React.CSSProperties = {
+const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '10px', fontWeight: 600,
-  letterSpacing: '0.1em', color: '#4A4540', marginBottom: '5px',
+  letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6,
   textTransform: 'uppercase',
 }
-const infoRow = (k: string, v: string | number | null) => ({
-  key: k, val: v ?? '—',
-})
 
 export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [booking, setBooking] = useState<Booking | null>(null)
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
+  const [service, setService] = useState<Service | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [creatingInvoice, setCreatingInvoice] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
 
-  // Editable shop management fields
   const [status, setStatus] = useState('')
   const [mechanicId, setMechanicId] = useState('')
   const [estimatedHours, setEstimatedHours] = useState('')
   const [actualHours, setActualHours] = useState('')
   const [notes, setNotes] = useState('')
+  const [serviceAutoFilled, setServiceAutoFilled] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -58,6 +67,17 @@ export default function BookingDetailPage() {
         setEstimatedHours(b.estimated_hours?.toString() ?? '')
         setActualHours(b.actual_hours?.toString() ?? '')
         setNotes(b.notes ?? '')
+
+        if (b.service_id) {
+          const { data: svc } = await supabase.from('services').select('*').eq('id', b.service_id).single()
+          if (svc) {
+            setService(svc)
+            if (!b.estimated_hours) {
+              setEstimatedHours(svc.estimated_hours.toString())
+              setServiceAutoFilled(true)
+            }
+          }
+        }
       }
       setMechanics(m ?? [])
       setLoading(false)
@@ -67,8 +87,7 @@ export default function BookingDetailPage() {
 
   async function save() {
     if (!booking) return
-    setSaving(true)
-    setSaveMsg('')
+    setSaving(true); setSaveMsg('')
     const supabase = createClient()
     const { error } = await supabase.from('bookings').update({
       status,
@@ -89,23 +108,69 @@ export default function BookingDetailPage() {
     }
   }
 
+  async function createInvoice() {
+    if (!booking) return
+    setCreatingInvoice(true)
+    const supabase = createClient()
+    const labourRate = parseFloat(localStorage.getItem('fixright_labour_rate') ?? '95')
+    const hrs = estimatedHours ? parseFloat(estimatedHours) : 1
+
+    const { data: invoiceNum } = await supabase.rpc('next_invoice_number')
+    if (!invoiceNum) { setCreatingInvoice(false); return }
+
+    const labourSubtotal = hrs * labourRate
+    const hstRate = 0.13
+    const hstAmount = labourSubtotal * hstRate
+    const total = labourSubtotal + hstAmount
+
+    const dueDate = new Date(Date.now() + 30 * 86_400_000).toISOString().split('T')[0]
+
+    const { data: inv, error: invErr } = await supabase.from('invoices').insert({
+      invoice_number: invoiceNum as string,
+      booking_id: booking.id,
+      customer_name: booking.customer_name,
+      customer_phone: booking.customer_phone,
+      customer_email: booking.customer_email,
+      vehicle_year: booking.vehicle_year,
+      vehicle_make: booking.vehicle_make,
+      vehicle_model: booking.vehicle_model,
+      status: 'draft',
+      labour_subtotal: labourSubtotal,
+      parts_subtotal: 0,
+      subtotal: labourSubtotal,
+      hst_rate: hstRate,
+      hst_amount: hstAmount,
+      total,
+      due_date: dueDate,
+    }).select().single()
+
+    if (invErr || !inv) { setCreatingInvoice(false); return }
+
+    await supabase.from('invoice_line_items').insert({
+      invoice_id: inv.id,
+      type: 'labour',
+      description: booking.service_description ?? 'Labour',
+      quantity: hrs,
+      unit_price: labourRate,
+      sort_order: 0,
+    })
+
+    router.push(`/workshop-portal/invoices/${inv.id}`)
+  }
+
   async function cancelBooking() {
     if (!booking) return
-    const supabase = createClient()
-    await supabase.from('bookings').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', booking.id)
+    await createClient().from('bookings').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', booking.id)
     router.push('/workshop-portal/bookings')
   }
 
   if (loading) {
-    return (
-      <div style={{ padding: '40px', color: '#4A4540', fontSize: '13px' }}>Loading booking…</div>
-    )
+    return <div style={{ padding: 40, color: '#6B6560', fontSize: '13px' }}>Loading booking…</div>
   }
-
   if (!booking) {
     return (
-      <div style={{ padding: '40px' }}>
-        <div style={{ color: '#FF4444', fontSize: '14px', marginBottom: '16px' }}>Booking not found</div>
+      <div style={{ padding: 40 }}>
+        <div style={{ color: '#FF4444', fontSize: '14px', marginBottom: 16 }}>Booking not found</div>
         <Link href="/workshop-portal/bookings" style={{ color: '#FF9500', textDecoration: 'none', fontSize: '13px' }}>
           ← Back to Bookings
         </Link>
@@ -114,156 +179,206 @@ export default function BookingDetailPage() {
   }
 
   const vehicle = [booking.vehicle_year, booking.vehicle_make, booking.vehicle_model].filter(Boolean).join(' ') || '—'
-  const customerInfo = [
-    infoRow('Name', booking.customer_name),
-    infoRow('Phone', booking.customer_phone),
-    infoRow('Email', booking.customer_email),
-  ]
-  const vehicleInfo = [
-    infoRow('Year', booking.vehicle_year),
-    infoRow('Make', booking.vehicle_make),
-    infoRow('Model', booking.vehicle_model),
-    infoRow('VIN', booking.vehicle_vin),
-  ]
-  const bookingInfo = [
-    infoRow('Service', booking.service_description),
-    infoRow('Preferred Date', booking.preferred_date),
-    infoRow('Preferred Time', booking.preferred_time),
-    infoRow('Source', booking.source),
-    infoRow('Created', booking.created_at ? new Date(booking.created_at).toLocaleString() : null),
-  ]
+  const breadcrumb = `#${booking.id.slice(0, 8).toUpperCase()} — ${booking.customer_name}`
 
   const card: React.CSSProperties = {
-    background: '#111008', border: '1px solid #1F1C17',
-    borderRadius: '4px', padding: '24px', marginBottom: '16px',
-  }
-  const sectionTitle: React.CSSProperties = {
-    fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em',
-    color: '#3A3430', textTransform: 'uppercase', marginBottom: '16px',
+    background: '#1E1C18', border: '1px solid #2A2420',
+    borderRadius: 12, padding: 24, marginBottom: 16,
   }
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1000px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
+    <div style={{ padding: 24, paddingBottom: 100 }}>
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: 20 }}>
         <Link
           href="/workshop-portal/bookings"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#4A4540', textDecoration: 'none', fontSize: '12px', marginBottom: '16px' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '12px', marginBottom: 10 }}
         >
-          <ArrowLeft size={13} /> Back to Bookings
+          <ArrowLeft size={13} /> Bookings
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#F0EDE8', margin: 0 }}>
-            {booking.customer_name}
-          </h1>
-          <StatusBadge status={booking.status} />
-          <span style={{ fontSize: '13px', color: '#4A4540' }}>{vehicle}</span>
+        <div style={{ fontSize: '14px', color: '#4A4540' }}>
+          Bookings / <span style={{ color: '#F0EDE8' }}>{breadcrumb}</span>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        {/* Left — Booking Info */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 20 }}>
+        {/* Left — Customer & Vehicle */}
         <div>
           <div style={card}>
-            <div style={sectionTitle}>Customer</div>
-            {customerInfo.map(({ key, val }) => (
-              <div key={key} style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                <span style={{ minWidth: '60px', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', color: '#3A3430', textTransform: 'uppercase' }}>{key}</span>
-                <span style={{ fontSize: '13px', color: '#F0EDE8' }}>{String(val)}</span>
+            {/* Customer header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+              <div
+                style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: '#FF9500', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '17px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
+                }}
+              >
+                {initials(booking.customer_name)}
               </div>
-            ))}
-          </div>
+              <div>
+                <div style={{ fontSize: '17px', fontWeight: 700, color: '#F0EDE8' }}>{booking.customer_name}</div>
+                <div style={{ fontSize: '13px', color: '#6B6560', marginTop: 2 }}>{booking.customer_phone}</div>
+                {booking.customer_email && (
+                  <div style={{ fontSize: '12px', color: '#4A4540', marginTop: 1 }}>{booking.customer_email}</div>
+                )}
+              </div>
+            </div>
 
-          <div style={card}>
-            <div style={sectionTitle}>Vehicle</div>
-            {vehicleInfo.map(({ key, val }) => (
-              <div key={key} style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                <span style={{ minWidth: '60px', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', color: '#3A3430', textTransform: 'uppercase' }}>{key}</span>
-                <span style={{ fontSize: '13px', color: '#F0EDE8' }}>{String(val)}</span>
-              </div>
-            ))}
-          </div>
+            <div style={{ height: 1, background: '#2A2420', marginBottom: 20 }} />
 
-          <div style={card}>
-            <div style={sectionTitle}>Booking Details</div>
-            {bookingInfo.map(({ key, val }) => (
-              <div key={key} style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                <span style={{ minWidth: '90px', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', color: '#3A3430', textTransform: 'uppercase' }}>{key}</span>
-                <span style={{ fontSize: '13px', color: '#F0EDE8' }}>{String(val)}</span>
+            {/* Vehicle */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <Car size={15} style={{ color: '#6B6560' }} />
+                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', textTransform: 'uppercase' }}>
+                  Vehicle
+                </span>
               </div>
-            ))}
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#F0EDE8', marginBottom: 8 }}>{vehicle}</div>
+              {booking.vehicle_vin && (
+                <div style={{ fontSize: '11px', color: '#4A4540' }}>VIN: {booking.vehicle_vin}</div>
+              )}
+            </div>
+
+            {booking.service_description && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
+                  Issue Described
+                </div>
+                <div
+                  style={{
+                    fontSize: '13px', color: '#9A8E82', fontStyle: 'italic',
+                    background: '#141210', border: '1px solid #2A2420', borderRadius: 8,
+                    padding: '12px 14px', lineHeight: 1.6,
+                    borderLeft: '3px solid rgba(255,149,0,0.3)',
+                  }}
+                >
+                  &ldquo;{booking.service_description}&rdquo;
+                </div>
+              </div>
+            )}
+
+            {/* Meta chips */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {booking.preferred_date && (
+                <span style={{
+                  background: '#141210', border: '1px solid #2A2420',
+                  color: '#9A8E82', padding: '5px 12px', borderRadius: 20,
+                  fontSize: '12px',
+                }}>
+                  {new Date(booking.preferred_date + 'T00:00:00').toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  {booking.preferred_time && ` · ${booking.preferred_time}`}
+                </span>
+              )}
+              {booking.source && (
+                <span style={{
+                  background: '#141210', border: '1px solid #2A2420',
+                  color: '#6B6560', padding: '5px 12px', borderRadius: 20,
+                  fontSize: '11px', textTransform: 'capitalize',
+                }}>
+                  {booking.source === 'walkin' ? 'Walk-in' : booking.source === 'web' ? 'Web Booking' : booking.source}
+                </span>
+              )}
+              {booking.created_at && (
+                <span style={{ fontSize: '11px', color: '#4A4540', padding: '5px 0' }}>
+                  Created {new Date(booking.created_at).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Right — Shop Management */}
         <div>
           <div style={card}>
-            <div style={sectionTitle}>Shop Management</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+              <User size={14} style={{ color: '#6B6560' }} />
+              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em', color: '#6B6560', textTransform: 'uppercase' }}>
+                SHOP MANAGEMENT
+              </span>
+            </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={label}>Status</label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  value={status}
-                  onChange={e => setStatus(e.target.value)}
-                  style={{ ...input, paddingRight: '28px', cursor: 'pointer', appearance: 'none' as const }}
-                >
-                  {STATUSES.map(s => (
-                    <option key={s} value={s}>
-                      {s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                    </option>
-                  ))}
-                </select>
-                <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4A4540', pointerEvents: 'none', fontSize: '10px' }}>▼</span>
+            {/* Status pills */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Status</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {STATUS_OPTIONS.map(opt => {
+                  const active = status === opt.value
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setStatus(opt.value)}
+                      style={{
+                        padding: '6px 14px', borderRadius: 20,
+                        fontSize: '12px', fontWeight: active ? 600 : 400,
+                        background: active ? `${opt.color}25` : 'transparent',
+                        border: `1px solid ${active ? opt.color : '#2A2420'}`,
+                        color: active ? opt.color : '#6B6560',
+                        cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={label}>Assigned Mechanic</label>
+            {/* Mechanic */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Assigned Mechanic</label>
               <div style={{ position: 'relative' }}>
                 <select
                   value={mechanicId}
                   onChange={e => setMechanicId(e.target.value)}
-                  style={{ ...input, paddingRight: '28px', cursor: 'pointer', appearance: 'none' as const }}
+                  style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', appearance: 'none' }}
                 >
                   <option value="">— Unassigned —</option>
                   {mechanics.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
-                <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4A4540', pointerEvents: 'none', fontSize: '10px' }}>▼</span>
+                <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540', pointerEvents: 'none', fontSize: '10px' }}>▼</span>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            {/* Hours */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>
-                <label style={label}>Est. Hours</label>
+                <label style={labelStyle}>Est. Hours</label>
                 <input
                   type="number" step="0.5" min="0"
                   value={estimatedHours}
-                  onChange={e => setEstimatedHours(e.target.value)}
-                  style={input}
+                  onChange={e => { setEstimatedHours(e.target.value); setServiceAutoFilled(false) }}
+                  style={inputStyle}
                 />
+                {service && serviceAutoFilled && (
+                  <div style={{ fontSize: '10px', color: '#FF9500', marginTop: 4 }}>
+                    auto-filled from service
+                  </div>
+                )}
               </div>
               <div>
-                <label style={label}>Actual Hours</label>
+                <label style={labelStyle}>Actual Hours</label>
                 <input
                   type="number" step="0.5" min="0"
                   value={actualHours}
                   onChange={e => setActualHours(e.target.value)}
-                  style={input}
+                  style={inputStyle}
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={label}>Internal Notes</label>
+            {/* Notes */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Internal Notes</label>
               <textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 rows={4}
-                style={{ ...input, resize: 'vertical' }}
-                placeholder="Notes visible only to shop staff…"
+                style={{ ...inputStyle, resize: 'vertical' }}
+                placeholder="Visible to shop staff only…"
               />
             </div>
 
@@ -271,82 +386,100 @@ export default function BookingDetailPage() {
               onClick={save}
               disabled={saving}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                background: saving ? '#CC7700' : '#FF9500', color: '#111008',
-                border: 'none', borderRadius: '3px', padding: '11px 20px',
-                fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em',
-                textTransform: 'uppercase', cursor: saving ? 'not-allowed' : 'pointer', width: '100%',
-                justifyContent: 'center',
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: saving ? '#CC7700' : '#FF9500', color: '#0D0B08',
+                border: 'none', borderRadius: 8, padding: '12px 20px',
+                fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em',
+                textTransform: 'uppercase', cursor: saving ? 'not-allowed' : 'pointer',
               }}
             >
-              <Save size={14} />
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
 
             {saveMsg && (
               <div style={{
-                marginTop: '10px', fontSize: '12px', textAlign: 'center',
+                marginTop: 10, fontSize: '12px', textAlign: 'center',
                 color: saveMsg.startsWith('Error') ? '#FF4444' : '#28C850',
               }}>
                 {saveMsg}
               </div>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Bottom actions */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {status === 'completed' && (
-              <button style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                background: 'rgba(74,158,255,0.1)', color: '#4A9EFF',
-                border: '1px solid rgba(74,158,255,0.3)', borderRadius: '3px',
-                padding: '10px 16px', fontSize: '12px', fontWeight: 600,
+      {/* Sticky bottom bar */}
+      <div
+        style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          background: '#141210', borderTop: '1px solid #1E1C18',
+          padding: '12px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          zIndex: 30,
+        }}
+      >
+        <Link
+          href="/workshop-portal/bookings"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '13px' }}
+        >
+          <ArrowLeft size={14} /> Back to Bookings
+        </Link>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          {status === 'completed' && (
+            <button
+              onClick={createInvoice}
+              disabled={creatingInvoice}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'rgba(40,200,80,0.1)', color: '#28C850',
+                border: '1px solid rgba(40,200,80,0.3)', borderRadius: 8,
+                padding: '9px 18px', fontSize: '13px', fontWeight: 600,
+                cursor: creatingInvoice ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <FileText size={14} />
+              {creatingInvoice ? 'Creating…' : 'Create Invoice'}
+            </button>
+          )}
+
+          {!confirmCancel ? (
+            <button
+              onClick={() => setConfirmCancel(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'transparent', color: '#FF4444',
+                border: '1px solid rgba(255,68,68,0.3)', borderRadius: 8,
+                padding: '9px 18px', fontSize: '13px', fontWeight: 600,
                 cursor: 'pointer',
-              }}>
-                <FileText size={14} />
-                Create Invoice
-              </button>
-            )}
-
-            {!confirmCancel ? (
+              }}
+            >
+              Cancel Booking
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', color: '#FF4444' }}>Confirm cancel?</span>
               <button
-                onClick={() => setConfirmCancel(true)}
+                onClick={cancelBooking}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'rgba(255,68,68,0.1)', color: '#FF4444',
-                  border: '1px solid rgba(255,68,68,0.3)', borderRadius: '3px',
-                  padding: '10px 16px', fontSize: '12px', fontWeight: 600,
-                  cursor: 'pointer',
+                  background: '#FF4444', color: '#fff', border: 'none',
+                  borderRadius: 8, padding: '8px 16px', fontSize: '12px',
+                  fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                <Trash2 size={14} />
-                Cancel Booking
+                Yes, Cancel
               </button>
-            ) : (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#FF4444' }}>Are you sure?</span>
-                <button
-                  onClick={cancelBooking}
-                  style={{
-                    background: '#FF4444', color: '#fff', border: 'none',
-                    borderRadius: '3px', padding: '8px 14px', fontSize: '12px',
-                    fontWeight: 700, cursor: 'pointer',
-                  }}
-                >
-                  Yes, Cancel
-                </button>
-                <button
-                  onClick={() => setConfirmCancel(false)}
-                  style={{
-                    background: 'none', border: '1px solid #2A2420', color: '#9A8E82',
-                    borderRadius: '3px', padding: '8px 14px', fontSize: '12px', cursor: 'pointer',
-                  }}
-                >
-                  Keep
-                </button>
-              </div>
-            )}
-          </div>
+              <button
+                onClick={() => setConfirmCancel(false)}
+                style={{
+                  background: 'none', border: '1px solid #2A2420', color: '#9A8E82',
+                  borderRadius: 8, padding: '8px 14px', fontSize: '12px', cursor: 'pointer',
+                }}
+              >
+                Keep
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

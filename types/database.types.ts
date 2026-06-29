@@ -98,6 +98,131 @@ export type Database = {
           },
         ]
       }
+      invoice_line_items: {
+        Row: {
+          id: string
+          invoice_id: string
+          type: string
+          description: string
+          quantity: number
+          unit_price: number
+          total: number
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          type: string
+          description: string
+          quantity: number
+          unit_price: number
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          invoice_id?: string
+          type?: string
+          description?: string
+          quantity?: number
+          unit_price?: number
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          id: string
+          invoice_number: string
+          booking_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          customer_email: string | null
+          vehicle_year: number | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_mileage: string | null
+          status: string
+          labour_subtotal: number
+          parts_subtotal: number
+          subtotal: number
+          hst_rate: number
+          hst_amount: number
+          total: number
+          notes: string | null
+          due_date: string | null
+          paid_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_number: string
+          booking_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_email?: string | null
+          vehicle_year?: number | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_mileage?: string | null
+          status?: string
+          labour_subtotal?: number
+          parts_subtotal?: number
+          subtotal?: number
+          hst_rate?: number
+          hst_amount?: number
+          total?: number
+          notes?: string | null
+          due_date?: string | null
+          paid_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          invoice_number?: string
+          booking_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_email?: string | null
+          vehicle_year?: number | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_mileage?: string | null
+          status?: string
+          labour_subtotal?: number
+          parts_subtotal?: number
+          subtotal?: number
+          hst_rate?: number
+          hst_amount?: number
+          total?: number
+          notes?: string | null
+          due_date?: string | null
+          paid_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mechanics: {
         Row: {
           created_at: string | null
@@ -167,7 +292,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      next_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
