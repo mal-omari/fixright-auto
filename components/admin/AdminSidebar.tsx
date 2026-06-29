@@ -61,7 +61,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
         overflow: 'hidden',
       }}
     >
-      {/* Fixed tooltip — position:fixed escapes overflow:hidden */}
+      {/* Tooltip */}
       {!isOpen && tooltip && (
         <div
           style={{
@@ -73,6 +73,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
             color: '#F0EDE8',
             padding: '6px 12px',
             borderRadius: '6px',
+            fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '12px',
             fontWeight: 500,
             whiteSpace: 'nowrap',
@@ -100,31 +101,39 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
       >
         {isOpen ? (
           <div>
-            <div style={{ fontSize: '17px', fontWeight: 800, color: '#FF9500', letterSpacing: '0.12em' }}>
+            <div style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: '28px', fontWeight: 700, color: '#FF9500', letterSpacing: '0.05em', lineHeight: 1,
+            }}>
               FIXRIGHT
             </div>
-            <div style={{ fontSize: '10px', color: '#F0EDE8', letterSpacing: '0.2em', fontWeight: 500, marginTop: '3px' }}>
+            <div style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: '12px', color: '#9A8E82', letterSpacing: '0.15em', fontWeight: 400, marginTop: 2,
+            }}>
               AUTOMOTIVE
             </div>
             <span
               style={{
-                display: 'inline-block', marginTop: '8px',
-                background: 'rgba(255,149,0,0.12)', color: '#FF9500',
-                fontSize: '9px', fontWeight: 700, letterSpacing: '0.15em',
-                padding: '3px 8px', borderRadius: '20px',
-                border: '1px solid rgba(255,149,0,0.25)',
+                display: 'inline-block', marginTop: 8,
+                background: '#3D2800', color: '#FF9500',
+                fontFamily: 'var(--font-heading), sans-serif',
+                fontSize: '9px', fontWeight: 600, letterSpacing: '0.15em',
+                padding: '2px 6px', borderRadius: 4,
               }}
             >
               ADMIN
             </span>
           </div>
         ) : (
-          <div style={{ fontSize: '15px', fontWeight: 800, color: '#FF9500', letterSpacing: '0.05em' }}>
+          <div style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '15px', fontWeight: 700, color: '#FF9500', letterSpacing: '0.05em',
+          }}>
             FR
           </div>
         )}
 
-        {/* Toggle arrow — right edge of sidebar, vertically centered in logo area */}
         <button
           onClick={onToggle}
           aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
@@ -169,6 +178,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
         <div
           style={{
             padding: '16px 20px 8px',
+            fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '10px',
             fontWeight: 600,
             letterSpacing: '0.2em',
@@ -183,12 +193,15 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: isOpen ? '4px 0' : '16px 0', overflowY: 'auto', overflowX: 'hidden' }}>
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV.map(({ href, label, icon: Icon }, idx) => {
           const active = isActive(href)
           return (
             <div
               key={href}
-              style={{ position: 'relative' }}
+              style={{
+                position: 'relative',
+                animation: `slideInLeft 300ms ease-out ${idx * 40}ms both`,
+              }}
               onMouseEnter={e => {
                 if (!isOpen) {
                   const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
@@ -203,10 +216,13 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
-                  padding: isOpen ? '10px 20px' : '10px 0',
+                  height: 48,
+                  padding: isOpen ? '0 20px' : '0',
                   justifyContent: isOpen ? 'flex-start' : 'center',
-                  fontSize: '14px',
-                  fontWeight: active ? 600 : 400,
+                  fontFamily: 'var(--font-heading), sans-serif',
+                  fontSize: '13px',
+                  fontWeight: active ? 600 : 500,
+                  letterSpacing: '0.04em',
                   color: active ? '#F0EDE8' : '#9A8E82',
                   textDecoration: 'none',
                   borderLeft: active ? '3px solid #FF9500' : '3px solid transparent',
@@ -224,7 +240,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
                 <Icon
                   size={20}
                   strokeWidth={active ? 2.5 : 2}
-                  style={{ color: active ? '#FF9500' : '#6B6560', flexShrink: 0 }}
+                  style={{ color: active ? '#FF9500' : '#6B6560', flexShrink: 0, transition: 'color 0.15s' }}
                 />
                 {isOpen && label}
               </Link>
@@ -251,13 +267,19 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
               style={{
                 width: 32, height: 32, borderRadius: '50%',
                 background: '#FF9500', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '13px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
+                fontFamily: 'var(--font-heading), sans-serif',
+                fontSize: '14px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
               }}
             >
               O
             </div>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#F0EDE8' }}>Omar</div>
+              <div style={{
+                fontFamily: 'var(--font-heading), sans-serif',
+                fontSize: '14px', fontWeight: 600, color: '#F0EDE8',
+              }}>
+                Omar
+              </div>
               <div style={{ fontSize: '11px', color: '#6B6560' }}>Owner</div>
             </div>
           </div>
@@ -278,7 +300,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
             borderRadius: '6px',
             cursor: 'pointer',
             width: isOpen ? '100%' : 40,
-            height: 36,
+            height: 40,
             transition: 'border-color 0.15s, color 0.15s',
           }}
           onMouseEnter={e => {

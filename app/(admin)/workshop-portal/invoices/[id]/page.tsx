@@ -1,17 +1,17 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, memo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { ArrowLeft, Plus, Trash2, Download, Check } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Download, Check, Loader2 } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
 
 interface DraftItem {
-  id?: string
+  id: string
   type: 'labour' | 'parts'
   description: string
   quantity: number
@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }
   draft:   { color: '#9A8E82', bg: 'rgba(155,142,130,0.15)', label: 'Draft' },
   sent:    { color: '#4A9EFF', bg: 'rgba(74,158,255,0.15)',  label: 'Sent' },
   paid:    { color: '#28C850', bg: 'rgba(40,200,80,0.15)',   label: 'Paid' },
-  overdue: { color: '#FF4444', bg: 'rgba(255,68,68,0.15)',   label: 'Overdue' },
+  overdue: { color: '#EF4444', bg: 'rgba(255,68,68,0.15)',   label: 'Overdue' },
 }
 
 const STATUS_OPTIONS = ['draft', 'sent', 'paid', 'overdue'] as const
@@ -32,11 +32,166 @@ function fmtAmount(n: number) {
   return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-const iStyle: React.CSSProperties = {
-  background: '#141210', border: '1px solid #2A2420',
-  borderRadius: 6, color: '#F0EDE8', padding: '8px 10px',
-  fontSize: '13px', outline: 'none', fontFamily: 'inherit',
+let _idCounter = 0
+function newId() { return `draft-${++_idCounter}` }
+
+const iBase: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '1px solid #3A3430',
+  color: '#F0EDE8',
+  padding: '6px 4px',
+  fontSize: '13px',
+  outline: 'none',
+  fontFamily: 'inherit',
+  transition: 'border-bottom-color 0.15s',
 }
+
+// ── Memoized row components to prevent re-render on sibling keystroke ────────
+
+interface LabourRowProps {
+  item: DraftItem
+  onChange: (id: string, field: keyof DraftItem, value: string | number) => void
+  onRemove: (id: string) => void
+}
+
+const LabourRow = memo(function LabourRow({ item, onChange, onRemove }: LabourRowProps) {
+  const lineTotal = item.quantity * item.unit_price
+  return (
+    <tr
+      style={{ borderTop: '1px solid #2A2420' }}
+      onMouseEnter={e => {
+        const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement | null
+        if (btn) btn.style.opacity = '1'
+      }}
+      onMouseLeave={e => {
+        const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement | null
+        if (btn) btn.style.opacity = '0'
+      }}
+    >
+      <td style={{ padding: '8px 4px' }}>
+        <input
+          value={item.description}
+          onChange={e => onChange(item.id, 'description', e.target.value)}
+          placeholder="Labour description…"
+          style={{ ...iBase, width: '100%' }}
+          onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+          onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+        />
+      </td>
+      <td style={{ padding: '8px 4px', width: 80 }}>
+        <input
+          type="number" step="0.5" min="0"
+          value={item.quantity}
+          onChange={e => onChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+          style={{ ...iBase, width: '100%', textAlign: 'right', fontFamily: 'var(--font-heading), sans-serif' }}
+          onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+          onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+        />
+      </td>
+      <td style={{ padding: '8px 4px', width: 100 }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)', color: '#6B6560', fontSize: '12px' }}>$</span>
+          <input
+            type="number" step="0.01" min="0"
+            value={item.unit_price}
+            onChange={e => onChange(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+            style={{ ...iBase, width: '100%', paddingLeft: 16, textAlign: 'right', fontFamily: 'var(--font-heading), sans-serif' }}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+          />
+        </div>
+      </td>
+      <td style={{ padding: '8px 4px', width: 100, textAlign: 'right', color: '#FF9500', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600 }}>
+        {fmtAmount(lineTotal)}
+      </td>
+      <td style={{ padding: '8px 4px', width: 32 }}>
+        <button
+          className="del-btn"
+          onClick={() => onRemove(item.id)}
+          style={{ background: 'none', border: 'none', color: '#4A4540', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, opacity: 0, transition: 'color 0.15s, opacity 0.15s' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#4A4540')}
+        >
+          <Trash2 size={13} />
+        </button>
+      </td>
+    </tr>
+  )
+})
+
+interface PartsRowProps {
+  item: DraftItem
+  onChange: (id: string, field: keyof DraftItem, value: string | number) => void
+  onRemove: (id: string) => void
+}
+
+const PartsRow = memo(function PartsRow({ item, onChange, onRemove }: PartsRowProps) {
+  const lineTotal = item.quantity * item.unit_price
+  return (
+    <tr
+      style={{ borderTop: '1px solid #2A2420' }}
+      onMouseEnter={e => {
+        const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement | null
+        if (btn) btn.style.opacity = '1'
+      }}
+      onMouseLeave={e => {
+        const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement | null
+        if (btn) btn.style.opacity = '0'
+      }}
+    >
+      <td style={{ padding: '8px 4px' }}>
+        <input
+          value={item.description}
+          onChange={e => onChange(item.id, 'description', e.target.value)}
+          placeholder="Part description…"
+          style={{ ...iBase, width: '100%' }}
+          onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+          onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+        />
+      </td>
+      <td style={{ padding: '8px 4px', width: 80 }}>
+        <input
+          type="number" step="1" min="0"
+          value={item.quantity}
+          onChange={e => onChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+          style={{ ...iBase, width: '100%', textAlign: 'right', fontFamily: 'var(--font-heading), sans-serif' }}
+          onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+          onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+        />
+      </td>
+      <td style={{ padding: '8px 4px', width: 100 }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)', color: '#6B6560', fontSize: '12px' }}>$</span>
+          <input
+            type="number" step="0.01" min="0"
+            value={item.unit_price}
+            onChange={e => onChange(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+            style={{ ...iBase, width: '100%', paddingLeft: 16, textAlign: 'right', fontFamily: 'var(--font-heading), sans-serif' }}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = '#FF9500')}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = '#3A3430')}
+          />
+        </div>
+      </td>
+      <td style={{ padding: '8px 4px', width: 100, textAlign: 'right', color: '#FF9500', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600 }}>
+        {fmtAmount(lineTotal)}
+      </td>
+      <td style={{ padding: '8px 4px', width: 32 }}>
+        <button
+          className="del-btn"
+          onClick={() => onRemove(item.id)}
+          style={{ background: 'none', border: 'none', color: '#4A4540', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, opacity: 0, transition: 'color 0.15s, opacity 0.15s' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#4A4540')}
+        >
+          <Trash2 size={13} />
+        </button>
+      </td>
+    </tr>
+  )
+})
+
+// ── Main page ────────────────────────────────────────────────────────────────
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -45,13 +200,16 @@ export default function InvoiceDetailPage() {
   const [partsItems, setPartsItems] = useState<DraftItem[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMsg, setSaveMsg] = useState('')
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [downloading, setDownloading] = useState(false)
 
   const [status, setStatus] = useState('draft')
   const [dueDate, setDueDate] = useState('')
   const [notes, setNotes] = useState('')
   const [hstRate] = useState(0.13)
+
+  const prevTotalRef = useRef<number | null>(null)
+  const totalFlashRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -87,37 +245,49 @@ export default function InvoiceDetailPage() {
   const hstAmount = subtotal * hstRate
   const total = subtotal + hstAmount
 
+  // Flash total on change
+  useEffect(() => {
+    if (prevTotalRef.current !== null && prevTotalRef.current !== total) {
+      const el = totalFlashRef.current
+      if (el) {
+        el.style.animation = 'none'
+        void el.offsetWidth
+        el.style.animation = 'amountFlash 0.4s ease'
+      }
+    }
+    prevTotalRef.current = total
+  }, [total])
+
   function addLabourItem() {
     const labourRate = parseFloat(localStorage.getItem('fixright_labour_rate') ?? '95')
-    setLabourItems(prev => [...prev, { type: 'labour', description: '', quantity: 1, unit_price: labourRate, sort_order: prev.length }])
+    setLabourItems(prev => [...prev, { id: newId(), type: 'labour', description: '', quantity: 1, unit_price: labourRate, sort_order: prev.length }])
   }
 
   function addPartsItem() {
-    setPartsItems(prev => [...prev, { type: 'parts', description: '', quantity: 1, unit_price: 0, sort_order: prev.length }])
+    setPartsItems(prev => [...prev, { id: newId(), type: 'parts', description: '', quantity: 1, unit_price: 0, sort_order: prev.length }])
   }
 
-  function updateLabour(idx: number, field: keyof DraftItem, value: string | number) {
-    setLabourItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
-  }
+  const updateLabour = useCallback((itemId: string, field: keyof DraftItem, value: string | number) => {
+    setLabourItems(prev => prev.map(item => item.id === itemId ? { ...item, [field]: value } : item))
+  }, [])
 
-  function updateParts(idx: number, field: keyof DraftItem, value: string | number) {
-    setPartsItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
-  }
+  const updateParts = useCallback((itemId: string, field: keyof DraftItem, value: string | number) => {
+    setPartsItems(prev => prev.map(item => item.id === itemId ? { ...item, [field]: value } : item))
+  }, [])
 
-  function removeLabour(idx: number) {
-    setLabourItems(prev => prev.filter((_, i) => i !== idx))
-  }
+  const removeLabour = useCallback((itemId: string) => {
+    setLabourItems(prev => prev.filter(item => item.id !== itemId))
+  }, [])
 
-  function removeParts(idx: number) {
-    setPartsItems(prev => prev.filter((_, i) => i !== idx))
-  }
+  const removeParts = useCallback((itemId: string) => {
+    setPartsItems(prev => prev.filter(item => item.id !== itemId))
+  }, [])
 
   const save = useCallback(async () => {
     if (!invoice) return
-    setSaving(true); setSaveMsg('')
+    setSaving(true); setSaveState('saving')
     const supabase = createClient()
 
-    // Delete existing line items and re-insert
     await supabase.from('invoice_line_items').delete().eq('invoice_id', id)
 
     const allItems: Omit<LineItem, 'id' | 'total' | 'created_at'>[] = [
@@ -144,12 +314,12 @@ export default function InvoiceDetailPage() {
     }).eq('id', id)
 
     setSaving(false)
-    if (error) {
-      setSaveMsg('Error: ' + error.message)
-    } else {
+    if (!error) {
       setInvoice(prev => prev ? { ...prev, status, labour_subtotal: labourSubtotal, parts_subtotal: partsSubtotal, subtotal, hst_amount: hstAmount, total, due_date: dueDate || null, notes: notes || null } : prev)
-      setSaveMsg('Saved')
-      setTimeout(() => setSaveMsg(''), 3000)
+      setSaveState('saved')
+      setTimeout(() => setSaveState('idle'), 2000)
+    } else {
+      setSaveState('idle')
     }
   }, [invoice, id, labourItems, partsItems, status, dueDate, notes, labourSubtotal, partsSubtotal, subtotal, hstRate, hstAmount, total])
 
@@ -163,12 +333,10 @@ export default function InvoiceDetailPage() {
       const margin = 20
       let y = 20
 
-      // Header
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(22)
       doc.text('FIXRIGHT AUTOMOTIVE', margin, y)
 
-      doc.setFont('helvetica', 'bold')
       doc.setFontSize(20)
       doc.text('INVOICE', pageW - margin, y, { align: 'right' })
 
@@ -176,10 +344,10 @@ export default function InvoiceDetailPage() {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
       doc.setTextColor(100, 100, 100)
-      doc.text('123 Industrial Rd, London, ON N6A 2W5', margin, y)
+      doc.text('2117 Aldersbrook Rd, London ON N6G 3X1', margin, y)
       doc.text('519.471.9462', pageW - margin, y, { align: 'right' })
       y += 4
-      doc.text('fixrightautomotive.ca', margin, y)
+      doc.text('fixrightauto.ca', margin, y)
       doc.text(invoice.invoice_number, pageW - margin, y, { align: 'right' })
       y += 3
       doc.text(`Date: ${new Date(invoice.created_at).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' })}`, pageW - margin, y, { align: 'right' })
@@ -189,14 +357,12 @@ export default function InvoiceDetailPage() {
         doc.text(`Due: ${new Date(invoice.due_date + 'T00:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' })}`, pageW - margin, y, { align: 'right' })
       }
 
-      // Divider
       doc.setTextColor(0, 0, 0)
       y += 6
       doc.setDrawColor(200, 200, 200)
       doc.line(margin, y, pageW - margin, y)
       y += 8
 
-      // Bill To + Vehicle
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
@@ -225,15 +391,12 @@ export default function InvoiceDetailPage() {
       doc.line(margin, y, pageW - margin, y)
       y += 8
 
-      // Labour table
       if (labourItems.length > 0) {
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(10)
         doc.setTextColor(50, 50, 50)
         doc.text('LABOUR', margin, y)
         y += 5
-
-        // Table header
         doc.setFillColor(245, 245, 245)
         doc.rect(margin, y - 3, pageW - margin * 2, 7, 'F')
         doc.setFontSize(8)
@@ -243,7 +406,6 @@ export default function InvoiceDetailPage() {
         doc.text('Rate/hr', 155, y + 1)
         doc.text('Amount', pageW - margin, y + 1, { align: 'right' })
         y += 8
-
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
         labourItems.forEach(item => {
@@ -255,18 +417,15 @@ export default function InvoiceDetailPage() {
           doc.text(fmtAmount(lineTotal), pageW - margin, y, { align: 'right' })
           y += 6
         })
-
         y += 2
       }
 
-      // Parts table
       if (partsItems.length > 0) {
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(10)
         doc.setTextColor(50, 50, 50)
         doc.text('PARTS', margin, y)
         y += 5
-
         doc.setFillColor(245, 245, 245)
         doc.rect(margin, y - 3, pageW - margin * 2, 7, 'F')
         doc.setFontSize(8)
@@ -276,7 +435,6 @@ export default function InvoiceDetailPage() {
         doc.text('Unit Price', 155, y + 1)
         doc.text('Amount', pageW - margin, y + 1, { align: 'right' })
         y += 8
-
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
         partsItems.forEach(item => {
@@ -290,7 +448,6 @@ export default function InvoiceDetailPage() {
         })
       }
 
-      // Totals
       doc.setDrawColor(200, 200, 200)
       doc.line(margin, y + 2, pageW - margin, y + 2)
       y += 10
@@ -312,14 +469,12 @@ export default function InvoiceDetailPage() {
       y += 2
       doc.line(totalsX, y, pageW - margin, y)
       y += 5
-
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(12)
       doc.setTextColor(0, 0, 0)
       doc.text('TOTAL DUE:', totalsX, y)
       doc.text(fmtAmount(total), pageW - margin, y, { align: 'right' })
 
-      // Footer
       const footerY = 270
       doc.setDrawColor(200, 200, 200)
       doc.line(margin, footerY, pageW - margin, footerY)
@@ -344,91 +499,53 @@ export default function InvoiceDetailPage() {
   if (!invoice) {
     return (
       <div style={{ padding: 40 }}>
-        <div style={{ color: '#FF4444', fontSize: '14px', marginBottom: 16 }}>Invoice not found</div>
+        <div style={{ color: '#EF4444', fontSize: '14px', marginBottom: 16 }}>Invoice not found</div>
         <Link href="/workshop-portal/invoices" style={{ color: '#FF9500', textDecoration: 'none', fontSize: '13px' }}>← Back to Invoices</Link>
       </div>
     )
   }
 
-  const statusCfg = STATUS_CONFIG[invoice.status] ?? STATUS_CONFIG.draft
+  const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft
   const vehicle = [invoice.vehicle_year, invoice.vehicle_make, invoice.vehicle_model].filter(Boolean).join(' ')
 
   const card: React.CSSProperties = {
     background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, padding: 24, marginBottom: 16,
   }
   const sectionHead: React.CSSProperties = {
+    fontFamily: 'var(--font-heading), sans-serif',
     fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em',
-    color: '#6B6560', textTransform: 'uppercase', marginBottom: 16,
+    color: '#6B6560', textTransform: 'uppercase', marginBottom: 16, display: 'block',
   }
-
-  function LineItemRow({
-    item, idx, type, onChange, onRemove,
-  }: {
-    item: DraftItem
-    idx: number
-    type: 'labour' | 'parts'
-    onChange: (idx: number, field: keyof DraftItem, value: string | number) => void
-    onRemove: (idx: number) => void
-  }) {
-    const lineTotal = item.quantity * item.unit_price
-    return (
-      <tr style={{ borderTop: '1px solid #2A2420' }}>
-        <td style={{ padding: '8px 4px' }}>
-          <input
-            value={item.description}
-            onChange={e => onChange(idx, 'description', e.target.value)}
-            placeholder={type === 'labour' ? 'Labour description…' : 'Part description…'}
-            style={{ ...iStyle, width: '100%' }}
-          />
-        </td>
-        <td style={{ padding: '8px 4px', width: 80 }}>
-          <input
-            type="number" step="0.5" min="0"
-            value={item.quantity}
-            onChange={e => onChange(idx, 'quantity', parseFloat(e.target.value) || 0)}
-            style={{ ...iStyle, width: '100%', textAlign: 'right' }}
-          />
-        </td>
-        <td style={{ padding: '8px 4px', width: 100 }}>
-          <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#6B6560', fontSize: '12px' }}>$</span>
-            <input
-              type="number" step="0.01" min="0"
-              value={item.unit_price}
-              onChange={e => onChange(idx, 'unit_price', parseFloat(e.target.value) || 0)}
-              style={{ ...iStyle, width: '100%', paddingLeft: 18, textAlign: 'right' }}
-            />
-          </div>
-        </td>
-        <td style={{ padding: '8px 4px', width: 100, textAlign: 'right', color: '#F0EDE8', fontSize: '13px', fontWeight: 600 }}>
-          {fmtAmount(lineTotal)}
-        </td>
-        <td style={{ padding: '8px 4px', width: 32 }}>
-          <button
-            onClick={() => onRemove(idx)}
-            style={{ background: 'none', border: 'none', color: '#4A4540', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
-          >
-            <Trash2 size={13} />
-          </button>
-        </td>
-      </tr>
-    )
+  const metaLabel: React.CSSProperties = {
+    fontFamily: 'var(--font-heading), sans-serif',
+    fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em',
+    color: '#6B6560', textTransform: 'uppercase', display: 'block', marginBottom: 4,
+  }
+  const colHeader: React.CSSProperties = {
+    textAlign: 'left', padding: '8px 4px',
+    fontFamily: 'var(--font-heading), sans-serif',
+    fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em',
+    color: '#6B6560', textTransform: 'uppercase',
   }
 
   return (
     <div style={{ padding: 24, paddingBottom: 100 }}>
-      {/* Breadcrumb + header */}
+      {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/workshop-portal/invoices" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '12px', marginBottom: 10 }}>
           <ArrowLeft size={13} /> Invoices
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#FF9500', fontFamily: 'monospace', margin: 0 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '32px', fontWeight: 700, color: '#FF9500', margin: 0, letterSpacing: '0.03em',
+          }}>
             {invoice.invoice_number}
           </h1>
           <span style={{
             background: statusCfg.bg, color: statusCfg.color,
-            padding: '3px 12px', borderRadius: 20,
+            padding: '6px 16px', borderRadius: 6,
+            fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
           }}>
             {statusCfg.label}
@@ -439,47 +556,38 @@ export default function InvoiceDetailPage() {
         </div>
       </div>
 
-      {/* Two column: customer info / invoice meta */}
+      {/* Two column */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 16 }}>
-        {/* Left — customer + vehicle */}
+        {/* Left */}
         <div style={card}>
-          <div style={sectionHead}>Customer & Vehicle</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <span style={sectionHead}>Customer &amp; Vehicle</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 20 }}>
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
-                Bill To
-              </div>
+              <span style={metaLabel}>Bill To</span>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#F0EDE8', marginBottom: 4 }}>{invoice.customer_name ?? '—'}</div>
-              {invoice.customer_phone && <div style={{ fontSize: '12px', color: '#9A8E82', marginBottom: 2 }}>{invoice.customer_phone}</div>}
+              {invoice.customer_phone && <div style={{ fontSize: '13px', color: '#9A8E82', marginBottom: 2 }}>{invoice.customer_phone}</div>}
               {invoice.customer_email && <div style={{ fontSize: '12px', color: '#6B6560' }}>{invoice.customer_email}</div>}
             </div>
             <div>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
-                Vehicle
-              </div>
+              <span style={metaLabel}>Vehicle</span>
               <div style={{ fontSize: '14px', fontWeight: 600, color: '#F0EDE8', marginBottom: 4 }}>{vehicle || '—'}</div>
               {invoice.vehicle_mileage && <div style={{ fontSize: '12px', color: '#6B6560' }}>Mileage: {invoice.vehicle_mileage}</div>}
             </div>
           </div>
-          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #2A2420' }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
-              Billed By
-            </div>
+          <div style={{ paddingTop: 16, borderTop: '1px solid #2A2420' }}>
+            <span style={metaLabel}>Billed By</span>
             <div style={{ fontSize: '13px', fontWeight: 700, color: '#F0EDE8' }}>FixRight Automotive</div>
-            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>123 Industrial Rd, London, ON N6A 2W5</div>
+            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>2117 Aldersbrook Rd, London ON N6G 3X1</div>
             <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 1 }}>519.471.9462</div>
           </div>
         </div>
 
-        {/* Right — invoice meta */}
+        {/* Right */}
         <div style={card}>
-          <div style={sectionHead}>Invoice Management</div>
+          <span style={sectionHead}>Invoice Management</span>
 
-          {/* Status */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
-              Status
-            </div>
+            <span style={metaLabel}>Status</span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {STATUS_OPTIONS.map(s => {
                 const cfg = STATUS_CONFIG[s]
@@ -489,8 +597,9 @@ export default function InvoiceDetailPage() {
                     key={s}
                     onClick={() => setStatus(s)}
                     style={{
-                      padding: '5px 12px', borderRadius: 20,
-                      fontSize: '11px', fontWeight: active ? 700 : 400,
+                      padding: '5px 12px', borderRadius: 6,
+                      fontFamily: 'var(--font-heading), sans-serif',
+                      fontSize: '11px', fontWeight: active ? 700 : 500,
                       background: active ? cfg.bg : 'transparent',
                       border: `1px solid ${active ? cfg.color : '#2A2420'}`,
                       color: active ? cfg.color : '#6B6560',
@@ -505,33 +614,34 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
 
-          {/* Due date */}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 6 }}>
-              Due Date
-            </label>
+            <label style={metaLabel}>Due Date</label>
             <input
               type="date" value={dueDate}
               onChange={e => setDueDate(e.target.value)}
-              style={{ ...iStyle, width: '100%' }}
+              style={{
+                width: '100%', background: '#141210', border: '1px solid #2A2420',
+                borderRadius: 6, color: '#F0EDE8', padding: '8px 10px',
+                fontSize: '13px', outline: 'none', fontFamily: 'inherit',
+              }}
             />
           </div>
 
-          {/* Notes */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 6 }}>
-              Notes
-            </label>
+            <label style={metaLabel}>Notes</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
               placeholder="Payment terms, notes to customer…"
-              style={{ ...iStyle, width: '100%', resize: 'vertical' }}
+              style={{
+                width: '100%', background: '#141210', border: '1px solid #2A2420',
+                borderRadius: 6, color: '#F0EDE8', padding: '8px 10px',
+                fontSize: '13px', outline: 'none', fontFamily: 'inherit', resize: 'vertical',
+              }}
             />
           </div>
 
-          {/* Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button
               onClick={downloadPDF}
@@ -542,6 +652,7 @@ export default function InvoiceDetailPage() {
                 border: '1px solid rgba(74,158,255,0.3)', borderRadius: 8,
                 padding: '10px 16px', fontSize: '12px', fontWeight: 600,
                 cursor: downloading ? 'not-allowed' : 'pointer',
+                fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
               }}
             >
               <Download size={14} />
@@ -556,6 +667,7 @@ export default function InvoiceDetailPage() {
                   border: '1px solid rgba(40,200,80,0.3)', borderRadius: 8,
                   padding: '10px 16px', fontSize: '12px', fontWeight: 600,
                   cursor: 'pointer',
+                  fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
                 }}
               >
                 <Check size={14} /> Mark as Paid
@@ -567,24 +679,22 @@ export default function InvoiceDetailPage() {
 
       {/* Line items */}
       <div style={card}>
-        {/* Labour section */}
+        {/* Labour */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={sectionHead}>Labour</span>
-          </div>
+          <span style={sectionHead}>Labour</span>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {['Description', 'Hours', 'Rate / hr', 'Total', ''].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '8px 4px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase' }}>
-                    {h}
-                  </th>
-                ))}
+                <th style={colHeader}>Description</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Hours</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Rate / hr</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
+                <th style={{ ...colHeader, width: 32 }} />
               </tr>
             </thead>
             <tbody>
-              {labourItems.map((item, idx) => (
-                <LineItemRow key={idx} item={item} idx={idx} type="labour" onChange={updateLabour} onRemove={removeLabour} />
+              {labourItems.map(item => (
+                <LabourRow key={item.id} item={item} onChange={updateLabour} onRemove={removeLabour} />
               ))}
               {labourItems.length === 0 && (
                 <tr>
@@ -599,33 +709,33 @@ export default function InvoiceDetailPage() {
             onClick={addLabourItem}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, marginTop: 10,
-              background: 'none', border: '1px dashed #2A2420',
-              color: '#6B6560', padding: '7px 14px', fontSize: '12px',
-              borderRadius: 6, cursor: 'pointer',
+              background: 'none', border: 'none',
+              color: '#6B6560', padding: '4px 0', fontSize: '12px',
+              cursor: 'pointer', transition: 'color 0.15s',
             }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#FF9500')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#6B6560')}
           >
             <Plus size={13} /> Add Labour Line
           </button>
         </div>
 
-        {/* Parts section */}
+        {/* Parts */}
         <div style={{ paddingTop: 20, borderTop: '1px solid #2A2420' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={sectionHead}>Parts</span>
-          </div>
+          <span style={sectionHead}>Parts</span>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {['Part Description', 'Qty', 'Unit Price', 'Total', ''].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '8px 4px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase' }}>
-                    {h}
-                  </th>
-                ))}
+                <th style={colHeader}>Description</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Qty</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Unit Price</th>
+                <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
+                <th style={{ ...colHeader, width: 32 }} />
               </tr>
             </thead>
             <tbody>
-              {partsItems.map((item, idx) => (
-                <LineItemRow key={idx} item={item} idx={idx} type="parts" onChange={updateParts} onRemove={removeParts} />
+              {partsItems.map(item => (
+                <PartsRow key={item.id} item={item} onChange={updateParts} onRemove={removeParts} />
               ))}
               {partsItems.length === 0 && (
                 <tr>
@@ -640,10 +750,12 @@ export default function InvoiceDetailPage() {
             onClick={addPartsItem}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, marginTop: 10,
-              background: 'none', border: '1px dashed #2A2420',
-              color: '#6B6560', padding: '7px 14px', fontSize: '12px',
-              borderRadius: 6, cursor: 'pointer',
+              background: 'none', border: 'none',
+              color: '#6B6560', padding: '4px 0', fontSize: '12px',
+              cursor: 'pointer', transition: 'color 0.15s',
             }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#FF9500')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#6B6560')}
           >
             <Plus size={13} /> Add Parts Line
           </button>
@@ -652,12 +764,10 @@ export default function InvoiceDetailPage() {
 
       {/* Totals */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-        <div
-          style={{
-            background: '#1E1C18', border: '1px solid #2A2420',
-            borderRadius: 12, padding: '20px 28px', minWidth: 280,
-          }}
-        >
+        <div style={{
+          background: '#1E1C18', border: '1px solid #2A2420',
+          borderRadius: 12, padding: '20px 28px', minWidth: 280,
+        }}>
           {[
             { label: 'Labour Subtotal', value: labourSubtotal },
             { label: 'Parts Subtotal', value: partsSubtotal },
@@ -665,14 +775,23 @@ export default function InvoiceDetailPage() {
             { label: 'HST (13%)', value: hstAmount },
           ].map(row => (
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: '12px', color: '#6B6560' }}>{row.label}</span>
+              <span style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B6560' }}>
+                {row.label}
+              </span>
               <span style={{ fontSize: '13px', color: '#F0EDE8', fontWeight: 500 }}>{fmtAmount(row.value)}</span>
             </div>
           ))}
           <div style={{ height: 1, background: '#2A2420', margin: '12px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#F0EDE8' }}>TOTAL DUE</span>
-            <span style={{ fontSize: '22px', fontWeight: 800, color: '#FF9500' }}>{fmtAmount(total)}</span>
+            <span style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#F0EDE8' }}>
+              TOTAL DUE
+            </span>
+            <span
+              ref={totalFlashRef}
+              style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '24px', fontWeight: 700, color: '#FF9500' }}
+            >
+              {fmtAmount(total)}
+            </span>
           </div>
         </div>
       </div>
@@ -682,20 +801,24 @@ export default function InvoiceDetailPage() {
         onClick={save}
         disabled={saving}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          background: saving ? '#CC7700' : '#FF9500', color: '#0D0B08',
-          border: 'none', borderRadius: 10, padding: '14px 24px',
-          fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em',
+          width: '100%', height: 48,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          background: saveState === 'saved' ? '#28C850' : '#FF9500',
+          color: '#0D0B08', border: 'none', borderRadius: 10,
+          fontFamily: 'var(--font-heading), sans-serif',
+          fontSize: '14px', fontWeight: 600, letterSpacing: '0.1em',
           textTransform: 'uppercase', cursor: saving ? 'not-allowed' : 'pointer',
+          transition: 'background 0.3s',
         }}
       >
-        {saving ? 'Saving…' : 'Save Invoice'}
+        {saving ? (
+          <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> SAVING…</>
+        ) : saveState === 'saved' ? (
+          <><Check size={16} /> SAVED</>
+        ) : (
+          'SAVE INVOICE'
+        )}
       </button>
-      {saveMsg && (
-        <div style={{ marginTop: 10, textAlign: 'center', fontSize: '12px', color: saveMsg.startsWith('Error') ? '#FF4444' : '#28C850' }}>
-          {saveMsg}
-        </div>
-      )}
     </div>
   )
 }

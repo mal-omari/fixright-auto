@@ -17,6 +17,7 @@ export default function Navbar() {
   const [visible, setVisible] = useState(true)
   const lastScrollY = useRef(0)
   const pathname = usePathname()
+  const bookBtnRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,6 +46,24 @@ export default function Navbar() {
     setMenuOpen(false)
   }, [pathname])
 
+  // Magnetic effect on Book Now button
+  const handleNavMouseMove = (e: React.MouseEvent) => {
+    const btn = bookBtnRef.current
+    if (!btn) return
+    const br = btn.getBoundingClientRect()
+    const bx = br.left + br.width / 2
+    const by = br.top + br.height / 2
+    const dx = e.clientX - bx
+    const dy = e.clientY - by
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < 100) {
+      const s = (100 - dist) / 100
+      btn.style.transform = `translate(${dx * s * 0.2}px, ${dy * s * 0.2}px)`
+    } else {
+      btn.style.transform = ''
+    }
+  }
+
   return (
     <>
       <header
@@ -55,11 +74,15 @@ export default function Navbar() {
           right: 0,
           zIndex: 100,
           background: 'rgba(30,26,22,0.95)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(12px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
           borderBottom: '1px solid #3A3430',
           transform: visible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.3s ease',
+        }}
+        onMouseMove={handleNavMouseMove}
+        onMouseLeave={() => {
+          if (bookBtnRef.current) bookBtnRef.current.style.transform = ''
         }}
       >
         <div
@@ -78,10 +101,16 @@ export default function Navbar() {
             href="/"
             style={{ display: 'flex', alignItems: 'baseline', gap: '6px', textDecoration: 'none' }}
           >
-            <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '0.05em', color: '#FF9500', lineHeight: 1 }}>
+            <span style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: '20px', fontWeight: 700, letterSpacing: '0.05em', color: '#FF9500', lineHeight: 1,
+            }}>
               FIXRIGHT
             </span>
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em', color: '#F0EDE8', lineHeight: 1 }}>
+            <span style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: '11px', fontWeight: 400, letterSpacing: '0.2em', color: '#F0EDE8', lineHeight: 1,
+            }}>
               AUTOMOTIVE
             </span>
           </Link>
@@ -95,10 +124,12 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   style={{
+                    fontFamily: 'var(--font-heading), sans-serif',
                     color: active ? '#F0EDE8' : '#9A8E82',
                     textDecoration: 'none',
                     fontSize: '13px',
-                    letterSpacing: '0.1em',
+                    fontWeight: 500,
+                    letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                     transition: 'color 0.2s',
                     position: 'relative',
@@ -124,9 +155,10 @@ export default function Navbar() {
                 gap: '5px',
                 color: '#FF9500',
                 textDecoration: 'none',
-                fontSize: '12px',
+                fontFamily: 'var(--font-heading), sans-serif',
+                fontSize: '13px',
                 letterSpacing: '0.06em',
-                fontWeight: 600,
+                fontWeight: 500,
               }}
             >
               <Phone size={13} />
@@ -134,18 +166,21 @@ export default function Navbar() {
             </a>
             <div style={{ width: '1px', height: '18px', background: '#3A3430' }} />
             <Link
+              ref={bookBtnRef}
               href="/book"
               style={{
                 background: '#FF9500',
                 color: '#111111',
                 padding: '9px 20px',
+                fontFamily: 'var(--font-heading), sans-serif',
                 fontSize: '12px',
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 textDecoration: 'none',
                 borderRadius: '3px',
-                transition: 'background 0.2s',
+                transition: 'background 0.2s, transform 0.2s',
+                display: 'inline-block',
               }}
               onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#E08400')}
               onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FF9500')}
@@ -184,8 +219,18 @@ export default function Navbar() {
         }}
       >
         <Link href="/" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', textDecoration: 'none', marginBottom: '8px' }}>
-          <span style={{ fontSize: '24px', fontWeight: 800, color: '#FF9500' }}>FIXRIGHT</span>
-          <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: '#F0EDE8' }}>AUTOMOTIVE</span>
+          <span style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '24px', fontWeight: 700, color: '#FF9500',
+          }}>
+            FIXRIGHT
+          </span>
+          <span style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '13px', fontWeight: 400, letterSpacing: '0.2em', color: '#F0EDE8',
+          }}>
+            AUTOMOTIVE
+          </span>
         </Link>
 
         {navLinks.map(link => (
@@ -193,10 +238,11 @@ export default function Navbar() {
             key={link.href}
             href={link.href}
             style={{
+              fontFamily: 'var(--font-heading), sans-serif',
               color: pathname === link.href ? '#FF9500' : '#F0EDE8',
               textDecoration: 'none',
               fontSize: '26px',
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
             }}
@@ -211,8 +257,9 @@ export default function Navbar() {
             background: '#FF9500',
             color: '#111111',
             padding: '14px 48px',
+            fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '14px',
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
             textDecoration: 'none',
@@ -225,7 +272,11 @@ export default function Navbar() {
 
         <a
           href="tel:5194719462"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9A8E82', textDecoration: 'none', fontSize: '16px' }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            fontFamily: 'var(--font-heading), sans-serif',
+            color: '#9A8E82', textDecoration: 'none', fontSize: '16px', fontWeight: 500,
+          }}
         >
           <Phone size={16} />
           519.471.9462

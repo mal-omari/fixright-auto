@@ -28,10 +28,6 @@ function formatDate(d: string | null) {
   return date.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
-function initials(name: string) {
-  return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
-}
-
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +97,12 @@ export default function BookingsPage() {
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0 }}>All Bookings</h1>
+          <h1 style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0, letterSpacing: '0.05em',
+          }}>
+            ALL BOOKINGS
+          </h1>
           <p style={{ fontSize: '12px', color: '#6B6560', marginTop: 4 }}>
             Showing {filtered.length} of {bookings.length} bookings
           </p>
@@ -111,7 +112,9 @@ export default function BookingsPage() {
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: '#FF9500', color: '#0D0B08', textDecoration: 'none',
-            padding: '10px 18px', fontSize: '12px', fontWeight: 700,
+            padding: '10px 18px',
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '12px', fontWeight: 700,
             letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 8,
           }}
         >
@@ -126,7 +129,6 @@ export default function BookingsPage() {
           borderRadius: 12, padding: 16, marginBottom: 16,
         }}
       >
-        {/* Search + dates */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ position: 'relative', minWidth: 240, flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540' }} />
@@ -165,7 +167,6 @@ export default function BookingsPage() {
           )}
         </div>
 
-        {/* Status pills */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {STATUS_PILLS.map(({ key, label, color }) => {
             const active = statusFilter === key
@@ -175,12 +176,14 @@ export default function BookingsPage() {
                 onClick={() => { setStatusFilter(key); setPage(1) }}
                 style={{
                   padding: '5px 14px', borderRadius: 20,
-                  fontSize: '12px', fontWeight: active ? 600 : 400,
+                  fontFamily: 'var(--font-heading), sans-serif',
+                  fontSize: '11px', fontWeight: active ? 600 : 500,
                   background: active ? `${color}20` : 'transparent',
                   border: `1px solid ${active ? color : '#2A2420'}`,
                   color: active ? color : '#6B6560',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
                 }}
               >
                 {label}
@@ -209,6 +212,7 @@ export default function BookingsPage() {
                     onClick={col.sortable && col.key ? () => toggleSort(col.key!) : undefined}
                     style={{
                       textAlign: 'left', padding: '11px 16px',
+                      fontFamily: 'var(--font-heading), sans-serif',
                       fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em',
                       color: '#6B6560', textTransform: 'uppercase',
                       cursor: col.sortable ? 'pointer' : 'default',
@@ -237,18 +241,29 @@ export default function BookingsPage() {
                     <div style={{ color: '#3A3430', fontSize: '12px', marginTop: 6 }}>Try adjusting your filters</div>
                   </td>
                 </tr>
-              ) : paginated.map(b => (
+              ) : paginated.map((b, rowIdx) => (
                 <tr
                   key={b.id}
-                  style={{ borderTop: '1px solid #2A2420', transition: 'background 0.1s', cursor: 'pointer' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,149,0,0.03)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  style={{
+                    borderTop: '1px solid #2A2420',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s',
+                    animation: `rowEnter 300ms ease-out ${rowIdx * 50}ms both`,
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255,149,0,0.04)'
+                    e.currentTarget.style.borderLeft = '2px solid #FF9500'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.borderLeft = ''
+                  }}
                   onClick={() => window.location.href = `/workshop-portal/bookings/${b.id}`}
                 >
                   <td style={{ padding: '0 16px', height: 64 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#F0EDE8' }}>{b.customer_name}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 500, color: '#F0EDE8' }}>{b.customer_name}</div>
                     {b.customer_phone && (
-                      <div style={{ fontSize: '11px', color: '#6B6560', marginTop: 2 }}>{b.customer_phone}</div>
+                      <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>{b.customer_phone}</div>
                     )}
                   </td>
                   <td style={{ padding: '0 16px', height: 64, color: '#9A8E82', whiteSpace: 'nowrap' }}>
@@ -262,6 +277,7 @@ export default function BookingsPage() {
                       <span style={{
                         display: 'inline-block', marginTop: 3,
                         background: 'rgba(255,149,0,0.1)', color: '#FF9500',
+                        fontFamily: 'var(--font-heading), sans-serif',
                         fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                       }}>
                         {b.estimated_hours}h
@@ -283,9 +299,11 @@ export default function BookingsPage() {
                     <Link
                       href={`/workshop-portal/bookings/${b.id}`}
                       style={{
-                        fontSize: '12px', color: '#FF9500', textDecoration: 'none',
+                        fontFamily: 'var(--font-heading), sans-serif',
+                        fontSize: '11px', color: '#FF9500', textDecoration: 'none',
                         border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
-                        padding: '5px 12px', display: 'inline-block', fontWeight: 500,
+                        padding: '5px 12px', display: 'inline-block', fontWeight: 600,
+                        letterSpacing: '0.06em',
                       }}
                     >
                       View
@@ -297,7 +315,6 @@ export default function BookingsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div
             style={{

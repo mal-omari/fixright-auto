@@ -17,6 +17,8 @@ export type Database = {
       bookings: {
         Row: {
           actual_hours: number | null
+          confirmed_date: string | null
+          confirmed_time: string | null
           created_at: string | null
           customer_email: string | null
           customer_name: string
@@ -39,6 +41,8 @@ export type Database = {
         }
         Insert: {
           actual_hours?: number | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           created_at?: string | null
           customer_email?: string | null
           customer_name: string
@@ -61,6 +65,8 @@ export type Database = {
         }
         Update: {
           actual_hours?: number | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           created_at?: string | null
           customer_email?: string | null
           customer_name?: string

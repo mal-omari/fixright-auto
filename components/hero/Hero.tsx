@@ -16,55 +16,55 @@ const DUST = Array.from({ length: 20 }, (_, i) => ({
   drift: `${(i % 2 === 0 ? 1 : -1) * (6 + (i % 14))}px`,
 }))
 
-// ── HUD element definitions ─────────────────────────────────────────────────
+// ── HUD definitions ─────────────────────────────────────────────────────────
 const HUD_DEFS = [
   {
     id: 'diag',
-    style: { top: '8%', left: '1.5%' },
+    style: { top: '8%', left: '24px' } as React.CSSProperties,
     label: 'DIAGNOSTIC SYSTEM',
-    values: ['ACTIVE'],
-    dot: true,
-    color: '#00FF88',
+    values: ['● ACTIVE', '● SCANNING...', '● ALL SYSTEMS OK', '● READY'],
+    dotColor: '#00FF88',
+    valueColor: '#FF9500',
   },
   {
     id: 'brake',
-    style: { top: '8%', right: '1.5%' },
+    style: { top: '8%', right: '24px' } as React.CSSProperties,
     label: 'BRAKE SYSTEM',
-    values: ['▓▓▓▓░░ 67%', '▓▓▓▓▓░ 83%', '▓▓░░░░ 34%'],
-    dot: false,
-    color: '#FF9500',
+    values: ['▓▓▓▓▓▓░░ 78%', '▓▓▓▓░░░░ 52%', '▓▓▓▓▓▓▓░ 91%'],
+    dotColor: null,
+    valueColor: '#FF9500',
   },
   {
     id: 'temp',
-    style: { bottom: '22%', left: '1.5%' },
+    style: { top: '45%', left: '24px', transform: 'translateY(-50%)' } as React.CSSProperties,
     label: 'ENGINE TEMP',
-    values: ['94°C', '87°C', '101°C', '91°C'],
-    dot: false,
-    color: '#FF9500',
-  },
-  {
-    id: 'vehicles',
-    style: { bottom: '22%', right: '1.5%' },
-    label: 'VEHICLES SERVICED TODAY',
-    values: ['3', '4', '2'],
-    dot: false,
-    color: '#00D4FF',
+    values: ['94°C ↑', '87°C', '101°C ↑↑', '91°C'],
+    dotColor: null,
+    valueColor: '#FF9500',
   },
   {
     id: 'oil',
-    style: { top: '50%', left: '1.5%', transform: 'translateY(-50%)' },
+    style: { top: '45%', right: '24px', transform: 'translateY(-50%)' } as React.CSSProperties,
     label: 'OIL LIFE',
     values: ['12% — SERVICE DUE', '8% — SERVICE DUE', '24% — MONITOR'],
-    dot: false,
-    color: '#E8C547',
+    dotColor: null,
+    valueColor: '#EF4444',
   },
   {
     id: 'battery',
-    style: { top: '50%', right: '1.5%', transform: 'translateY(-50%)' },
+    style: { bottom: '120px', left: '24px' } as React.CSSProperties,
     label: 'BATTERY',
     values: ['12.6V ✓', '12.4V ✓', '12.8V ✓'],
-    dot: false,
-    color: '#00D4FF',
+    dotColor: null,
+    valueColor: '#00D4FF',
+  },
+  {
+    id: 'jobs',
+    style: { bottom: '120px', right: '24px' } as React.CSSProperties,
+    label: "TODAY'S JOBS",
+    values: ['3 VEHICLES', '4 VEHICLES', '2 VEHICLES'],
+    dotColor: null,
+    valueColor: '#FF9500',
   },
 ]
 
@@ -76,8 +76,9 @@ export default function Hero() {
   const [hudValues, setHudValues] = useState(() =>
     Object.fromEntries(HUD_DEFS.map(h => [h.id, h.values[0]]))
   )
+  const [hudVisible, setHudVisible] = useState(false)
 
-  // ── Spotlight ──────────────────────────────────────────────────────────────
+  // ── Spotlight + magnetic ────────────────────────────────────────────────
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const section = sectionRef.current
     const spotlight = spotlightRef.current
@@ -85,9 +86,8 @@ export default function Hero() {
     const rect = section.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    spotlight.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(255,149,0,0.08), transparent 70%)`
+    spotlight.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(255,149,0,0.06), transparent 60%)`
 
-    // Magnetic button
     const btn = bookBtnRef.current
     if (btn) {
       const br = btn.getBoundingClientRect()
@@ -111,17 +111,19 @@ export default function Hero() {
     if (spotlightRef.current) spotlightRef.current.style.background = 'transparent'
   }, [])
 
-  // ── GSAP setup ─────────────────────────────────────────────────────────────
+  // ── GSAP setup ─────────────────────────────────────────────────────────
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
     const ctx = gsap.context(() => {
-      // Content stagger fade-in
-      gsap.fromTo(
-        '.hero-item',
-        { opacity: 0, y: 35 },
-        { opacity: 1, y: 0, duration: 1, stagger: 0.18, ease: 'power3.out', delay: 0.4 }
-      )
-      // Parallax on background image
+      gsap.fromTo('.hero-label', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 })
+      gsap.fromTo('.hero-title-1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 })
+      gsap.fromTo('.hero-title-2', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.5 })
+      gsap.fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.7 })
+      gsap.fromTo('.hero-body', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.9 })
+      gsap.fromTo('.hero-cta-1', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.1 })
+      gsap.fromTo('.hero-cta-2', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.2 })
+      gsap.fromTo('.hero-scroll', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: 1.5 })
+
       if (bgRef.current) {
         gsap.to(bgRef.current, {
           y: '25%',
@@ -136,6 +138,8 @@ export default function Hero() {
       }
     }, sectionRef)
 
+    setTimeout(() => setHudVisible(true), 1300)
+
     const section = sectionRef.current
     section?.addEventListener('mousemove', handleMouseMove)
     section?.addEventListener('mouseleave', handleMouseLeave)
@@ -147,7 +151,7 @@ export default function Hero() {
     }
   }, [handleMouseMove, handleMouseLeave])
 
-  // ── HUD cycling ────────────────────────────────────────────────────────────
+  // ── HUD cycling ────────────────────────────────────────────────────────
   useEffect(() => {
     const indices: Record<string, number> = Object.fromEntries(HUD_DEFS.map(h => [h.id, 0]))
     const interval = setInterval(() => {
@@ -159,7 +163,7 @@ export default function Hero() {
         }
       }
       setHudValues(prev => ({ ...prev, ...updates }))
-    }, 3500)
+    }, 4000)
     return () => clearInterval(interval)
   }, [])
 
@@ -173,7 +177,7 @@ export default function Hero() {
       <div className="absolute inset-0 overflow-hidden">
         <img
           ref={bgRef}
-          src="https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80"
           alt=""
           aria-hidden="true"
           style={{
@@ -192,7 +196,16 @@ export default function Hero() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to bottom, rgba(30,26,22,0.85) 0%, rgba(30,26,22,0.6) 50%, rgba(30,26,22,0.9) 100%)',
+          background: 'linear-gradient(135deg, rgba(30,26,22,0.92) 0%, rgba(20,18,14,0.75) 100%)',
+        }}
+      />
+
+      {/* Vignette */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(10,8,5,0.8) 100%)',
+          zIndex: 1,
         }}
       />
 
@@ -200,55 +213,65 @@ export default function Hero() {
       <div
         ref={spotlightRef}
         className="absolute inset-0 pointer-events-none"
-        style={{ transition: 'background 0.1s ease', willChange: 'background' }}
+        style={{ transition: 'background 0.1s ease', willChange: 'background', zIndex: 2 }}
       />
 
-      {/* Scan line */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+      {/* Scanline texture */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,149,0,0.015) 2px, rgba(255,149,0,0.015) 4px)',
+          zIndex: 3,
+        }}
+      />
+
+      {/* Scan beam */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 4 }}>
         <div
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             height: '1px',
-            background: 'rgba(255,149,0,0.03)',
-            animation: 'scanLine 8s linear infinite',
+            background: 'linear-gradient(90deg, transparent, rgba(255,149,0,0.4), transparent)',
+            animation: 'scanBeam 8s linear infinite',
+            opacity: 0.6,
           }}
         />
       </div>
 
       {/* HUD elements */}
-      {HUD_DEFS.map(h => (
+      {HUD_DEFS.map((h, idx) => (
         <div
           key={h.id}
           className="absolute pointer-events-none hidden lg:block hud-pulse"
           style={{
             ...h.style,
-            background: 'rgba(10,8,5,0.75)',
-            border: '1px solid rgba(58,52,48,0.8)',
-            borderRadius: '2px',
-            padding: '6px 10px',
+            background: 'rgba(10,8,5,0.7)',
+            border: '1px solid rgba(255,149,0,0.2)',
+            borderRadius: 4,
+            padding: '8px 12px',
             fontFamily: 'monospace',
-            fontSize: '10px',
+            fontSize: '11px',
             letterSpacing: '0.06em',
-            color: h.color,
             backdropFilter: 'blur(4px)',
             zIndex: 5,
             minWidth: '160px',
+            opacity: hudVisible ? 1 : 0,
+            transition: `opacity 0.4s ease ${idx * 0.15}s`,
           }}
         >
-          <div style={{ color: '#9A8E82', fontSize: '9px', marginBottom: '3px', letterSpacing: '0.1em' }}>
+          <div style={{ color: '#9A8E82', fontSize: '10px', marginBottom: 4, letterSpacing: '0.1em' }}>
             {h.label}
-            {h.dot && (
-              <span className="hud-blink" style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: h.color, marginLeft: '6px', verticalAlign: 'middle' }} />
-            )}
           </div>
-          <div style={{ fontWeight: 700, color: h.color }}>{hudValues[h.id]}</div>
+          <div style={{ fontWeight: 700, color: h.valueColor, transition: 'opacity 0.3s' }}>
+            {hudValues[h.id]}
+          </div>
         </div>
       ))}
 
       {/* Dust particles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 2 }}>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 6 }}>
         {DUST.map(p => (
           <div
             key={p.id}
@@ -268,68 +291,113 @@ export default function Hero() {
         ))}
       </div>
 
-      {/* Vignette */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 70% 70% at 50% 45%, transparent 20%, rgba(30,26,22,0.65) 100%)',
-          zIndex: 3,
-        }}
-      />
-
       {/* Bottom fade */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-48"
-        style={{ background: 'linear-gradient(to top, #1E1A16, transparent)', zIndex: 4 }}
+        style={{ background: 'linear-gradient(to top, #1E1A16, transparent)', zIndex: 7 }}
       />
 
       {/* Content */}
-      <div className="relative px-6 text-center" style={{ maxWidth: '800px', margin: '0 auto', zIndex: 10 }}>
-        <p
-          className="hero-item mb-3"
-          style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#FF9500' }}
-        >
-          London, Ontario · Est. 1996
-        </p>
+      <div className="relative px-6 text-center" style={{ maxWidth: '860px', margin: '0 auto', zIndex: 10 }}>
 
-        <h1
-          className="hero-item mb-4 font-bold leading-none"
-          style={{ fontSize: 'clamp(3rem, 9vw, 72px)', color: '#F0EDE8', letterSpacing: '0.05em' }}
+        {/* Label */}
+        <div
+          className="hero-label mb-4"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+            opacity: 0,
+          }}
         >
-          FIXRIGHT AUTOMOTIVE
+          <div style={{ flex: 1, maxWidth: 60, height: 1, background: '#FF9500', opacity: 0.5 }} />
+          <span style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em',
+            textTransform: 'uppercase', color: '#FF9500',
+          }}>
+            LONDON ONTARIO&apos;S TRUSTED GARAGE
+          </span>
+          <div style={{ flex: 1, maxWidth: 60, height: 1, background: '#FF9500', opacity: 0.5 }} />
+        </div>
+
+        {/* Main headline */}
+        <h1 style={{ margin: 0 }}>
+          <div
+            className="hero-title-1"
+            style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: 'clamp(64px, 10vw, 96px)',
+              fontWeight: 700,
+              color: '#F0EDE8',
+              letterSpacing: '0.05em',
+              lineHeight: 0.95,
+              textTransform: 'uppercase',
+              opacity: 0,
+            }}
+          >
+            FIXRIGHT
+          </div>
+          <div
+            className="hero-title-2"
+            style={{
+              fontFamily: 'var(--font-heading), sans-serif',
+              fontSize: 'clamp(64px, 10vw, 96px)',
+              fontWeight: 300,
+              color: '#F0EDE8',
+              letterSpacing: '0.05em',
+              lineHeight: 0.95,
+              textTransform: 'uppercase',
+              opacity: 0,
+              marginBottom: 24,
+            }}
+          >
+            AUTOMOTIVE
+          </div>
         </h1>
 
         <p
-          className="hero-item mb-3 font-semibold"
-          style={{ fontSize: '20px', color: '#FF9500', letterSpacing: '0.02em' }}
+          className="hero-sub"
+          style={{
+            fontFamily: 'var(--font-body), sans-serif',
+            fontSize: '18px', fontWeight: 400, color: '#9A8E82',
+            marginBottom: 8, opacity: 0,
+          }}
         >
-          London Ontario&apos;s Most Trusted Independent Garage
+          28 Years. 6,000+ Vehicles. One Promise.
         </p>
 
         <p
-          className="hero-item mx-auto mb-10 leading-relaxed"
-          style={{ fontSize: '16px', color: '#9A8E82', maxWidth: '520px' }}
+          className="hero-body"
+          style={{
+            fontFamily: 'var(--font-body), sans-serif',
+            fontSize: '16px', fontWeight: 300, color: '#7A7068',
+            marginBottom: 40, opacity: 0,
+          }}
         >
-          28 years of honest, expert auto care. No dealer markup. No pressure. Just results.
+          Honest diagnostics. Fair pricing. No dealer markup.
         </p>
 
-        <div className="hero-item flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }} className="sm:flex-row">
           <Link
             ref={bookBtnRef}
             href="/book"
+            className="hero-cta-1"
             style={{
               display: 'inline-block',
               background: '#FF9500',
               color: '#111111',
-              padding: '15px 36px',
+              padding: '0 36px',
+              height: 48,
+              lineHeight: '48px',
+              fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '13px',
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
               textDecoration: 'none',
               borderRadius: '3px',
               transition: 'background 0.2s',
               willChange: 'transform',
+              opacity: 0,
             }}
             onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#E08400')}
             onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FF9500')}
@@ -339,19 +407,23 @@ export default function Hero() {
 
           <a
             href="tel:5194719462"
+            className="hero-cta-2"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: '1px solid rgba(240,237,232,0.3)',
+              border: '1px solid #3A3430',
               color: '#F0EDE8',
-              padding: '14px 32px',
+              padding: '0 32px',
+              height: 48,
+              fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '13px',
-              fontWeight: 600,
+              fontWeight: 500,
               letterSpacing: '0.08em',
               textDecoration: 'none',
               borderRadius: '3px',
               transition: 'border-color 0.2s, background 0.2s',
+              opacity: 0,
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLAnchorElement
@@ -360,7 +432,7 @@ export default function Hero() {
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLAnchorElement
-              el.style.borderColor = 'rgba(240,237,232,0.3)'
+              el.style.borderColor = '#3A3430'
               el.style.background = 'transparent'
             }}
           >
@@ -371,7 +443,7 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="hero-item absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={{ zIndex: 10 }}>
+      <div className="hero-scroll absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={{ zIndex: 10, opacity: 0 }}>
         <span style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9A8E82' }}>
           Scroll
         </span>

@@ -19,6 +19,12 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',   label: 'Cancelled',   color: '#FF4444' },
 ]
 
+const TIME_SLOTS = [
+  '8:00 AM','8:30 AM','9:00 AM','9:30 AM','10:00 AM','10:30 AM',
+  '11:00 AM','11:30 AM','12:00 PM','12:30 PM','1:00 PM','1:30 PM',
+  '2:00 PM','2:30 PM','3:00 PM','3:30 PM','4:00 PM','4:30 PM',
+]
+
 function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
 }
@@ -29,7 +35,9 @@ const inputStyle: React.CSSProperties = {
   fontSize: '13px', outline: 'none', fontFamily: 'inherit',
 }
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: '10px', fontWeight: 600,
+  display: 'block',
+  fontFamily: 'var(--font-heading), sans-serif',
+  fontSize: '10px', fontWeight: 600,
   letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6,
   textTransform: 'uppercase',
 }
@@ -51,6 +59,8 @@ export default function BookingDetailPage() {
   const [estimatedHours, setEstimatedHours] = useState('')
   const [actualHours, setActualHours] = useState('')
   const [notes, setNotes] = useState('')
+  const [confirmedDate, setConfirmedDate] = useState('')
+  const [confirmedTime, setConfirmedTime] = useState('')
   const [serviceAutoFilled, setServiceAutoFilled] = useState(false)
 
   useEffect(() => {
@@ -67,6 +77,10 @@ export default function BookingDetailPage() {
         setEstimatedHours(b.estimated_hours?.toString() ?? '')
         setActualHours(b.actual_hours?.toString() ?? '')
         setNotes(b.notes ?? '')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setConfirmedDate((b as any).confirmed_date ?? '')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setConfirmedTime((b as any).confirmed_time ?? '')
 
         if (b.service_id) {
           const { data: svc } = await supabase.from('services').select('*').eq('id', b.service_id).single()
@@ -95,6 +109,8 @@ export default function BookingDetailPage() {
       estimated_hours: estimatedHours ? parseFloat(estimatedHours) : null,
       actual_hours: actualHours ? parseFloat(actualHours) : null,
       notes: notes || null,
+      confirmed_date: confirmedDate || null,
+      confirmed_time: confirmedTime || null,
       updated_at: new Date().toISOString(),
     }).eq('id', booking.id)
 
@@ -202,15 +218,15 @@ export default function BookingDetailPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 20 }}>
-        {/* Left — Customer & Vehicle */}
+        {/* Left */}
         <div>
           <div style={card}>
-            {/* Customer header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
               <div
                 style={{
                   width: 48, height: 48, borderRadius: '50%',
                   background: '#FF9500', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '17px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
                 }}
               >
@@ -227,13 +243,10 @@ export default function BookingDetailPage() {
 
             <div style={{ height: 1, background: '#2A2420', marginBottom: 20 }} />
 
-            {/* Vehicle */}
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <Car size={15} style={{ color: '#6B6560' }} />
-                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', textTransform: 'uppercase' }}>
-                  Vehicle
-                </span>
+                <span style={{ ...labelStyle, marginBottom: 0 }}>Vehicle</span>
               </div>
               <div style={{ fontSize: '16px', fontWeight: 600, color: '#F0EDE8', marginBottom: 8 }}>{vehicle}</div>
               {booking.vehicle_vin && (
@@ -243,9 +256,7 @@ export default function BookingDetailPage() {
 
             {booking.service_description && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Issue Described
-                </div>
+                <div style={{ ...labelStyle, marginBottom: 8 }}>Issue Described</div>
                 <div
                   style={{
                     fontSize: '13px', color: '#9A8E82', fontStyle: 'italic',
@@ -259,7 +270,6 @@ export default function BookingDetailPage() {
               </div>
             )}
 
-            {/* Meta chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {booking.preferred_date && (
                 <span style={{
@@ -289,17 +299,14 @@ export default function BookingDetailPage() {
           </div>
         </div>
 
-        {/* Right — Shop Management */}
+        {/* Right */}
         <div>
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
               <User size={14} style={{ color: '#6B6560' }} />
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em', color: '#6B6560', textTransform: 'uppercase' }}>
-                SHOP MANAGEMENT
-              </span>
+              <span style={{ ...labelStyle, marginBottom: 0 }}>SHOP MANAGEMENT</span>
             </div>
 
-            {/* Status pills */}
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Status</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -311,11 +318,13 @@ export default function BookingDetailPage() {
                       onClick={() => setStatus(opt.value)}
                       style={{
                         padding: '6px 14px', borderRadius: 20,
-                        fontSize: '12px', fontWeight: active ? 600 : 400,
+                        fontFamily: 'var(--font-heading), sans-serif',
+                        fontSize: '11px', fontWeight: active ? 600 : 500,
                         background: active ? `${opt.color}25` : 'transparent',
                         border: `1px solid ${active ? opt.color : '#2A2420'}`,
                         color: active ? opt.color : '#6B6560',
                         cursor: 'pointer', transition: 'all 0.15s',
+                        letterSpacing: '0.04em',
                       }}
                     >
                       {opt.label}
@@ -325,7 +334,6 @@ export default function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Mechanic */}
             <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>Assigned Mechanic</label>
               <div style={{ position: 'relative' }}>
@@ -343,7 +351,33 @@ export default function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Hours */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Confirmed Date</label>
+              <input
+                type="date"
+                value={confirmedDate}
+                onChange={e => setConfirmedDate(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Confirmed Time</label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={confirmedTime}
+                  onChange={e => setConfirmedTime(e.target.value)}
+                  style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', appearance: 'none' }}
+                >
+                  <option value="">— Not set —</option>
+                  {TIME_SLOTS.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+                <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540', pointerEvents: 'none', fontSize: '10px' }}>▼</span>
+              </div>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>
                 <label style={labelStyle}>Est. Hours</label>
@@ -370,7 +404,6 @@ export default function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Notes */}
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Internal Notes</label>
               <textarea
@@ -386,9 +419,11 @@ export default function BookingDetailPage() {
               onClick={save}
               disabled={saving}
               style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                width: '100%', height: 40,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 background: saving ? '#CC7700' : '#FF9500', color: '#0D0B08',
-                border: 'none', borderRadius: 8, padding: '12px 20px',
+                border: 'none', borderRadius: 8,
+                fontFamily: 'var(--font-heading), sans-serif',
                 fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em',
                 textTransform: 'uppercase', cursor: saving ? 'not-allowed' : 'pointer',
               }}

@@ -193,41 +193,51 @@ export default function SchedulePage() {
                     >
                       <span style={{ fontSize: '11px', color: '#3A3430' }}>Available</span>
                     </div>
-                  ) : bks.map(b => (
-                    <Link
-                      key={b.id}
-                      href={`/workshop-portal/bookings/${b.id}`}
-                      style={{
-                        display: 'block', textDecoration: 'none',
-                        background: '#141210',
-                        borderLeft: `3px solid ${STATUS_BORDER[b.status ?? ''] ?? '#2A2420'}`,
-                        borderRadius: '0 8px 8px 0',
-                        padding: '8px 10px',
-                        border: '1px solid #2A2420',
-                        transition: 'border-color 0.15s',
-                      }}
-                    >
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#F0EDE8', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {b.customer_name}
-                      </div>
-                      <div style={{ fontSize: '10px', color: '#6B6560', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {b.service_description ?? '—'}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
-                        <StatusBadge status={b.status} />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          {b.estimated_hours && (
-                            <span style={{
-                              fontSize: '9px', color: '#6B6560',
-                              background: '#1E1C18', padding: '1px 5px', borderRadius: 3,
-                            }}>
-                              {b.estimated_hours}h
-                            </span>
-                          )}
+                  ) : bks.map(b => {
+                    const isConfirmed = !!(b as { confirmed_date?: string | null }).confirmed_date
+                    return (
+                      <Link
+                        key={b.id}
+                        href={`/workshop-portal/bookings/${b.id}`}
+                        style={{
+                          display: 'block', textDecoration: 'none',
+                          background: isConfirmed ? '#141210' : 'transparent',
+                          borderLeft: `3px solid ${STATUS_BORDER[b.status ?? ''] ?? '#2A2420'}`,
+                          borderRadius: '0 8px 8px 0',
+                          padding: '8px 10px',
+                          border: isConfirmed ? '1px solid #2A2420' : '1px dashed #2A2420',
+                          opacity: isConfirmed ? 1 : 0.65,
+                          transition: 'border-color 0.15s',
+                        }}
+                      >
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: isConfirmed ? '#F0EDE8' : '#9A8E82', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {b.customer_name}
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                        {isConfirmed ? (
+                          <div style={{ fontSize: '10px', color: '#6B6560', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {b.service_description ?? '—'}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '10px', color: '#4A4540', marginBottom: 5 }}>
+                            Preferred: {b.preferred_time ? b.preferred_time.charAt(0).toUpperCase() + b.preferred_time.slice(1) : 'Flexible'}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
+                          <StatusBadge status={b.status} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {b.estimated_hours && (
+                              <span style={{
+                                fontSize: '9px', color: '#6B6560',
+                                background: '#1E1C18', padding: '1px 5px', borderRadius: 3,
+                              }}>
+                                {b.estimated_hours}h
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
                 </div>
               </div>
             )
