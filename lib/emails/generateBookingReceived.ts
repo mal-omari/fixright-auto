@@ -12,12 +12,6 @@ interface BookingReceivedData {
   source?: string | null
 }
 
-const TIME_LABELS: Record<string, string> = {
-  morning: 'Morning (8:00am – 11:00am)',
-  afternoon: 'Afternoon (12:00pm – 4:00pm)',
-  flexible: 'Flexible — any time works',
-}
-
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—'
   return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-CA', {
@@ -26,8 +20,7 @@ function formatDate(dateStr?: string | null): string {
 }
 
 function formatTime(timeStr?: string | null): string {
-  if (!timeStr) return '—'
-  return TIME_LABELS[timeStr] ?? timeStr
+  return timeStr ?? '—'
 }
 
 export function generateBookingReceivedEmail(data: BookingReceivedData): string {
