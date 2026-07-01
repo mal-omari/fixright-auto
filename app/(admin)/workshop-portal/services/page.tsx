@@ -19,10 +19,6 @@ function categoryStyle(category: string | null) {
   return CATEGORY_COLORS[category ?? ''] ?? { color: '#9A8E82', bg: 'rgba(155,142,130,0.15)', label: category ?? '—' }
 }
 
-function fmtRate(n: number | null) {
-  return `$${(n ?? 0).toFixed(2)}/hr`
-}
-
 interface EditableCellProps {
   value: number
   suffix: string
@@ -78,6 +74,11 @@ function EditableCell({ value, suffix, onSave }: EditableCellProps) {
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [newService, setNewService] = useState({
+    name: '', category: 'maintenance', estimated_hours: '', base_price: '', description: '',
+  })
 
   useEffect(() => {
     loadServices()
@@ -108,6 +109,43 @@ export default function ServicesPage() {
     toast.success('Service updated')
   }
 
+  async function toggleActive(id: string, current: boolean | null) {
+    const next = !current
+    const { error } = await createClient().from('services').update({ is_active: next }).eq('id', id)
+    if (error) {
+      toast.error('Failed to update status')
+      return
+    }
+    setServices(prev => prev.map(s => s.id === id ? { ...s, is_active: next } : s))
+    toast.success(next ? 'Service activated' : 'Service deactivated')
+  }
+
+  async function addService(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newService.name.trim() || !newService.estimated_hours) {
+      toast.error('Name and estimated hours are required')
+      return
+    }
+    setSubmitting(true)
+    const { error } = await createClient().from('services').insert({
+      name: newService.name.trim(),
+      category: newService.category,
+      estimated_hours: parseFloat(newService.estimated_hours),
+      base_price: newService.base_price ? parseFloat(newService.base_price) : 0,
+      description: newService.description.trim() || null,
+      is_active: true,
+    })
+    setSubmitting(false)
+    if (error) {
+      toast.error('Failed to add service')
+      return
+    }
+    toast.success('Service added')
+    setShowAddForm(false)
+    setNewService({ name: '', category: 'maintenance', estimated_hours: '', base_price: '', description: '' })
+    loadServices()
+  }
+
   const activeCount = useMemo(() => services.filter(s => s.is_active).length, [services])
   const categoryCount = useMemo(() => new Set(services.map(s => s.category).filter(Boolean)).size, [services])
 
@@ -121,6 +159,7 @@ export default function ServicesPage() {
           </p>
         </div>
         <button
+          onClick={() => setShowAddForm(true)}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: '#FF9500', color: '#0D0B08', border: 'none',
@@ -207,9 +246,25 @@ export default function ServicesPage() {
                       <EditableCell value={svc.base_price ?? 0} suffix="/hr ($)" onSave={v => updateField(svc.id, 'base_price', v)} />
                     </td>
                     <td style={{ padding: '0 16px', height: 56 }}>
-                      <span style={{ fontSize: '12px', color: svc.is_active ? '#28C850' : '#6B6560' }}>
-                        {svc.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      <button
+                        onClick={() => toggleActive(svc.id, svc.is_active)}
+                        style={{
+                          width: 44, height: 24, borderRadius: 12, border: 'none',
+                          background: svc.is_active ? '#28C850' : '#2A2420',
+                          cursor: 'pointer', position: 'relative',
+                          flexShrink: 0, transition: 'background 0.2s',
+                          padding: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            position: 'absolute', top: 3,
+                            left: svc.is_active ? 23 : 3,
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: '#F0EDE8', transition: 'left 0.2s',
+                          }}
+                        />
+                      </button>
                     </td>
                     <td style={{ padding: '0 16px', height: 56, color: '#4A4540', fontSize: '12px' }}>—</td>
                   </tr>
@@ -219,6 +274,116 @@ export default function ServicesPage() {
           </table>
         </div>
       </div>
+
+      {showAddForm && (
+        <div
+          onClick={() => setShowAddForm(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: 420, maxWidth: '100%', height: '100%', background: '#1A1714',
+              borderLeft: '1px solid #2A2420', padding: 28, overflowY: 'auto',
+            }}
+          >
+            <h2 style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '18px', fontWeight: 700, color: '#F0EDE8', marginBottom: 20 }}>
+              Add Service
+            </h2>
+            <form onSubmit={addService}>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
+                  Service Name *
+                </label>
+                <input
+                  value={newService.name}
+                  onChange={e => setNewService(prev => ({ ...prev, name: e.target.value }))}
+                  style={{ width: '100%', background: '#141210', border: '1px solid #2A2420', borderRadius: 8, color: '#F0EDE8', padding: '10px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
+                  placeholder="e.g. Brake Pad Replacement"
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
+                  Category
+                </label>
+                <select
+                  value={newService.category}
+                  onChange={e => setNewService(prev => ({ ...prev, category: e.target.value }))}
+                  style={{ width: '100%', background: '#141210', border: '1px solid #2A2420', borderRadius: 8, color: '#F0EDE8', padding: '10px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer' }}
+                >
+                  <option value="maintenance">Maintenance</option>
+                  <option value="electrical">Electrical</option>
+                  <option value="safety">Safety</option>
+                  <option value="body">Body</option>
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
+                    Estimated Hours *
+                  </label>
+                  <input
+                    type="number" step="0.5" min="0"
+                    value={newService.estimated_hours}
+                    onChange={e => setNewService(prev => ({ ...prev, estimated_hours: e.target.value }))}
+                    style={{ width: '100%', background: '#141210', border: '1px solid #2A2420', borderRadius: 8, color: '#F0EDE8', padding: '10px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
+                    placeholder="1.5"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
+                    Base Rate ($/hr)
+                  </label>
+                  <input
+                    type="number" step="0.01" min="0"
+                    value={newService.base_price}
+                    onChange={e => setNewService(prev => ({ ...prev, base_price: e.target.value }))}
+                    style={{ width: '100%', background: '#141210', border: '1px solid #2A2420', borderRadius: 8, color: '#F0EDE8', padding: '10px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
+                    placeholder="95.00"
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
+                  Description
+                </label>
+                <textarea
+                  value={newService.description}
+                  onChange={e => setNewService(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  style={{ width: '100%', background: '#141210', border: '1px solid #2A2420', borderRadius: 8, color: '#F0EDE8', padding: '10px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit', resize: 'vertical' }}
+                  placeholder="Internal notes about this service…"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    background: submitting ? '#CC7700' : '#FF9500', color: '#0D0B08', border: 'none',
+                    borderRadius: 8, padding: '12px 20px', fontSize: '12px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-heading), sans-serif',
+                  }}
+                >
+                  {submitting ? 'Adding…' : 'Add Service'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  style={{
+                    background: 'none', border: '1px solid #2A2420', color: '#9A8E82',
+                    borderRadius: 8, padding: '12px 20px', fontSize: '12px', cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
