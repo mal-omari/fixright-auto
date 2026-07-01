@@ -96,9 +96,14 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 - New booking form: phone-ins, pre-confirmed, mechanic assignment
 - Schedule: weekly Mon-Sat view, timezone-aware (America/Toronto),
   solid cards (confirmed) vs dashed cards (preferred only)
+- Services management: stats bar (active count, category count), inline-editable
+  estimated hours + base rate, active/inactive toggle (hides from /book form),
+  add-service slide-in panel
 - Invoices list: outstanding/paid/overdue summary bar, status pills
 - Invoice editor: inline editable labour + parts tables (React.memo fix done),
   live HST 13% calculation, PDF download via jsPDF
+- Invoice emails: "Send Invoice to Customer" button emails the full invoice
+  (sets status to sent), "Mark as Paid" offers to send a payment receipt email
 - Settings: labour rate (localStorage), mechanic management + add new mechanic,
   notification toggles
 
