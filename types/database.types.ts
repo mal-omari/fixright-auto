@@ -106,35 +106,37 @@ export type Database = {
       }
       invoice_line_items: {
         Row: {
+          created_at: string
+          description: string
           id: string
           invoice_id: string
-          type: string
-          description: string
           quantity: number
-          unit_price: number
-          total: number
           sort_order: number
-          created_at: string
+          total: number | null
+          type: string
+          unit_price: number
         }
         Insert: {
+          created_at?: string
+          description: string
           id?: string
           invoice_id: string
-          type: string
-          description: string
           quantity: number
-          unit_price: number
           sort_order?: number
-          created_at?: string
+          total?: number | null
+          type: string
+          unit_price: number
         }
         Update: {
+          created_at?: string
+          description?: string
           id?: string
           invoice_id?: string
-          type?: string
-          description?: string
           quantity?: number
-          unit_price?: number
           sort_order?: number
-          created_at?: string
+          total?: number | null
+          type?: string
+          unit_price?: number
         }
         Relationships: [
           {
@@ -148,76 +150,76 @@ export type Database = {
       }
       invoices: {
         Row: {
-          id: string
-          invoice_number: string
           booking_id: string | null
+          created_at: string
+          customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
-          customer_email: string | null
-          vehicle_year: number | null
-          vehicle_make: string | null
-          vehicle_model: string | null
-          vehicle_mileage: string | null
-          status: string
-          labour_subtotal: number
-          parts_subtotal: number
-          subtotal: number
-          hst_rate: number
-          hst_amount: number
-          total: number
-          notes: string | null
           due_date: string | null
+          hst_amount: number
+          hst_rate: number
+          id: string
+          invoice_number: string
+          labour_subtotal: number
+          notes: string | null
           paid_date: string | null
-          created_at: string
+          parts_subtotal: number
+          status: string
+          subtotal: number
+          total: number
           updated_at: string
+          vehicle_make: string | null
+          vehicle_mileage: string | null
+          vehicle_model: string | null
+          vehicle_year: number | null
         }
         Insert: {
+          booking_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          due_date?: string | null
+          hst_amount?: number
+          hst_rate?: number
           id?: string
           invoice_number: string
-          booking_id?: string | null
-          customer_name?: string | null
-          customer_phone?: string | null
-          customer_email?: string | null
-          vehicle_year?: number | null
-          vehicle_make?: string | null
-          vehicle_model?: string | null
-          vehicle_mileage?: string | null
-          status?: string
           labour_subtotal?: number
-          parts_subtotal?: number
-          subtotal?: number
-          hst_rate?: number
-          hst_amount?: number
-          total?: number
           notes?: string | null
-          due_date?: string | null
           paid_date?: string | null
-          created_at?: string
+          parts_subtotal?: number
+          status?: string
+          subtotal?: number
+          total?: number
           updated_at?: string
+          vehicle_make?: string | null
+          vehicle_mileage?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
         }
         Update: {
-          id?: string
-          invoice_number?: string
           booking_id?: string | null
+          created_at?: string
+          customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
-          customer_email?: string | null
-          vehicle_year?: number | null
-          vehicle_make?: string | null
-          vehicle_model?: string | null
-          vehicle_mileage?: string | null
-          status?: string
-          labour_subtotal?: number
-          parts_subtotal?: number
-          subtotal?: number
-          hst_rate?: number
-          hst_amount?: number
-          total?: number
-          notes?: string | null
           due_date?: string | null
+          hst_amount?: number
+          hst_rate?: number
+          id?: string
+          invoice_number?: string
+          labour_subtotal?: number
+          notes?: string | null
           paid_date?: string | null
-          created_at?: string
+          parts_subtotal?: number
+          status?: string
+          subtotal?: number
+          total?: number
           updated_at?: string
+          vehicle_make?: string | null
+          vehicle_mileage?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
         }
         Relationships: [
           {
@@ -258,6 +260,7 @@ export type Database = {
       }
       services: {
         Row: {
+          base_price: number | null
           category: string | null
           created_at: string | null
           description: string | null
@@ -265,8 +268,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          show_price_publicly: boolean | null
         }
         Insert: {
+          base_price?: number | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -274,8 +279,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          show_price_publicly?: boolean | null
         }
         Update: {
+          base_price?: number | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -283,6 +290,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          show_price_publicly?: boolean | null
         }
         Relationships: []
       }
@@ -298,10 +306,7 @@ export type Database = {
       }
     }
     Functions: {
-      next_invoice_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      next_invoice_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

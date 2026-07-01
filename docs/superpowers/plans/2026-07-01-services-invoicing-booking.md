@@ -823,7 +823,7 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
             <td style="padding:8px 0;color:#1A1714;">${item.description}</td>
             <td align="center" style="color:#1A1714;">${item.quantity}</td>
             <td align="right" style="color:#1A1714;">$${item.unit_price}/hr</td>
-            <td align="right" style="color:#1A1714;">$${item.total.toFixed(2)}</td>
+            <td align="right" style="color:#1A1714;">$${(item.total ?? 0).toFixed(2)}</td>
           </tr>`).join('')}
         </table>
       </div>` : ''}
@@ -845,7 +845,7 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
             <td style="padding:8px 0;color:#1A1714;">${item.description}</td>
             <td align="center" style="color:#1A1714;">${item.quantity}</td>
             <td align="right" style="color:#1A1714;">$${item.unit_price}</td>
-            <td align="right" style="color:#1A1714;">$${item.total.toFixed(2)}</td>
+            <td align="right" style="color:#1A1714;">$${(item.total ?? 0).toFixed(2)}</td>
           </tr>`).join('')}
         </table>
       </div>` : ''}
