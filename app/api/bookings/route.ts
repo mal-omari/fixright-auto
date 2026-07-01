@@ -64,7 +64,11 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await resend.emails.send({
+      console.log('Attempting to send email via Resend...')
+      console.log('API Key exists:', !!process.env.RESEND_API_KEY)
+      console.log('API Key prefix:', process.env.RESEND_API_KEY?.substring(0, 8))
+
+      const emailResult = await resend.emails.send({
         from: FROM_ADDRESS,
         to: ['ofomari59@gmail.com'],
         subject: `New Booking Request — ${customer_name} — ${service_description ?? 'Service'}`,
@@ -82,8 +86,16 @@ export async function POST(req: NextRequest) {
           source,
         }),
       })
+
+      console.log('Resend full result:', JSON.stringify(emailResult))
+
+      if (emailResult.error) {
+        console.error('Resend error details:', JSON.stringify(emailResult.error))
+      } else {
+        console.log('Email sent successfully, ID:', emailResult.data?.id)
+      }
     } catch (emailError) {
-      console.error('Failed to send booking notification email:', emailError)
+      console.error('Resend exception:', emailError)
     }
 
     return NextResponse.json({ success: true, booking: data }, { status: 201 })
