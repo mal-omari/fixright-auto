@@ -162,7 +162,7 @@ export default function Hero() {
         width: '100%',
         height: '100vh',
         overflow: 'hidden',
-        backgroundImage: "url('https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80')",
+        backgroundImage: "url('https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=1920&q=80')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
