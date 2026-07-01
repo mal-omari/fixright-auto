@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Calendar, Plus, Clock, Settings,
-  LogOut, FileText, ChevronLeft, ChevronRight,
+  LogOut, FileText, ChevronLeft, ChevronRight, Wrench,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -13,6 +13,7 @@ const NAV = [
   { href: '/workshop-portal/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
   { href: '/workshop-portal/bookings',    label: 'Bookings',    icon: Calendar },
   { href: '/workshop-portal/new-booking', label: 'New Booking', icon: Plus },
+  { href: '/workshop-portal/services',    label: 'Services',    icon: Wrench },
   { href: '/workshop-portal/invoices',    label: 'Invoices',    icon: FileText },
   { href: '/workshop-portal/schedule',    label: 'Schedule',    icon: Clock },
   { href: '/workshop-portal/settings',    label: 'Settings',    icon: Settings },
