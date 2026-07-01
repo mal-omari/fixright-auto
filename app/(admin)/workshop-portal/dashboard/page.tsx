@@ -193,9 +193,6 @@ export default function DashboardPage() {
           }}>
             SHOP CAPACITY — TODAY
           </div>
-          <div style={{ fontSize: '12px', color: '#4A4540', marginTop: 2 }}>
-            {new Date(getTodayEastern() + 'T12:00:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </div>
         </div>
 
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
