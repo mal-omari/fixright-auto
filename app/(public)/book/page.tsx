@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Phone, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Phone, CheckCircle, ArrowLeft, ArrowRight, Sun, Clock, CalendarDays } from 'lucide-react'
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
 import { createClient } from '@/lib/supabase'
 
@@ -59,9 +59,9 @@ const SERVICES = [
 ]
 
 const TIME_OPTIONS = [
-  { value: 'morning', label: 'Morning', sub: '8:00am – 11:00am' },
-  { value: 'afternoon', label: 'Afternoon', sub: '12:00pm – 4:00pm' },
-  { value: 'flexible', label: 'Flexible', sub: 'Any time works' },
+  { value: 'Morning (8:00am – 11:00am)', label: 'MORNING', sub: '8:00am – 11:00am', icon: Sun },
+  { value: 'Afternoon (12:00pm – 4:00pm)', label: 'AFTERNOON', sub: '12:00pm – 4:00pm', icon: Clock },
+  { value: 'Flexible', label: 'FLEXIBLE', sub: 'Any time works', icon: CheckCircle },
 ]
 
 const SOURCE_OPTIONS = ['Google', 'Referral', 'Returning Customer', 'Drive-by', 'Other']
@@ -489,28 +489,36 @@ export default function BookPage() {
           {step === 3 && (
             <div>
               <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Timing</h2>
-              <div className="mb-4">
-                <label style={labelStyle()}>Preferred Date *</label>
-                <input style={inputStyle(!!errors.preferredDate)} value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today}
+              <div className="mb-6">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#FF9500' }}>
+                  <CalendarDays size={16} /> Select Your Preferred Date
+                </label>
+                <input
+                  style={{ ...inputStyle(!!errors.preferredDate), height: '56px', fontSize: '15px' }}
+                  value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today}
                   onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.preferredDate ? '#FF4444' : '#3A3430')} />
                 {errors.preferredDate && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.preferredDate}</p>}
+                <p style={{ fontSize: '12px', color: '#9A8E82', marginTop: '6px' }}>We&apos;ll confirm the exact time when we call you.</p>
               </div>
               <div className="mb-4">
                 <label style={labelStyle()}>Preferred Time *</label>
                 {errors.preferredTime && <p style={{ color: '#FF4444', fontSize: '12px', marginBottom: '8px' }}>{errors.preferredTime}</p>}
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                   {TIME_OPTIONS.map(opt => {
                     const selected = form.preferredTime === opt.value
+                    const Icon = opt.icon
                     return (
                       <button key={opt.value} type="button" onClick={() => set('preferredTime', opt.value)}
                         style={{
-                          padding: '14px 12px', textAlign: 'center',
-                          background: selected ? 'rgba(255,149,0,0.1)' : '#1E1A16',
-                          border: `1px solid ${selected ? '#FF9500' : '#3A3430'}`,
-                          borderRadius: '3px', cursor: 'pointer', transition: 'all 0.15s',
+                          padding: '16px 12px', textAlign: 'center',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                          background: selected ? 'rgba(255,149,0,0.12)' : '#1E1C18',
+                          border: `${selected ? '2px' : '1px'} solid ${selected ? '#FF9500' : '#3A3430'}`,
+                          borderRadius: '3px', cursor: 'pointer', transition: 'background 0.2s, border-color 0.2s',
                         }}>
-                        <div style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600, color: selected ? '#FF9500' : '#F0EDE8' }}>{opt.label}</div>
-                        <div style={{ fontSize: '11px', color: '#9A8E82', marginTop: '3px' }}>{opt.sub}</div>
+                        <Icon size={28} color="#FF9500" />
+                        <div style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '14px', fontWeight: 600, color: selected ? '#FF9500' : '#F0EDE8' }}>{opt.label}</div>
+                        <div style={{ fontSize: '12px', color: '#9A8E82' }}>{opt.sub}</div>
                       </button>
                     )
                   })}
