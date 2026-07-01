@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { StatCard } from '@/components/admin/StatCard'
 import { FuelGauge } from '@/components/admin/FuelGauge'
+import { RevenueAnalytics } from '@/components/admin/RevenueAnalytics'
+import type { MonthRevenue, ServiceCount, DayCount } from '@/components/admin/RevenueAnalytics'
 import { Plus, Calendar, FileText, CalendarDays, Clock, Wrench, CheckCircle } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
@@ -13,6 +15,16 @@ type Booking = Tables<'bookings'>
 type Mechanic = Tables<'mechanics'>
 
 const SHOP_CAPACITY_PER_MECHANIC = 8
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+interface Analytics {
+  revenue: MonthRevenue
+  topServices: ServiceCount[]
+  busiestDays: DayCount[]
+  outstandingCount: number
+  outstandingTotal: number
+  avgJobValue: number
+}
 
 interface MechanicWorkload {
   mechanic: Mechanic
@@ -61,6 +73,7 @@ export default function DashboardPage() {
   const [workload, setWorkload] = useState<MechanicWorkload[]>([])
   const [totalTodayHours, setTotalTodayHours] = useState(0)
   const [totalMechanics, setTotalMechanics] = useState(3)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -70,7 +83,13 @@ export default function DashboardPage() {
       const yesterday = addDaysToDateStr(today, -1)
       const weekAgo = addDaysToDateStr(today, -7)
 
-      const [{ data: allBookings }, { data: recentBookings }, { data: mechanics }, { data: todayBookings }] = await Promise.all([
+      const [
+        { data: allBookings },
+        { data: recentBookings },
+        { data: mechanics },
+        { data: todayBookings },
+        { data: invoices },
+      ] = await Promise.all([
         supabase.from('bookings').select('*'),
         supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(8),
         supabase.from('mechanics').select('*').eq('is_active', true).order('name'),
@@ -79,6 +98,7 @@ export default function DashboardPage() {
           .select('mechanic_id, estimated_hours, status, confirmed_date, preferred_date')
           .in('status', ['confirmed', 'in_progress'])
           .or(`confirmed_date.eq.${today},preferred_date.eq.${today}`),
+        supabase.from('invoices').select('status, total, paid_date'),
       ])
 
       const all = allBookings ?? []
@@ -105,6 +125,50 @@ export default function DashboardPage() {
       )
       setTotalTodayHours(hours)
       setRecent(recentBookings ?? [])
+
+      const thisMonthStr = today.slice(0, 7)
+      const lastMonthStr = addDaysToDateStr(`${thisMonthStr}-01`, -1).slice(0, 7)
+
+      const invoiceRows = invoices ?? []
+      const paidThisMonth = invoiceRows.filter(inv => inv.status === 'paid' && inv.paid_date?.startsWith(thisMonthStr))
+      const paidLastMonth = invoiceRows.filter(inv => inv.status === 'paid' && inv.paid_date?.startsWith(lastMonthStr))
+      const revenueThisMonth = paidThisMonth.reduce((s, inv) => s + inv.total, 0)
+      const revenueLastMonth = paidLastMonth.reduce((s, inv) => s + inv.total, 0)
+      const outstanding = invoiceRows.filter(inv => ['draft', 'sent', 'overdue'].includes(inv.status))
+      const outstandingTotal = outstanding.reduce((s, inv) => s + inv.total, 0)
+
+      const activeBookings = all.filter(b => b.status !== 'cancelled')
+
+      const serviceCounts = new Map<string, number>()
+      activeBookings
+        .filter(b => b.service_description && b.preferred_date?.startsWith(thisMonthStr))
+        .forEach(b => {
+          const name = b.service_description as string
+          serviceCounts.set(name, (serviceCounts.get(name) ?? 0) + 1)
+        })
+      const topServices = Array.from(serviceCounts.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+
+      const dayCounts = new Array(6).fill(0)
+      activeBookings
+        .filter(b => b.preferred_date)
+        .forEach(b => {
+          const dow = new Date(`${b.preferred_date}T12:00:00`).getDay()
+          if (dow >= 1 && dow <= 6) dayCounts[dow - 1] += 1
+        })
+      const busiestDays = DAY_LABELS.map((day, i) => ({ day, count: dayCounts[i] }))
+
+      setAnalytics({
+        revenue: { thisMonth: revenueThisMonth, lastMonth: revenueLastMonth },
+        topServices,
+        busiestDays,
+        outstandingCount: outstanding.length,
+        outstandingTotal,
+        avgJobValue: paidThisMonth.length > 0 ? revenueThisMonth / paidThisMonth.length : 0,
+      })
+
       setLoading(false)
     }
     load()
@@ -182,6 +246,18 @@ export default function DashboardPage() {
           />
         ))}
       </div>
+
+      {/* Analytics */}
+      {analytics && (
+        <RevenueAnalytics
+          revenue={analytics.revenue}
+          topServices={analytics.topServices}
+          busiestDays={analytics.busiestDays}
+          outstandingCount={analytics.outstandingCount}
+          outstandingTotal={analytics.outstandingTotal}
+          avgJobValue={analytics.avgJobValue}
+        />
+      )}
 
       {/* Workload */}
       <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, padding: '20px 24px', marginBottom: 24 }}>
