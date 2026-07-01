@@ -23,6 +23,58 @@ function fmtRate(n: number | null) {
   return `$${(n ?? 0).toFixed(2)}/hr`
 }
 
+interface EditableCellProps {
+  value: number
+  suffix: string
+  onSave: (next: number) => void
+}
+
+function EditableCell({ value, suffix, onSave }: EditableCellProps) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(String(value))
+
+  useEffect(() => { setDraft(String(value)) }, [value])
+
+  function commit() {
+    const parsed = parseFloat(draft)
+    setEditing(false)
+    if (!Number.isNaN(parsed) && parsed !== value) onSave(parsed)
+    else setDraft(String(value))
+  }
+
+  if (editing) {
+    return (
+      <input
+        type="number" step="0.5" min="0" autoFocus
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(String(value)); setEditing(false) } }}
+        style={{
+          width: 80, background: '#141210', border: '1px solid #FF9500',
+          borderRadius: 6, color: '#F0EDE8', padding: '4px 8px',
+          fontSize: '13px', outline: 'none', fontFamily: 'inherit',
+        }}
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      style={{
+        background: 'none', border: 'none', color: '#9A8E82', cursor: 'pointer',
+        padding: '4px 8px', fontSize: '13px', fontFamily: 'inherit', borderRadius: 6,
+        transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,149,0,0.08)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      {value}{suffix}
+    </button>
+  )
+}
+
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,6 +95,17 @@ export default function ServicesPage() {
         setServices(data ?? [])
         setLoading(false)
       })
+  }
+
+  async function updateField(id: string, field: 'estimated_hours' | 'base_price', value: number) {
+    const updateData = field === 'estimated_hours' ? { estimated_hours: value } : { base_price: value }
+    const { error } = await createClient().from('services').update(updateData).eq('id', id)
+    if (error) {
+      toast.error('Failed to update service')
+      return
+    }
+    setServices(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
+    toast.success('Service updated')
   }
 
   const activeCount = useMemo(() => services.filter(s => s.is_active).length, [services])
@@ -137,8 +200,12 @@ export default function ServicesPage() {
                         {cat.label}
                       </span>
                     </td>
-                    <td style={{ padding: '0 16px', height: 56, color: '#9A8E82' }}>{svc.estimated_hours}h</td>
-                    <td style={{ padding: '0 16px', height: 56, color: '#9A8E82' }}>{fmtRate(svc.base_price)}</td>
+                    <td style={{ padding: '0 16px', height: 56 }}>
+                      <EditableCell value={svc.estimated_hours} suffix="h" onSave={v => updateField(svc.id, 'estimated_hours', v)} />
+                    </td>
+                    <td style={{ padding: '0 16px', height: 56 }}>
+                      <EditableCell value={svc.base_price ?? 0} suffix="/hr ($)" onSave={v => updateField(svc.id, 'base_price', v)} />
+                    </td>
                     <td style={{ padding: '0 16px', height: 56 }}>
                       <span style={{ fontSize: '12px', color: svc.is_active ? '#28C850' : '#6B6560' }}>
                         {svc.is_active ? 'Active' : 'Inactive'}
