@@ -5,6 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 // ── Dust particles ──────────────────────────────────────────────────────────
 const DUST = Array.from({ length: 20 }, (_, i) => ({
@@ -70,7 +71,7 @@ const HUD_DEFS = [
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
-  const bgRef = useRef<HTMLImageElement>(null)
+  const bgRef = useRef<HTMLDivElement>(null)
   const bookBtnRef = useRef<HTMLAnchorElement>(null)
   const spotlightRef = useRef<HTMLDivElement>(null)
   const [hudValues, setHudValues] = useState(() =>
@@ -175,21 +176,24 @@ export default function Hero() {
     >
       {/* Background photo */}
       <div className="absolute inset-0 overflow-hidden">
-        <img
+        <div
           ref={bgRef}
-          src="https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80"
-          alt=""
-          aria-hidden="true"
           style={{
             position: 'absolute',
             top: '-15%',
             left: 0,
             width: '100%',
             height: '130%',
-            objectFit: 'cover',
-            objectPosition: 'center',
           }}
-        />
+        >
+          <Image
+            src="https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80"
+            alt=""
+            fill
+            priority
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+        </div>
       </div>
 
       {/* Dark warm overlay */}

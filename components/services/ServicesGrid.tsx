@@ -11,21 +11,20 @@ import type { LucideIcon } from 'lucide-react'
 interface Service {
   icon: LucideIcon
   name: string
-  time: string
   description: string
   iconBg: string
   iconColor: string
 }
 
 const services: Service[] = [
-  { icon: Wrench,      name: 'Oil Change',               time: 'Est. 30 min',    description: 'Full synthetic or conventional oil changes with filter replacement and fluid top-up.',                       iconBg: 'rgba(255,149,0,0.12)', iconColor: '#FF9500' },
-  { icon: Activity,    name: 'Brake Service',             time: 'Est. 2 hrs',     description: 'Pads, rotors, calipers, and brake fluid flush. We inspect the full brake system.',                          iconBg: 'rgba(239,68,68,0.12)', iconColor: '#EF4444' },
-  { icon: Settings,    name: 'Engine & Transmission',     time: 'Est. 1–2 days',  description: 'Complete engine diagnostics, repair, and full transmission service by certified technicians.',             iconBg: 'rgba(74,158,255,0.12)', iconColor: '#4A9EFF' },
-  { icon: Thermometer, name: 'Heating & A/C',             time: 'Est. 3 hrs',     description: 'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',         iconBg: 'rgba(0,212,255,0.12)', iconColor: '#00D4FF' },
-  { icon: Zap,         name: 'Electrical & Diagnostics',  time: 'Est. 1–2 hrs',   description: 'OBD-II scanning, starter, alternator, ignition, and complete electrical diagnostics.',                     iconBg: 'rgba(232,197,71,0.12)', iconColor: '#E8C547' },
-  { icon: RotateCcw,   name: 'Tire Services',             time: 'Est. 1 hr',      description: 'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',          iconBg: 'rgba(74,222,128,0.12)', iconColor: '#4ADE80' },
-  { icon: ShieldCheck, name: 'Safety Certification',      time: 'Est. 2 hrs',     description: 'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',                      iconBg: 'rgba(167,139,250,0.12)', iconColor: '#A78BFA' },
-  { icon: Layers,      name: 'Body & Rust Work',          time: 'Est. varies',    description: 'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',    iconBg: 'rgba(251,146,60,0.12)', iconColor: '#FB923C' },
+  { icon: Wrench,      name: 'Oil Change',               description: 'Full synthetic or conventional oil changes with filter replacement and fluid top-up.',                       iconBg: 'rgba(255,149,0,0.12)', iconColor: '#FF9500' },
+  { icon: Activity,    name: 'Brake Service',             description: 'Pads, rotors, calipers, and brake fluid flush. We inspect the full brake system.',                          iconBg: 'rgba(239,68,68,0.12)', iconColor: '#EF4444' },
+  { icon: Settings,    name: 'Engine & Transmission',     description: 'Complete engine diagnostics, repair, and full transmission service by certified technicians.',             iconBg: 'rgba(74,158,255,0.12)', iconColor: '#4A9EFF' },
+  { icon: Thermometer, name: 'Heating & A/C',             description: 'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',         iconBg: 'rgba(0,212,255,0.12)', iconColor: '#00D4FF' },
+  { icon: Zap,         name: 'Electrical & Diagnostics',  description: 'OBD-II scanning, starter, alternator, ignition, and complete electrical diagnostics.',                     iconBg: 'rgba(232,197,71,0.12)', iconColor: '#E8C547' },
+  { icon: RotateCcw,   name: 'Tire Services',             description: 'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',          iconBg: 'rgba(74,222,128,0.12)', iconColor: '#4ADE80' },
+  { icon: ShieldCheck, name: 'Safety Certification',      description: 'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',                      iconBg: 'rgba(167,139,250,0.12)', iconColor: '#A78BFA' },
+  { icon: Layers,      name: 'Body & Rust Work',          description: 'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',    iconBg: 'rgba(251,146,60,0.12)', iconColor: '#FB923C' },
 ]
 
 function ServiceCard({ service }: { service: Service }) {
@@ -112,19 +111,9 @@ function ServiceCard({ service }: { service: Service }) {
         >
           {service.name}
         </h3>
-        <p style={{ fontSize: '12px', fontWeight: 400, color: '#9A8E82', marginBottom: 10, lineHeight: 1.5 }}>
+        <p style={{ fontSize: '12px', fontWeight: 400, color: '#9A8E82', lineHeight: 1.5 }}>
           {service.description}
         </p>
-        <div style={{ position: 'absolute' as const, bottom: 0, right: 0 }}>
-          <span style={{
-            fontFamily: 'var(--font-heading), sans-serif',
-            background: 'rgba(255,149,0,0.12)', color: '#FF9500',
-            fontSize: '10px', fontWeight: 500, padding: '3px 8px',
-            borderRadius: 20, letterSpacing: '0.04em',
-          }}>
-            {service.time}
-          </span>
-        </div>
       </div>
     </div>
   )

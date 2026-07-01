@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { Search, X, ChevronUp, ChevronDown, Plus } from 'lucide-react'
@@ -28,7 +29,8 @@ function formatDate(d: string | null) {
   return date.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
-export default function BookingsPage() {
+function BookingsContent() {
+  const searchParams = useSearchParams()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -38,6 +40,21 @@ export default function BookingsPage() {
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    const statusParam = searchParams.get('status')
+    const dateParam = searchParams.get('date')
+
+    if (statusParam) {
+      const match = STATUS_PILLS.find(p => p.key === statusParam)
+      if (match) setStatusFilter(statusParam)
+    }
+    if (dateParam === 'today') {
+      const today = new Date().toISOString().split('T')[0]
+      setDateFrom(today)
+      setDateTo(today)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     createClient()
@@ -352,5 +369,13 @@ export default function BookingsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, color: '#4A4540', fontSize: '13px' }}>Loading…</div>}>
+      <BookingsContent />
+    </Suspense>
   )
 }

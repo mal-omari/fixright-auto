@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
@@ -12,6 +14,7 @@ interface StatCardProps {
   iconColor: string
   delay?: number
   format?: (n: number) => string
+  href?: string
 }
 
 function defaultFormat(n: number): string {
@@ -20,7 +23,7 @@ function defaultFormat(n: number): string {
 }
 
 export function StatCard({
-  label, value, trend, icon: Icon, iconBg, iconColor, delay = 0, format = defaultFormat,
+  label, value, trend, icon: Icon, iconBg, iconColor, delay = 0, format = defaultFormat, href,
 }: StatCardProps) {
   const numRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -45,17 +48,31 @@ export function StatCard({
     return () => cancelAnimationFrame(raf)
   }, [value, delay, format])
 
-  return (
+  const card = (
     <div
       ref={cardRef}
       style={{
         background: '#1E1C18', border: '1px solid #2A2420',
         borderRadius: 12, padding: 24, minHeight: 120,
-        transition: 'border-color 0.2s',
+        transition: 'border-color 0.2s, transform 0.15s',
+        cursor: href ? 'pointer' : 'default',
+        position: 'relative',
       }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,149,0,0.4)')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = '#2A2420')}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = 'rgba(255,149,0,0.5)'
+        if (href) e.currentTarget.style.transform = 'scale(1.02)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = '#2A2420'
+        if (href) e.currentTarget.style.transform = 'scale(1)'
+      }}
     >
+      {href && (
+        <ArrowUpRight
+          size={14}
+          style={{ position: 'absolute', top: 12, right: 12, color: '#4A4540' }}
+        />
+      )}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{
           width: 40, height: 40, borderRadius: '50%',
@@ -93,4 +110,13 @@ export function StatCard({
       </div>
     </div>
   )
+
+  if (href) {
+    return (
+      <Link href={href} style={{ textDecoration: 'none', display: 'block' }}>
+        {card}
+      </Link>
+    )
+  }
+  return card
 }

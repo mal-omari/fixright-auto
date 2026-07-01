@@ -53,18 +53,19 @@ export default function DashboardPage() {
       const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]
       const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
 
-      const [{ data: allBookings }, { data: recentBookings }, { data: mechanics }] = await Promise.all([
+      const [{ data: allBookings }, { data: recentBookings }, { data: mechanics }, { data: todayBookings }] = await Promise.all([
         supabase.from('bookings').select('*'),
         supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(8),
         supabase.from('mechanics').select('*').eq('is_active', true).order('name'),
+        supabase
+          .from('bookings')
+          .select('mechanic_id, estimated_hours, status, confirmed_date, preferred_date')
+          .in('status', ['confirmed', 'in_progress'])
+          .or(`confirmed_date.eq.${today},preferred_date.eq.${today}`),
       ])
 
       const all = allBookings ?? []
-      // Include confirmed + in_progress for capacity tracking
-      const activeToday = all.filter(b =>
-        b.preferred_date === today &&
-        (b.status === 'confirmed' || b.status === 'in_progress')
-      )
+      const activeToday = todayBookings ?? []
       const hours = activeToday.reduce((s, b) => s + (b.estimated_hours ?? 0), 0)
 
       setStats({
@@ -103,6 +104,7 @@ export default function DashboardPage() {
       iconBg: '#1E3A5F',
       iconColor: '#60A5FA',
       delay: 0,
+      href: '/workshop-portal/bookings?date=today',
     },
     {
       label: 'Pending Confirmation',
@@ -112,6 +114,7 @@ export default function DashboardPage() {
       iconBg: '#3D2800',
       iconColor: '#FF9500',
       delay: 150,
+      href: '/workshop-portal/bookings?status=pending',
     },
     {
       label: 'In Progress',
@@ -121,6 +124,7 @@ export default function DashboardPage() {
       iconBg: '#1A3320',
       iconColor: '#4ADE80',
       delay: 300,
+      href: '/workshop-portal/bookings?status=in_progress',
     },
     {
       label: 'Completed This Week',
@@ -130,6 +134,7 @@ export default function DashboardPage() {
       iconBg: '#2D1B4E',
       iconColor: '#A78BFA',
       delay: 450,
+      href: '/workshop-portal/bookings?status=completed',
     },
   ] : []
 
@@ -156,6 +161,7 @@ export default function DashboardPage() {
             iconBg={card.iconBg}
             iconColor={card.iconColor}
             delay={card.delay}
+            href={card.href}
           />
         ))}
       </div>

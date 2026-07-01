@@ -71,6 +71,12 @@ export default function SettingsPage() {
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [notifSaved, setNotifSaved] = useState(false)
   const [notifs, setNotifs] = useState({ newBooking: true, cancellation: true })
+  const [newName, setNewName] = useState('')
+  const [newPhone, setNewPhone] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [addStatus, setAddStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [nameError, setNameError] = useState('')
+  const [addingMechanic, setAddingMechanic] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('fixright_labour_rate')
@@ -91,6 +97,27 @@ export default function SettingsPage() {
   async function toggleMechanic(id: string, current: boolean) {
     await createClient().from('mechanics').update({ is_active: !current }).eq('id', id)
     setMechanics(prev => prev.map(m => m.id === id ? { ...m, is_active: !current } : m))
+  }
+
+  async function addMechanic() {
+    if (!newName.trim()) { setNameError('Name is required'); return }
+    setNameError('')
+    setAddingMechanic(true)
+    const { data, error } = await createClient()
+      .from('mechanics')
+      .insert({ name: newName.trim(), phone: newPhone.trim() || null, email: newEmail.trim() || null, is_active: true })
+      .select()
+      .single()
+    setAddingMechanic(false)
+    if (error) {
+      setAddStatus({ type: 'error', message: error.message })
+      setTimeout(() => setAddStatus(null), 4000)
+    } else {
+      setMechanics(prev => [...prev, data])
+      setNewName(''); setNewPhone(''); setNewEmail('')
+      setAddStatus({ type: 'success', message: 'Mechanic added successfully' })
+      setTimeout(() => setAddStatus(null), 3000)
+    }
   }
 
   function saveNotifs() {
@@ -233,6 +260,72 @@ export default function SettingsPage() {
             ))}
           </div>
         )}
+
+        {/* Add New Mechanic */}
+        <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #2A2420' }}>
+          <div style={{
+            fontFamily: 'var(--font-heading), sans-serif',
+            fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em',
+            color: '#FF9500', textTransform: 'uppercase', marginBottom: 12,
+          }}>
+            ADD NEW MECHANIC
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+              <input
+                placeholder="Name *"
+                value={newName}
+                onChange={e => { setNewName(e.target.value); if (nameError) setNameError('') }}
+                style={iStyle}
+              />
+              {nameError && (
+                <div style={{ fontSize: '11px', color: '#EF4444', marginTop: 4 }}>{nameError}</div>
+              )}
+            </div>
+            <div style={{ flex: '1 1 140px', minWidth: 120 }}>
+              <input
+                placeholder="Phone"
+                value={newPhone}
+                onChange={e => setNewPhone(e.target.value)}
+                style={iStyle}
+              />
+            </div>
+            <div style={{ flex: '1 1 180px', minWidth: 150 }}>
+              <input
+                placeholder="Email"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                style={iStyle}
+              />
+            </div>
+            <button
+              onClick={addMechanic}
+              disabled={addingMechanic}
+              style={{
+                background: '#FF9500', color: '#0D0B08',
+                border: 'none', borderRadius: 8,
+                padding: '10px 18px',
+                fontFamily: 'var(--font-heading), sans-serif',
+                fontSize: '12px', fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                cursor: addingMechanic ? 'not-allowed' : 'pointer',
+                opacity: addingMechanic ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+                alignSelf: 'flex-start',
+              }}
+            >
+              + Add Mechanic
+            </button>
+          </div>
+          {addStatus && (
+            <div style={{
+              marginTop: 10, fontSize: '12px', fontWeight: 500,
+              color: addStatus.type === 'success' ? '#28C850' : '#EF4444',
+            }}>
+              {addStatus.message}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Notifications */}
