@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Car, User, FileText } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
@@ -103,6 +104,7 @@ export default function BookingDetailPage() {
     if (!booking) return
     setSaving(true); setSaveMsg('')
     const supabase = createClient()
+    const statusChangedToConfirmed = status === 'confirmed' && booking.status !== 'confirmed'
     const { error } = await supabase.from('bookings').update({
       status,
       mechanic_id: mechanicId || null,
@@ -117,10 +119,29 @@ export default function BookingDetailPage() {
     setSaving(false)
     if (error) {
       setSaveMsg('Error: ' + error.message)
+      toast.error('Error saving booking: ' + error.message)
     } else {
       setBooking(prev => prev ? { ...prev, status, mechanic_id: mechanicId || null } : prev)
       setSaveMsg('Saved successfully')
       setTimeout(() => setSaveMsg(''), 3000)
+      toast.success('Booking saved successfully')
+
+      if (statusChangedToConfirmed && booking.customer_email) {
+        try {
+          const res = await fetch('/api/bookings/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: booking.id }),
+          })
+          if (res.ok) {
+            toast.success('Confirmation email sent to customer')
+          } else {
+            toast.error('Booking saved, but confirmation email failed to send')
+          }
+        } catch {
+          toast.error('Booking saved, but confirmation email failed to send')
+        }
+      }
     }
   }
 
@@ -160,7 +181,11 @@ export default function BookingDetailPage() {
       due_date: dueDate,
     }).select().single()
 
-    if (invErr || !inv) { setCreatingInvoice(false); return }
+    if (invErr || !inv) {
+      setCreatingInvoice(false)
+      toast.error('Failed to create invoice')
+      return
+    }
 
     await supabase.from('invoice_line_items').insert({
       invoice_id: inv.id,
@@ -176,7 +201,12 @@ export default function BookingDetailPage() {
 
   async function cancelBooking() {
     if (!booking) return
-    await createClient().from('bookings').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', booking.id)
+    const { error } = await createClient().from('bookings').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', booking.id)
+    if (error) {
+      toast.error('Failed to cancel booking')
+      return
+    }
+    toast.success('Booking cancelled')
     router.push('/workshop-portal/bookings')
   }
 

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { resend } from '@/lib/resend'
+import { generateBookingReceivedEmail } from '@/lib/emails/generateBookingReceived'
+
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding@resend.dev>'
 
 export async function GET() {
   return NextResponse.json({ message: 'Bookings API' })
@@ -57,6 +61,29 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('Supabase insert error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    try {
+      await resend.emails.send({
+        from: FROM_ADDRESS,
+        to: ['ofomari59@gmail.com'],
+        subject: `New Booking Request — ${customer_name} — ${service_description ?? 'Service'}`,
+        html: generateBookingReceivedEmail({
+          customerName: customer_name,
+          customerPhone: customer_phone,
+          customerEmail: customer_email,
+          vehicleYear: vehicle_year,
+          vehicleMake: vehicle_make,
+          vehicleModel: vehicle_model,
+          serviceName: service_description,
+          notes,
+          preferredDate: preferred_date,
+          preferredTime: preferred_time,
+          source,
+        }),
+      })
+    } catch (emailError) {
+      console.error('Failed to send booking notification email:', emailError)
     }
 
     return NextResponse.json({ success: true, booking: data }, { status: 201 })

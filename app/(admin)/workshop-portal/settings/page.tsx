@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { Check, Building2, DollarSign, Wrench, Bell } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
@@ -112,11 +113,13 @@ export default function SettingsPage() {
     if (error) {
       setAddStatus({ type: 'error', message: error.message })
       setTimeout(() => setAddStatus(null), 4000)
+      toast.error(error.message)
     } else {
       setMechanics(prev => [...prev, data])
       setNewName(''); setNewPhone(''); setNewEmail('')
       setAddStatus({ type: 'success', message: 'Mechanic added successfully' })
       setTimeout(() => setAddStatus(null), 3000)
+      toast.success('Mechanic added successfully')
     }
   }
 

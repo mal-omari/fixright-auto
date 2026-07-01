@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef, memo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Plus, Trash2, Download, Check, Loader2 } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
@@ -318,8 +319,10 @@ export default function InvoiceDetailPage() {
       setInvoice(prev => prev ? { ...prev, status, labour_subtotal: labourSubtotal, parts_subtotal: partsSubtotal, subtotal, hst_amount: hstAmount, total, due_date: dueDate || null, notes: notes || null } : prev)
       setSaveState('saved')
       setTimeout(() => setSaveState('idle'), 2000)
+      toast.success('Invoice saved')
     } else {
       setSaveState('idle')
+      toast.error('Failed to save invoice')
     }
   }, [invoice, id, labourItems, partsItems, status, dueDate, notes, labourSubtotal, partsSubtotal, subtotal, hstRate, hstAmount, total])
 
@@ -489,6 +492,7 @@ export default function InvoiceDetailPage() {
       doc.save(`${invoice.invoice_number}.pdf`)
     } catch (err) {
       console.error('PDF generation failed:', err)
+      toast.error('Failed to generate PDF')
     }
     setDownloading(false)
   }

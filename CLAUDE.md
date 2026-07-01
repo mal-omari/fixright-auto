@@ -13,7 +13,7 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere).
 - GSAP + ScrollTrigger for animations
 - Framer Motion for page transitions
 - jsPDF for invoice PDF generation
-- Resend for email (not yet wired)
+- Resend for email (wired — booking received + confirmation emails)
 - Vercel for deployment
 - GitHub: mal-omari/fixright-auto
 
@@ -65,6 +65,12 @@ Admin panel (/workshop-portal):
 - Settings — labour rate, mechanic toggles
 - Invoices list with outstanding/paid/overdue summary
 - Invoice editor with inline labour + parts lines, live HST calc, PDF download
+- Toast notifications (react-hot-toast) across admin actions
+
+Email notifications (Resend):
+- New web booking → email to Omar (lib/emails/generateBookingReceived.ts, sent from app/api/bookings/route.ts)
+- Booking confirmed → email to customer (lib/emails/generateBookingConfirmed.ts, sent from app/api/bookings/confirm/route.ts, triggered from booking detail page on status → confirmed)
+- Falls back to onboarding@resend.dev until RESEND_FROM_EMAIL domain is verified
 
 ## Rules — Always Follow These
 1. NEVER add admin links to the public navbar or footer
@@ -78,7 +84,6 @@ Admin panel (/workshop-portal):
 9. Address: 2117 Aldersbrook Rd, London ON N6G 3X1
 
 ## Still To Build
-- Phase 5: Resend email notifications (booking confirmation to Omar + customer)
 - Phase 6: Domain cutover to fixrightauto.ca
 - Polish pass: hero 3D scene, reactive elements, warm color refinements
 - Ruflo integration (after build complete)

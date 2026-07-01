@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
@@ -128,7 +129,8 @@ export default function NewBookingPage() {
     }).select().single()
 
     setSubmitting(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError(err.message); toast.error(err.message); return }
+    toast.success('Booking created successfully')
     router.push(`/workshop-portal/bookings/${data.id}`)
   }
 
