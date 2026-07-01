@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { AdminSidebar } from './AdminSidebar'
 import { Bell } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
 
 const TITLE_MAP: Record<string, string> = {
   '/workshop-portal/dashboard':   'Dashboard',
@@ -42,10 +43,29 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const dt = useDateTime()
 
   useEffect(() => {
-    const auth = localStorage.getItem('fixright_admin_auth') === 'true'
-    setIsAuth(auth)
-    setChecking(false)
-    if (!auth && !isLoginPage) router.push('/workshop-portal')
+    const supabase = createClient()
+
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setIsAuth(false)
+        setChecking(false)
+        if (!isLoginPage) router.push('/workshop-portal')
+        return
+      }
+      setIsAuth(true)
+      setChecking(false)
+    }
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_OUT' || !session) {
+          setIsAuth(false)
+          router.push('/workshop-portal')
+        }
+      }
+    )
 
     const mobile = window.innerWidth < 768
     setIsMobile(mobile)
@@ -62,7 +82,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       if (m) setSidebarOpen(false)
     }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      subscription.unsubscribe()
+    }
   }, [pathname, router, isLoginPage])
 
   const toggleSidebar = useCallback(() => {

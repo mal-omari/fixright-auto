@@ -7,6 +7,7 @@ import {
   LogOut, FileText, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase'
 
 const NAV = [
   { href: '/workshop-portal/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -28,8 +29,9 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
   const router = useRouter()
   const [tooltip, setTooltip] = useState<{ label: string; y: number } | null>(null)
 
-  function logout() {
-    localStorage.removeItem('fixright_admin_auth')
+  async function logout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
     router.push('/workshop-portal')
   }
 

@@ -56,7 +56,7 @@ Public site:
 - /book — multi-step booking form (5 steps, saves to Supabase)
 
 Admin panel (/workshop-portal):
-- Login page (localStorage auth, real Supabase Auth coming later)
+- Login page with real Supabase Auth (email/password), middleware-protected routes
 - Dashboard with live stats, per-mechanic workload bars
 - Bookings list with status pill filters, search, pagination
 - Booking detail with status management, auto-fill hours, Create Invoice
@@ -78,7 +78,6 @@ Admin panel (/workshop-portal):
 9. Address: 2117 Aldersbrook Rd, London ON N6G 3X1
 
 ## Still To Build
-- Phase 4: Supabase Auth on /workshop-portal (replace localStorage)
 - Phase 5: Resend email notifications (booking confirmation to Omar + customer)
 - Phase 6: Domain cutover to fixrightauto.ca
 - Polish pass: hero 3D scene, reactive elements, warm color refinements

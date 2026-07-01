@@ -2,21 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    if (localStorage.getItem('fixright_admin_auth') === 'true') {
-      router.replace('/workshop-portal/dashboard')
-    }
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace('/workshop-portal/dashboard')
+    })
   }, [router])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    localStorage.setItem('fixright_admin_auth', 'true')
+    setError('')
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setError('Invalid email or password')
+      return
+    }
     router.push('/workshop-portal/dashboard')
   }
 
@@ -76,6 +85,11 @@ export default function LoginPage() {
                 onBlur={e => (e.target.style.borderColor = '#2A2420')}
               />
             </div>
+            {error && (
+              <div style={{ color: '#FF6B6B', fontSize: '12px', marginBottom: '16px', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               style={{
