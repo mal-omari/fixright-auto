@@ -12,7 +12,7 @@ import type { Tables } from '@/types/database.types'
 type Mechanic = Tables<'mechanics'>
 type Service = Tables<'services'>
 
-const TIMES = ['morning', 'afternoon', 'flexible']
+const TIMES = ['Morning (8:00am – 11:00am)', 'Afternoon (12:00pm – 4:00pm)', 'Flexible']
 const SOURCES = ['phone', 'walkin', 'web', 'referral', 'google', 'other']
 
 const iStyle: React.CSSProperties = {
@@ -61,7 +61,7 @@ export default function NewBookingPage() {
     service_id: '',
     service_description: '',
     preferred_date: '',
-    preferred_time: 'morning',
+    preferred_time: 'Morning (8:00am – 11:00am)',
     source: 'phone',
     mechanic_id: '',
     estimated_hours: '',
@@ -271,7 +271,7 @@ export default function NewBookingPage() {
                   <label style={lStyle}>Preferred Time</label>
                   <SelectWrap>
                     <select value={form.preferred_time} onChange={e => set('preferred_time', e.target.value)} style={sel}>
-                      {TIMES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                      {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </SelectWrap>
                 </div>
