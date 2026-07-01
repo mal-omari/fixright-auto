@@ -12,7 +12,7 @@ const CATEGORY_COLORS: Record<string, { color: string; bg: string; label: string
   maintenance: { color: '#4A9EFF', bg: 'rgba(74,158,255,0.15)', label: 'Maintenance' },
   electrical:  { color: '#FF9500', bg: 'rgba(255,149,0,0.15)',  label: 'Electrical' },
   safety:      { color: '#28C850', bg: 'rgba(40,200,80,0.15)', label: 'Safety' },
-  body:        { color: '#A855F7', bg: 'rgba(168,85,247,0.15)', label: 'Body' },
+  body:        { color: '#A78BFA', bg: 'rgba(167,139,250,0.15)', label: 'Body' },
 }
 
 function categoryStyle(category: string | null) {
