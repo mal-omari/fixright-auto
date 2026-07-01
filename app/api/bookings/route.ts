@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
 
       const emailResult = await resend.emails.send({
         from: FROM_ADDRESS,
-        to: ['ofomari59@gmail.com'],
+        // TODO: change to ofomari59@gmail.com after domain verified
+        to: ['12mfao@gmail.com'],
         subject: `New Booking Request — ${customer_name} — ${service_description ?? 'Service'}`,
         html: generateBookingReceivedEmail({
           customerName: customer_name,
