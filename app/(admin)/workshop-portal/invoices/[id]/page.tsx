@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
-import { ArrowLeft, Plus, Trash2, Download, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Download, Check, Loader2, Send } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
 type Invoice = Tables<'invoices'>
@@ -203,6 +203,8 @@ export default function InvoiceDetailPage() {
   const [saving, setSaving] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [downloading, setDownloading] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [showPaidConfirm, setShowPaidConfirm] = useState(false)
 
   const [status, setStatus] = useState('draft')
   const [dueDate, setDueDate] = useState('')
@@ -497,6 +499,44 @@ export default function InvoiceDetailPage() {
     setDownloading(false)
   }
 
+  async function sendInvoiceEmail() {
+    if (!invoice) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/invoices/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceId: invoice.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to send invoice')
+      setInvoice(prev => prev ? { ...prev, status: 'sent' } : prev)
+      setStatus('sent')
+      toast.success('Invoice sent to customer')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send invoice')
+    }
+    setSending(false)
+  }
+
+  async function confirmMarkPaid(sendReceipt: boolean) {
+    setStatus('paid')
+    setShowPaidConfirm(false)
+    if (sendReceipt && invoice) {
+      try {
+        const res = await fetch('/api/invoices/receipt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoiceId: invoice.id }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Receipt sent to customer')
+      } catch {
+        toast.error('Failed to send receipt')
+      }
+    }
+  }
+
   if (loading) {
     return <div style={{ padding: 40, color: '#6B6560', fontSize: '13px' }}>Loading invoice…</div>
   }
@@ -662,9 +702,41 @@ export default function InvoiceDetailPage() {
               <Download size={14} />
               {downloading ? 'Generating…' : 'Download PDF'}
             </button>
-            {status !== 'paid' && (
+            {invoice.customer_email ? (
               <button
-                onClick={() => setStatus('paid')}
+                onClick={sendInvoiceEmail}
+                disabled={sending}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'rgba(59,130,246,0.1)', color: '#3B82F6',
+                  border: '1px solid rgba(59,130,246,0.3)', borderRadius: 8,
+                  padding: '10px 16px', fontSize: '12px', fontWeight: 600,
+                  cursor: sending ? 'not-allowed' : 'pointer',
+                  fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
+                }}
+              >
+                <Send size={14} />
+                {sending ? 'Sending…' : 'Send Invoice to Customer'}
+              </button>
+            ) : (
+              <button
+                disabled
+                title="No customer email on file"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'rgba(59,130,246,0.05)', color: '#3B4655',
+                  border: '1px solid rgba(59,130,246,0.1)', borderRadius: 8,
+                  padding: '10px 16px', fontSize: '12px', fontWeight: 600,
+                  cursor: 'not-allowed',
+                  fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
+                }}
+              >
+                <Send size={14} /> No Customer Email
+              </button>
+            )}
+            {status !== 'paid' && !showPaidConfirm && (
+              <button
+                onClick={() => setShowPaidConfirm(true)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   background: 'rgba(40,200,80,0.1)', color: '#28C850',
@@ -676,6 +748,37 @@ export default function InvoiceDetailPage() {
               >
                 <Check size={14} /> Mark as Paid
               </button>
+            )}
+            {status !== 'paid' && showPaidConfirm && (
+              <div style={{
+                background: 'rgba(40,200,80,0.06)', border: '1px solid rgba(40,200,80,0.25)',
+                borderRadius: 8, padding: 12,
+              }}>
+                <div style={{ fontSize: '12px', color: '#F0EDE8', marginBottom: 10 }}>
+                  Send payment receipt to customer?
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => confirmMarkPaid(true)}
+                    style={{
+                      flex: 1, background: '#28C850', color: '#0D0B08', border: 'none',
+                      borderRadius: 6, padding: '8px 12px', fontSize: '12px', fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'var(--font-heading), sans-serif',
+                    }}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => confirmMarkPaid(false)}
+                    style={{
+                      flex: 1, background: 'none', color: '#9A8E82', border: '1px solid #2A2420',
+                      borderRadius: 6, padding: '8px 12px', fontSize: '12px', cursor: 'pointer',
+                    }}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
