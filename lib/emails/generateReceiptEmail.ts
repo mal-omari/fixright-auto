@@ -1,3 +1,5 @@
+import { escapeHtml } from './escapeHtml'
+
 interface ReceiptEmailData {
   invoiceNumber: string
   vehicle: string
@@ -27,8 +29,8 @@ export function generateReceiptEmail(data: ReceiptEmailData): string {
       <p style="color:#1A1714;font-size:15px;text-align:center;">Thank you! We've received your payment.</p>
 
       <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Payment Details</h2>
-      <p style="color:#1A1714;"><strong>Invoice:</strong> ${data.invoiceNumber}</p>
-      <p style="color:#1A1714;"><strong>Vehicle:</strong> ${data.vehicle}</p>
+      <p style="color:#1A1714;"><strong>Invoice:</strong> ${escapeHtml(data.invoiceNumber)}</p>
+      <p style="color:#1A1714;"><strong>Vehicle:</strong> ${escapeHtml(data.vehicle)}</p>
       <p style="color:#1A1714;"><strong>Amount Paid:</strong> $${data.amountPaid.toFixed(2)}</p>
       <p style="color:#1A1714;"><strong>Date Paid:</strong> ${formatDate(data.paidDate)}</p>
 

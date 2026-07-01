@@ -1,4 +1,5 @@
 import type { Tables } from '@/types/database.types'
+import { escapeHtml } from './escapeHtml'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
@@ -24,22 +25,22 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
             <div style="font-size:11px;color:#888;text-transform:uppercase;
               letter-spacing:1px;">Invoice</div>
             <div style="font-size:28px;font-weight:bold;color:#1A1714;">
-              ${invoice.invoice_number}</div>
+              ${escapeHtml(invoice.invoice_number)}</div>
           </td>
           <td align="right">
             <div style="font-size:11px;color:#888;">Date</div>
             <div style="color:#1A1714;">${new Date(invoice.created_at).toLocaleDateString('en-CA')}</div>
             <div style="font-size:11px;color:#888;margin-top:8px;">Due Date</div>
-            <div style="color:#1A1714;">${invoice.due_date || 'Upon Receipt'}</div>
+            <div style="color:#1A1714;">${escapeHtml(invoice.due_date) || 'Upon Receipt'}</div>
           </td>
         </tr>
       </table>
 
       <div style="margin-top:24px;padding:16px;background:#f9f9f9;border-radius:4px;">
         <div style="font-size:11px;color:#888;text-transform:uppercase;">Bill To</div>
-        <div style="font-weight:bold;color:#1A1714;">${invoice.customer_name}</div>
-        <div style="color:#555;">${invoice.customer_phone}</div>
-        <div style="color:#555;">${invoice.vehicle_year} ${invoice.vehicle_make} ${invoice.vehicle_model}</div>
+        <div style="font-weight:bold;color:#1A1714;">${escapeHtml(invoice.customer_name)}</div>
+        <div style="color:#555;">${escapeHtml(invoice.customer_phone)}</div>
+        <div style="color:#555;">${escapeHtml(invoice.vehicle_year)} ${escapeHtml(invoice.vehicle_make)} ${escapeHtml(invoice.vehicle_model)}</div>
       </div>
 
       ${labourItems.length > 0 ? `
@@ -56,9 +57,9 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
           </tr>
           ${labourItems.map(item => `
           <tr style="border-top:1px solid #eee;">
-            <td style="padding:8px 0;color:#1A1714;">${item.description}</td>
-            <td align="center" style="color:#1A1714;">${item.quantity}</td>
-            <td align="right" style="color:#1A1714;">$${item.unit_price}/hr</td>
+            <td style="padding:8px 0;color:#1A1714;">${escapeHtml(item.description)}</td>
+            <td align="center" style="color:#1A1714;">${escapeHtml(item.quantity)}</td>
+            <td align="right" style="color:#1A1714;">$${escapeHtml(item.unit_price)}/hr</td>
             <td align="right" style="color:#1A1714;">$${(item.total ?? 0).toFixed(2)}</td>
           </tr>`).join('')}
         </table>
@@ -78,9 +79,9 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
           </tr>
           ${partsItems.map(item => `
           <tr style="border-top:1px solid #eee;">
-            <td style="padding:8px 0;color:#1A1714;">${item.description}</td>
-            <td align="center" style="color:#1A1714;">${item.quantity}</td>
-            <td align="right" style="color:#1A1714;">$${item.unit_price}</td>
+            <td style="padding:8px 0;color:#1A1714;">${escapeHtml(item.description)}</td>
+            <td align="center" style="color:#1A1714;">${escapeHtml(item.quantity)}</td>
+            <td align="right" style="color:#1A1714;">$${escapeHtml(item.unit_price)}</td>
             <td align="right" style="color:#1A1714;">$${(item.total ?? 0).toFixed(2)}</td>
           </tr>`).join('')}
         </table>
@@ -116,7 +117,7 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
       ${invoice.notes ? `
       <div style="margin-top:24px;padding:12px;background:#f9f9f9;border-radius:4px;">
         <div style="font-size:11px;color:#888;">Notes</div>
-        <div style="color:#555;margin-top:4px;">${invoice.notes}</div>
+        <div style="color:#555;margin-top:4px;">${escapeHtml(invoice.notes)}</div>
       </div>` : ''}
     </div>
     <div style="background:#1A1714;padding:24px;text-align:center;
