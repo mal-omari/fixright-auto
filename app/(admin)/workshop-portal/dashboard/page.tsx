@@ -38,6 +38,23 @@ function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
 }
 
+function getTodayEastern(): string {
+  const now = new Date()
+  const easternTime = new Date(now.toLocaleString('en-US', {
+    timeZone: 'America/Toronto',
+  }))
+  const year = easternTime.getFullYear()
+  const month = String(easternTime.getMonth() + 1).padStart(2, '0')
+  const day = String(easternTime.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function addDaysToDateStr(dateStr: string, n: number): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + n)
+  return d.toISOString().split('T')[0]
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<Booking[]>([])
@@ -49,9 +66,9 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const today = new Date().toISOString().split('T')[0]
-      const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]
-      const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
+      const today = getTodayEastern()
+      const yesterday = addDaysToDateStr(today, -1)
+      const weekAgo = addDaysToDateStr(today, -7)
 
       const [{ data: allBookings }, { data: recentBookings }, { data: mechanics }, { data: todayBookings }] = await Promise.all([
         supabase.from('bookings').select('*'),
@@ -177,7 +194,7 @@ export default function DashboardPage() {
             SHOP CAPACITY — TODAY
           </div>
           <div style={{ fontSize: '12px', color: '#4A4540', marginTop: 2 }}>
-            {new Date().toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })}
+            {new Date(getTodayEastern() + 'T12:00:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
         </div>
 

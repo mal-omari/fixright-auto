@@ -5,34 +5,60 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
-import type { Tables } from '@/types/database.types'
-
-type Booking = Tables<'bookings'>
 
 const SHOP_CAPACITY = 24
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-function getWeekStart(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
-  d.setHours(0, 0, 0, 0)
-  return d
+interface ScheduleBooking {
+  id: string
+  customer_name: string
+  vehicle_year: number | null
+  vehicle_make: string | null
+  vehicle_model: string | null
+  service_id: string | null
+  estimated_hours: number | null
+  status: string | null
+  mechanic_id: string | null
+  preferred_date: string | null
+  confirmed_date: string | null
+  preferred_time: string | null
+  confirmed_time: string | null
+  services: { name: string } | null
+  mechanics: { name: string } | null
 }
 
-function addDays(date: Date, n: number): Date {
-  const d = new Date(date)
+function getTodayEastern(): string {
+  const now = new Date()
+  const easternTime = new Date(now.toLocaleString('en-US', {
+    timeZone: 'America/Toronto',
+  }))
+  const year = easternTime.getFullYear()
+  const month = String(easternTime.getMonth() + 1).padStart(2, '0')
+  const day = String(easternTime.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getWeekStart(todayStr: string): string {
+  const today = new Date(todayStr + 'T12:00:00')
+  const dayOfWeek = today.getDay()
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  const monday = new Date(today)
+  monday.setDate(today.getDate() + diff)
+  return monday.toISOString().split('T')[0]
+}
+
+function addDaysStr(dateStr: string, n: number): string {
+  const d = new Date(dateStr + 'T12:00:00')
   d.setDate(d.getDate() + n)
-  return d
+  return d.toISOString().split('T')[0]
 }
 
-function toISO(date: Date): string {
-  return date.toISOString().split('T')[0]
+function fmtHeader(dateStr: string): string {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
 }
 
-function fmtHeader(date: Date): string {
-  return date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
+function dayOfMonth(dateStr: string): number {
+  return new Date(dateStr + 'T12:00:00').getDate()
 }
 
 const STATUS_BORDER: Record<string, string> = {
@@ -48,37 +74,53 @@ function initials(name: string) {
 }
 
 export default function SchedulePage() {
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()))
-  const [bookings, setBookings] = useState<Booking[]>([])
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(getTodayEastern()))
+  const [bookings, setBookings] = useState<ScheduleBooking[]>([])
   const [loading, setLoading] = useState(true)
 
-  const weekDays = Array.from({ length: 6 }, (_, i) => addDays(weekStart, i))
-  const weekFrom = toISO(weekDays[0])
-  const weekTo = toISO(weekDays[5])
+  const weekDays = Array.from({ length: 6 }, (_, i) => addDaysStr(weekStart, i))
+  const weekFrom = weekDays[0]
+  const weekTo = weekDays[5]
+  const today = getTodayEastern()
 
   useEffect(() => {
     setLoading(true)
     createClient()
       .from('bookings')
-      .select('*')
-      .gte('preferred_date', weekFrom)
-      .lte('preferred_date', weekTo)
-      .neq('status', 'cancelled')
-      .order('preferred_date')
+      .select(`
+        id,
+        customer_name,
+        vehicle_year,
+        vehicle_make,
+        vehicle_model,
+        service_id,
+        estimated_hours,
+        status,
+        mechanic_id,
+        preferred_date,
+        confirmed_date,
+        preferred_time,
+        confirmed_time,
+        services (name),
+        mechanics (name)
+      `)
+      .or(`confirmed_date.gte.${weekFrom},preferred_date.gte.${weekFrom}`)
+      .or(`confirmed_date.lte.${weekTo},preferred_date.lte.${weekTo}`)
+      .not('status', 'eq', 'cancelled')
       .then(({ data }) => {
-        setBookings(data ?? [])
+        setBookings((data as unknown as ScheduleBooking[]) ?? [])
         setLoading(false)
       })
   }, [weekFrom, weekTo])
 
-  const today = toISO(new Date())
+  function prevWeek() { setWeekStart(d => addDaysStr(d, -7)) }
+  function nextWeek() { setWeekStart(d => addDaysStr(d, 7)) }
+  function goToday() { setWeekStart(getWeekStart(getTodayEastern())) }
 
-  function prevWeek() { setWeekStart(d => addDays(d, -7)) }
-  function nextWeek() { setWeekStart(d => addDays(d, 7)) }
-  function goToday() { setWeekStart(getWeekStart(new Date())) }
-
-  const dayBookings = (date: Date) => bookings.filter(b => b.preferred_date === toISO(date))
-  const dayHours = (date: Date) => dayBookings(date).reduce((s, b) => s + (b.estimated_hours ?? 0), 0)
+  const dayBookings = (dateStr: string) => bookings.filter(b =>
+    b.confirmed_date === dateStr || (!b.confirmed_date && b.preferred_date === dateStr)
+  )
+  const dayHours = (dateStr: string) => dayBookings(dateStr).reduce((s, b) => s + (b.estimated_hours ?? 0), 0)
 
   const weekLabel = `Week of ${fmtHeader(weekDays[0])} — ${fmtHeader(weekDays[5])}`
 
@@ -118,14 +160,13 @@ export default function SchedulePage() {
         <div style={{ color: '#6B6560', fontSize: '13px' }}>Loading schedule…</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
-          {weekDays.map((day, i) => {
-            const iso = toISO(day)
+          {weekDays.map((iso, i) => {
             const isToday = iso === today
-            const hours = dayHours(day)
+            const hours = dayHours(iso)
             const pct = Math.min((hours / SHOP_CAPACITY) * 100, 100)
             const overCapacity = pct >= 80
             const barColor = pct >= 80 ? '#FF4444' : '#FF9500'
-            const bks = dayBookings(day)
+            const bks = dayBookings(iso)
 
             return (
               <div
@@ -163,7 +204,7 @@ export default function SchedulePage() {
                         )}
                       </div>
                       <div style={{ fontSize: '20px', fontWeight: 700, color: isToday ? '#FF9500' : '#F0EDE8', marginTop: 2 }}>
-                        {day.getDate()}
+                        {dayOfMonth(iso)}
                       </div>
                     </div>
                     {overCapacity && <AlertTriangle size={13} style={{ color: '#FF4444', marginTop: 2 }} />}
@@ -194,37 +235,63 @@ export default function SchedulePage() {
                       <span style={{ fontSize: '11px', color: '#3A3430' }}>Available</span>
                     </div>
                   ) : bks.map(b => {
-                    const isConfirmed = !!(b as { confirmed_date?: string | null }).confirmed_date
+                    const isConfirmed = !!b.confirmed_date
+                    const mechanicName = b.mechanics?.name
+                    const vehicle = [b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ')
+
                     return (
                       <Link
                         key={b.id}
                         href={`/workshop-portal/bookings/${b.id}`}
                         style={{
                           display: 'block', textDecoration: 'none',
-                          background: isConfirmed ? '#141210' : 'transparent',
-                          borderLeft: `3px solid ${STATUS_BORDER[b.status ?? ''] ?? '#2A2420'}`,
-                          borderRadius: '0 8px 8px 0',
+                          background: isConfirmed ? '#1E1C18' : 'transparent',
+                          borderLeft: isConfirmed ? `3px solid ${STATUS_BORDER[b.status ?? ''] ?? '#2A2420'}` : undefined,
+                          border: isConfirmed ? undefined : '1px dashed #3A3430',
+                          borderRadius: isConfirmed ? '0 8px 8px 0' : 8,
                           padding: '8px 10px',
-                          border: isConfirmed ? '1px solid #2A2420' : '1px dashed #2A2420',
-                          opacity: isConfirmed ? 1 : 0.65,
                           transition: 'border-color 0.15s',
                         }}
                       >
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: isConfirmed ? '#F0EDE8' : '#9A8E82', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {b.customer_name}
-                        </div>
-                        {isConfirmed ? (
-                          <div style={{ fontSize: '10px', color: '#6B6560', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {b.service_description ?? '—'}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: isConfirmed ? '#F0EDE8' : '#6B6560', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {b.customer_name}
                           </div>
-                        ) : (
-                          <div style={{ fontSize: '10px', color: '#4A4540', marginBottom: 5 }}>
+                          {mechanicName && (
+                            <span style={{
+                              flexShrink: 0,
+                              width: 18, height: 18, borderRadius: '50%',
+                              background: isConfirmed ? 'rgba(255,149,0,0.15)' : 'rgba(106,101,96,0.15)',
+                              color: isConfirmed ? '#FF9500' : '#6B6560',
+                              fontSize: '8px', fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              {initials(mechanicName)}
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ fontSize: '10px', color: isConfirmed ? '#6B6560' : '#6B6560', marginTop: 2, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {b.services?.name ?? vehicle ?? '—'}
+                        </div>
+
+                        {!isConfirmed && (
+                          <div style={{ fontSize: '9px', color: '#4A4540', marginBottom: 5 }}>
                             Preferred: {b.preferred_time ? b.preferred_time.charAt(0).toUpperCase() + b.preferred_time.slice(1) : 'Flexible'}
                           </div>
                         )}
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
                           <StatusBadge status={b.status} />
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {isConfirmed && b.confirmed_time && (
+                              <span style={{
+                                fontSize: '9px', color: '#FF9500',
+                                background: 'rgba(255,149,0,0.1)', padding: '1px 5px', borderRadius: 3,
+                              }}>
+                                {b.confirmed_time}
+                              </span>
+                            )}
                             {b.estimated_hours && (
                               <span style={{
                                 fontSize: '9px', color: '#6B6560',

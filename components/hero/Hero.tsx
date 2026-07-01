@@ -5,7 +5,6 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ── Dust particles ──────────────────────────────────────────────────────────
 const DUST = Array.from({ length: 20 }, (_, i) => ({
@@ -71,7 +70,6 @@ const HUD_DEFS = [
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
-  const bgRef = useRef<HTMLDivElement>(null)
   const bookBtnRef = useRef<HTMLAnchorElement>(null)
   const spotlightRef = useRef<HTMLDivElement>(null)
   const [hudValues, setHudValues] = useState(() =>
@@ -124,19 +122,6 @@ export default function Hero() {
       gsap.fromTo('.hero-cta-1', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.1 })
       gsap.fromTo('.hero-cta-2', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.2 })
       gsap.fromTo('.hero-scroll', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: 1.5 })
-
-      if (bgRef.current) {
-        gsap.to(bgRef.current, {
-          y: '25%',
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
-      }
     }, sectionRef)
 
     setTimeout(() => setHudVisible(true), 1300)
@@ -171,31 +156,18 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex min-h-screen items-center justify-center overflow-hidden"
-      style={{ background: '#1E1A16' }}
+      className="flex items-center justify-center"
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
+        backgroundImage: "url('https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
     >
-      {/* Background photo */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          ref={bgRef}
-          style={{
-            position: 'absolute',
-            top: '-15%',
-            left: 0,
-            width: '100%',
-            height: '130%',
-          }}
-        >
-          <Image
-            src="https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=1920&q=80"
-            alt=""
-            fill
-            priority
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-          />
-        </div>
-      </div>
-
       {/* Dark warm overlay */}
       <div
         className="absolute inset-0"
