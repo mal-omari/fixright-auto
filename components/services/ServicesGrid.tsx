@@ -130,7 +130,7 @@ export default function ServicesGrid() {
         { opacity: 0, y: 40 },
         {
           opacity: 1, y: 0, duration: 0.65, stagger: { each: 0.08 }, ease: 'power2.out',
-          scrollTrigger: { trigger: gridRef.current, start: 'top 78%' },
+          scrollTrigger: { trigger: gridRef.current, start: 'top 78%', once: true },
         }
       )
     }, gridRef)

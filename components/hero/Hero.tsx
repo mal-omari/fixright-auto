@@ -7,7 +7,7 @@ import { Phone } from 'lucide-react'
 import Link from 'next/link'
 
 // ── Dust particles ──────────────────────────────────────────────────────────
-const DUST = Array.from({ length: 20 }, (_, i) => ({
+const generateDust = (count: number) => Array.from({ length: count }, (_, i) => ({
   id: i,
   left: `${5 + (i * 4.7) % 90}%`,
   size: 1 + (i % 2),
@@ -76,9 +76,22 @@ export default function Hero() {
     Object.fromEntries(HUD_DEFS.map(h => [h.id, h.values[0]]))
   )
   const [hudVisible, setHudVisible] = useState(false)
+  const [dust, setDust] = useState(() => generateDust(20))
+  const lastMoveRef = useRef(0)
+
+  // Reduce particle count on low-end devices
+  useEffect(() => {
+    const isLowEnd = navigator.hardwareConcurrency <= 4 ||
+      !window.matchMedia('(min-device-pixel-ratio: 2)').matches
+    setDust(generateDust(isLowEnd ? 20 : 70))
+  }, [])
 
   // ── Spotlight + magnetic ────────────────────────────────────────────────
   const handleMouseMove = useCallback((e: MouseEvent) => {
+    const now = Date.now()
+    if (now - lastMoveRef.current < 33) return // throttle to ~30fps
+    lastMoveRef.current = now
+
     const section = sectionRef.current
     const spotlight = spotlightRef.current
     if (!section || !spotlight) return
@@ -149,7 +162,7 @@ export default function Hero() {
         }
       }
       setHudValues(prev => ({ ...prev, ...updates }))
-    }, 4000)
+    }, 6000)
     return () => clearInterval(interval)
   }, [])
 
@@ -248,7 +261,7 @@ export default function Hero() {
 
       {/* Dust particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 6 }}>
-        {DUST.map(p => (
+        {dust.map(p => (
           <div
             key={p.id}
             style={{
@@ -274,7 +287,7 @@ export default function Hero() {
       />
 
       {/* Content */}
-      <div className="relative px-6 text-center" style={{ maxWidth: '860px', margin: '0 auto', zIndex: 10 }}>
+      <div className="relative px-6 text-center" style={{ maxWidth: '860px', margin: '0 auto', zIndex: 10, willChange: 'opacity, transform' }}>
 
         {/* Label */}
         <div

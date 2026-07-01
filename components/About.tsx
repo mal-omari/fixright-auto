@@ -14,12 +14,12 @@ export default function About() {
       gsap.fromTo(
         '.about-text',
         { opacity: 0, x: -30 },
-        { opacity: 1, x: 0, duration: 0.9, ease: 'power2.out', scrollTrigger: { trigger: sectionRef.current, start: 'top 70%' } }
+        { opacity: 1, x: 0, duration: 0.9, ease: 'power2.out', scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true } }
       )
       gsap.fromTo(
         '.about-visual',
         { opacity: 0, x: 30 },
-        { opacity: 1, x: 0, duration: 0.9, ease: 'power2.out', scrollTrigger: { trigger: sectionRef.current, start: 'top 70%' } }
+        { opacity: 1, x: 0, duration: 0.9, ease: 'power2.out', scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true } }
       )
     }, sectionRef)
     return () => ctx.revert()
