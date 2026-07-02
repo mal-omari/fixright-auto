@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import toast from 'react-hot-toast'
-import { Plus, Wrench, Layers } from 'lucide-react'
+import { Plus, Wrench, Layers, Search } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
 type Service = Tables<'services'>
@@ -14,6 +14,20 @@ const CATEGORY_COLORS: Record<string, { color: string; bg: string; label: string
   safety:      { color: '#28C850', bg: 'rgba(40,200,80,0.15)', label: 'Safety' },
   body:        { color: '#A78BFA', bg: 'rgba(167,139,250,0.15)', label: 'Body' },
 }
+
+const CATEGORY_PILLS = [
+  { key: 'All', label: 'All', color: '#9A8E82' },
+  { key: 'maintenance', label: 'Maintenance', color: '#4A9EFF' },
+  { key: 'electrical', label: 'Electrical', color: '#FF9500' },
+  { key: 'safety', label: 'Safety', color: '#28C850' },
+  { key: 'body', label: 'Body', color: '#A78BFA' },
+]
+
+const STATUS_PILLS = [
+  { key: 'active', label: 'Active Only', color: '#28C850' },
+  { key: 'inactive', label: 'Inactive Only', color: '#FF4444' },
+  { key: 'All', label: 'All', color: '#9A8E82' },
+]
 
 function categoryStyle(category: string | null) {
   return CATEGORY_COLORS[category ?? ''] ?? { color: '#9A8E82', bg: 'rgba(155,142,130,0.15)', label: category ?? '—' }
@@ -79,6 +93,9 @@ export default function ServicesPage() {
   const [newService, setNewService] = useState({
     name: '', category: 'maintenance', estimated_hours: '', base_price: '', description: '',
   })
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState('All')
 
   useEffect(() => {
     loadServices()
@@ -149,13 +166,25 @@ export default function ServicesPage() {
   const activeCount = useMemo(() => services.filter(s => s.is_active).length, [services])
   const categoryCount = useMemo(() => new Set(services.map(s => s.category).filter(Boolean)).size, [services])
 
+  const filteredServices = useMemo(() => {
+    let rows = services
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      rows = rows.filter(s => s.name.toLowerCase().includes(q))
+    }
+    if (categoryFilter !== 'All') rows = rows.filter(s => s.category === categoryFilter)
+    if (statusFilter === 'active') rows = rows.filter(s => s.is_active)
+    else if (statusFilter === 'inactive') rows = rows.filter(s => !s.is_active)
+    return rows
+  }, [services, search, categoryFilter, statusFilter])
+
   return (
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0 }}>Services Management</h1>
           <p style={{ fontSize: '12px', color: '#6B6560', marginTop: 4 }}>
-            {services.length} total services
+            Showing {filteredServices.length} of {services.length} services
           </p>
         </div>
         <button
@@ -196,6 +225,81 @@ export default function ServicesPage() {
         })}
       </div>
 
+      {/* Filter bar */}
+      <div
+        style={{
+          background: '#1E1C18', border: '1px solid #2A2420',
+          borderRadius: 12, padding: 16, marginBottom: 16,
+        }}
+      >
+        <div style={{ position: 'relative', marginBottom: 14 }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540' }} />
+          <input
+            placeholder="Search services…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onFocus={e => (e.currentTarget.style.borderColor = '#FF9500')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#2A2420')}
+            style={{
+              width: '100%', background: '#141210', border: '1px solid #2A2420',
+              borderRadius: 8, color: '#F0EDE8', padding: '9px 12px 9px 32px',
+              fontSize: '13px', outline: 'none', fontFamily: 'inherit',
+              transition: 'border-color 0.15s',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          {CATEGORY_PILLS.map(({ key, label, color }) => {
+            const active = categoryFilter === key
+            return (
+              <button
+                key={key}
+                onClick={() => setCategoryFilter(key)}
+                style={{
+                  padding: '5px 14px', borderRadius: 20,
+                  fontFamily: 'var(--font-heading), sans-serif',
+                  fontSize: '11px', fontWeight: active ? 600 : 500,
+                  background: active ? `${color}20` : 'transparent',
+                  border: `1px solid ${active ? color : '#2A2420'}`,
+                  color: active ? color : '#6B6560',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {STATUS_PILLS.map(({ key, label, color }) => {
+            const active = statusFilter === key
+            return (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key)}
+                style={{
+                  padding: '5px 14px', borderRadius: 20,
+                  fontFamily: 'var(--font-heading), sans-serif',
+                  fontSize: '11px', fontWeight: active ? 600 : 500,
+                  background: active ? `${color}20` : 'transparent',
+                  border: `1px solid ${active ? color : '#2A2420'}`,
+                  color: active ? color : '#6B6560',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Table */}
       <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
@@ -220,9 +324,9 @@ export default function ServicesPage() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td></tr>
-              ) : services.length === 0 ? (
+              ) : filteredServices.length === 0 ? (
                 <tr><td colSpan={6} style={{ padding: 48, textAlign: 'center', color: '#4A4540' }}>No services found</td></tr>
-              ) : services.map(svc => {
+              ) : filteredServices.map(svc => {
                 const cat = categoryStyle(svc.category)
                 return (
                   <tr key={svc.id} style={{ borderTop: '1px solid #2A2420' }}>
