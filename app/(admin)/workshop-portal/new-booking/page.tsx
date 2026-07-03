@@ -184,16 +184,35 @@ function NewBookingForm() {
 
     if (!form.customer_id) {
       try {
-        const { data: customer } = await supabase
+        const { data: existingCustomer } = await supabase
           .from('customers')
-          .upsert(
-            { name: form.customer_name.trim(), phone: form.customer_phone.trim(), email: form.customer_email.trim() || null },
-            { onConflict: 'phone' }
-          )
-          .select()
-          .single()
-        if (customer) {
-          await supabase.from('bookings').update({ customer_id: customer.id }).eq('id', data.id)
+          .select('id')
+          .eq('phone', form.customer_phone.trim())
+          .maybeSingle()
+
+        let customerId = existingCustomer?.id ?? null
+
+        if (!customerId) {
+          const { data: newCustomer, error: insertError } = await supabase
+            .from('customers')
+            .insert({ name: form.customer_name.trim(), phone: form.customer_phone.trim(), email: form.customer_email.trim() || null })
+            .select('id')
+            .single()
+
+          if (insertError) {
+            const { data: retryCustomer } = await supabase
+              .from('customers')
+              .select('id')
+              .eq('phone', form.customer_phone.trim())
+              .maybeSingle()
+            customerId = retryCustomer?.id ?? null
+          } else {
+            customerId = newCustomer?.id ?? null
+          }
+        }
+
+        if (customerId) {
+          await supabase.from('bookings').update({ customer_id: customerId }).eq('id', data.id)
         }
       } catch (customerErr) {
         console.error('Customer link error:', customerErr)

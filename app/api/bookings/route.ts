@@ -64,16 +64,36 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const { data: customer } = await supabase
+      const { data: existingCustomer } = await supabase
         .from('customers')
-        .upsert(
-          { name: customer_name, phone: customer_phone, email: customer_email ?? null },
-          { onConflict: 'phone' }
-        )
-        .select()
-        .single()
-      if (customer) {
-        await supabase.from('bookings').update({ customer_id: customer.id }).eq('id', data.id)
+        .select('id')
+        .eq('phone', customer_phone)
+        .maybeSingle()
+
+      let customerId = existingCustomer?.id ?? null
+
+      if (!customerId) {
+        const { data: newCustomer, error: insertError } = await supabase
+          .from('customers')
+          .insert({ name: customer_name, phone: customer_phone, email: customer_email ?? null })
+          .select('id')
+          .single()
+
+        if (insertError) {
+          // Another request may have created the customer concurrently — re-fetch by phone.
+          const { data: retryCustomer } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('phone', customer_phone)
+            .maybeSingle()
+          customerId = retryCustomer?.id ?? null
+        } else {
+          customerId = newCustomer?.id ?? null
+        }
+      }
+
+      if (customerId) {
+        await supabase.from('bookings').update({ customer_id: customerId }).eq('id', data.id)
       }
     } catch (customerError) {
       console.error('Customer link error:', customerError)
