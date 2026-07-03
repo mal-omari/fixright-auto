@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Phone, CheckCircle, ArrowLeft, ArrowRight, Sun, Clock, CalendarDays } from 'lucide-react'
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
 import { createClient } from '@/lib/supabase'
+import { Input } from '@/components/ui/Input'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -322,27 +323,23 @@ export default function BookPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label style={labelStyle()}>First Name *</label>
-                  <input style={inputStyle(!!errors.firstName)} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="John"
-                    onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.firstName ? '#FF4444' : '#3A3430')} />
+                  <Input error={!!errors.firstName} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="John" />
                   {errors.firstName && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.firstName}</p>}
                 </div>
                 <div>
                   <label style={labelStyle()}>Last Name *</label>
-                  <input style={inputStyle(!!errors.lastName)} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Smith"
-                    onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.lastName ? '#FF4444' : '#3A3430')} />
+                  <Input error={!!errors.lastName} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Smith" />
                   {errors.lastName && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.lastName}</p>}
                 </div>
               </div>
               <div className="mt-4">
                 <label style={labelStyle()}>Phone Number *</label>
-                <input style={inputStyle(!!errors.phone)} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="519-555-0100" type="tel"
-                  onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.phone ? '#FF4444' : '#3A3430')} />
+                <Input error={!!errors.phone} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="519-555-0100" type="tel" />
                 {errors.phone && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.phone}</p>}
               </div>
               <div className="mt-4">
                 <label style={labelStyle()}>Email (optional)</label>
-                <input style={inputStyle()} value={form.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" type="email"
-                  onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = '#3A3430')} />
+                <Input value={form.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" type="email" />
               </div>
             </div>
           )}
@@ -431,8 +428,7 @@ export default function BookPage() {
 
               <div className="mt-4">
                 <label style={labelStyle()}>Approximate Mileage</label>
-                <input style={inputStyle()} value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder="e.g. 95,000 km"
-                  onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = '#3A3430')} />
+                <Input value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder="e.g. 95,000 km" />
               </div>
               <div className="mt-4">
                 <label style={labelStyle()}>Known Issues / Description</label>
@@ -483,10 +479,10 @@ export default function BookPage() {
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#FF9500' }}>
                   <CalendarDays size={16} /> Select Your Preferred Date
                 </label>
-                <input
-                  style={{ ...inputStyle(!!errors.preferredDate), height: '56px', fontSize: '15px', background: '#141210', paddingRight: '14px' }}
-                  value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today}
-                  onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.preferredDate ? '#FF4444' : '#3A3430')} />
+                <Input
+                  error={!!errors.preferredDate}
+                  style={{ height: '56px', fontSize: '15px', background: '#141210', paddingRight: '14px' }}
+                  value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today} />
                 {errors.preferredDate && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.preferredDate}</p>}
                 <p style={{ fontSize: '12px', color: '#9A8E82', marginTop: '6px' }}>We&apos;ll confirm the exact time when we call you.</p>
               </div>

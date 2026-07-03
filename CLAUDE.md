@@ -1,5 +1,10 @@
 # FixRight Auto — Project Context
 
+## Design Context
+Strategic + visual design specs live at project root:
+- `PRODUCT.md` — register (brand, public site primary / product, admin secondary), users, brand personality ("Night Shift Garage": rugged, trustworthy, precise), anti-references, design principles.
+- `DESIGN.md` — visual system: dark warm-charcoal + amber palette, Barlow Condensed/Inter type pairing, flat-by-default elevation, sharp 3px radius (public) vs rounder 12px (admin). Read before any UI work; see `.claude/skills/impeccable/`.
+
 ## What This Is
 A futuristic automotive service website for FixRight Automotive, London Ontario.
 Owner: Omar (ofomari59@gmail.com). Shop has 3 mechanics, 28 years experience, 

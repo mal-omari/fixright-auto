@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 
 interface StatCardProps {
   label: string
@@ -49,23 +50,11 @@ export function StatCard({
   }, [value, delay, format])
 
   const card = (
-    <div
+    <Card
       ref={cardRef}
-      style={{
-        background: '#1E1C18', border: '1px solid #2A2420',
-        borderRadius: 12, padding: 24, minHeight: 120,
-        transition: 'border-color 0.2s, transform 0.15s',
-        cursor: href ? 'pointer' : 'default',
-        position: 'relative',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,149,0,0.5)'
-        if (href) e.currentTarget.style.transform = 'scale(1.02)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#2A2420'
-        if (href) e.currentTarget.style.transform = 'scale(1)'
-      }}
+      variant="admin"
+      interactive={!!href}
+      style={{ minHeight: 120, position: 'relative' }}
     >
       {href && (
         <ArrowUpRight
@@ -108,7 +97,7 @@ export function StatCard({
       }}>
         {label}
       </div>
-    </div>
+    </Card>
   )
 
   if (href) {

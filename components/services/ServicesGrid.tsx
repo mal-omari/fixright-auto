@@ -7,6 +7,7 @@ import {
   Wrench, Settings, Thermometer, Zap, RotateCcw, ShieldCheck, Layers, Activity,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 
 interface Service {
   icon: LucideIcon
@@ -55,8 +56,6 @@ function ServiceCard({ service }: { service: Service }) {
   const handleMouseEnter = useCallback(() => {
     const card = cardRef.current
     if (!card) return
-    card.style.borderColor = 'rgba(255,149,0,0.5)'
-    card.style.boxShadow = '0 0 32px rgba(255,149,0,0.12)'
     card.style.animation = 'rumble 0.3s ease-out 1'
   }, [])
 
@@ -65,8 +64,6 @@ function ServiceCard({ service }: { service: Service }) {
     if (!card) return
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1) translateY(0)'
     card.style.transition = 'transform 0.5s ease, border-color 0.3s, box-shadow 0.3s'
-    card.style.borderColor = '#3A3430'
-    card.style.boxShadow = 'none'
     card.style.animation = ''
     const highlight = card.querySelector('.card-highlight') as HTMLElement | null
     if (highlight) {
@@ -76,16 +73,12 @@ function ServiceCard({ service }: { service: Service }) {
   }, [])
 
   return (
-    <div
+    <Card
       ref={cardRef}
-      className="service-card group relative cursor-default p-6"
-      style={{
-        background: '#2A2420',
-        border: '1px solid #3A3430',
-        borderRadius: '3px',
-        transition: 'transform 0.15s ease, border-color 0.3s, box-shadow 0.3s',
-        willChange: 'transform',
-      }}
+      variant="public"
+      interactive
+      className="service-card group relative cursor-default"
+      style={{ willChange: 'transform' }}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -115,7 +108,7 @@ function ServiceCard({ service }: { service: Service }) {
           {service.description}
         </p>
       </div>
-    </div>
+    </Card>
   )
 }
 

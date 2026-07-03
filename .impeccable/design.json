@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-03T19:59:00Z",
+  "title": "Design System: FixRight Automotive",
+  "extensions": {
+    "colorMeta": {
+      "accent-amber": {
+        "role": "primary",
+        "displayName": "Shop-Light Amber",
+        "canonical": "oklch(72% 0.19 55)",
+        "tonalRamp": ["oklch(20% 0.05 55)", "oklch(30% 0.09 55)", "oklch(42% 0.13 55)", "oklch(54% 0.16 55)", "oklch(64% 0.18 55)", "oklch(72% 0.19 55)", "oklch(84% 0.13 55)", "oklch(94% 0.06 55)"]
+      },
+      "accent-cyan": {
+        "role": "secondary",
+        "displayName": "Diagnostic Cyan",
+        "canonical": "oklch(80% 0.14 220)",
+        "tonalRamp": ["oklch(20% 0.04 220)", "oklch(32% 0.07 220)", "oklch(44% 0.10 220)", "oklch(56% 0.12 220)", "oklch(68% 0.13 220)", "oklch(80% 0.14 220)", "oklch(89% 0.09 220)", "oklch(96% 0.03 220)"]
+      },
+      "accent-gold": {
+        "role": "tertiary",
+        "displayName": "Dash Gold",
+        "canonical": "oklch(84% 0.13 90)",
+        "tonalRamp": ["oklch(22% 0.03 90)", "oklch(34% 0.06 90)", "oklch(46% 0.09 90)", "oklch(58% 0.11 90)", "oklch(70% 0.12 90)", "oklch(84% 0.13 90)", "oklch(90% 0.09 90)", "oklch(96% 0.04 90)"]
+      },
+      "bg-primary": {
+        "role": "neutral",
+        "displayName": "Garage Charcoal",
+        "canonical": "oklch(22% 0.015 55)",
+        "tonalRamp": ["oklch(10% 0.01 55)", "oklch(16% 0.012 55)", "oklch(22% 0.015 55)", "oklch(30% 0.015 55)", "oklch(45% 0.015 55)", "oklch(60% 0.012 55)", "oklch(78% 0.01 55)", "oklch(92% 0.005 55)"]
+      },
+      "bg-surface": {
+        "role": "neutral",
+        "displayName": "Bay Surface",
+        "canonical": "oklch(26% 0.017 55)"
+      },
+      "admin-bg-surface": {
+        "role": "neutral",
+        "displayName": "Admin Surface",
+        "canonical": "oklch(23% 0.012 60)"
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Warm White",
+        "canonical": "oklch(94% 0.008 70)"
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Warm Grey",
+        "canonical": "oklch(63% 0.015 60)"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Bay Border",
+        "canonical": "oklch(32% 0.015 55)"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline only, sits at the 96px format ceiling." },
+      "headline": { "displayName": "Headline", "purpose": "Mobile menu links, major section headers." },
+      "title": { "displayName": "Title", "purpose": "Card headings — service names, stat labels. Always uppercase Barlow Condensed." },
+      "body": { "displayName": "Body", "purpose": "Paragraph copy, form helper text. 65-75ch measure." },
+      "label": { "displayName": "Label", "purpose": "Buttons, nav pills, badges. Smallest text, always tracked wide." }
+    },
+    "shadows": [
+      { "name": "hover-glow", "value": "0 0 32px rgba(255,149,0,0.12)", "purpose": "Public-site card hover, paired with amber border shift." },
+      { "name": "focus-glow", "value": "0 0 0 3px rgba(255,149,0,0.15)", "purpose": "Form input focus state." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "ease-out", "purpose": "Default transition easing across hover/focus state changes." },
+      { "name": "duration-fast", "value": "0.2s", "purpose": "Color/border transitions (buttons, nav links)." },
+      { "name": "duration-card", "value": "0.15s", "purpose": "Card tilt/transform transitions on hover." }
+    ],
+    "breakpoints": [
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main CTA button — 'Book Now' / 'Book Your Appointment'.",
+      "html": "<a href=\"#\" class=\"ds-btn-primary\">Book Now</a>",
+      "css": ".ds-btn-primary { display: inline-block; background: #FF9500; color: #111111; padding: 12px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border-radius: 3px; border: none; transition: background 0.2s, transform 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #E08400; } .ds-btn-primary:focus-visible { outline: 2px solid #FF9500; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Link",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Phone number / underlined text link, secondary action.",
+      "html": "<a href=\"tel:5194719462\" class=\"ds-link-ghost\">519.471.9462</a>",
+      "css": ".ds-link-ghost { color: #FF9500; text-decoration: underline; text-decoration-color: rgba(255,149,0,0.4); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 0.06em; font-weight: 500; } .ds-link-ghost:hover { text-decoration-color: #FF9500; }"
+    },
+    {
+      "name": "Service Card",
+      "kind": "card",
+      "refersTo": "service-card",
+      "description": "Public-site service tile with tilt + amber glow on hover.",
+      "html": "<div class=\"ds-service-card\"><div class=\"ds-service-icon\">&#9881;</div><h3 class=\"ds-service-title\">Oil Change</h3><p class=\"ds-service-desc\">Full synthetic or conventional oil changes with filter replacement and fluid top-up.</p></div>",
+      "css": ".ds-service-card { background: #2A2420; border: 1px solid #3A3430; border-radius: 3px; padding: 24px; transition: border-color 0.3s, box-shadow 0.3s; } .ds-service-card:hover { border-color: rgba(255,149,0,0.5); box-shadow: 0 0 32px rgba(255,149,0,0.12); } .ds-service-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,149,0,0.12); color: #FF9500; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; } .ds-service-title { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #F0EDE8; margin-bottom: 4px; } .ds-service-desc { font-size: 12px; color: #9A8E82; line-height: 1.5; }"
+    },
+    {
+      "name": "Admin Stat Card",
+      "kind": "card",
+      "refersTo": "admin-stat-card",
+      "description": "Dashboard KPI tile with count-up value, used in /workshop-portal.",
+      "html": "<div class=\"ds-stat-card\"><div class=\"ds-stat-icon\">&#128663;</div><div class=\"ds-stat-value\">128</div><div class=\"ds-stat-label\">Bookings this month</div></div>",
+      "css": ".ds-stat-card { background: #1E1C18; border: 1px solid #2A2420; border-radius: 12px; padding: 24px; min-height: 120px; transition: border-color 0.2s, transform 0.15s; } .ds-stat-card:hover { border-color: rgba(255,149,0,0.5); } .ds-stat-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,149,0,0.12); color: #FF9500; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; } .ds-stat-value { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: #F0EDE8; } .ds-stat-label { font-size: 12px; color: #9A8E82; margin-top: 4px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard form field used across the booking flow.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Phone number\" />",
+      "css": ".ds-input { background: #1E1A16; border: 1px solid #3A3430; border-radius: 3px; padding: 12px 14px; color: #F0EDE8; font-family: 'Inter', sans-serif; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input::placeholder { color: #9A8E82; } .ds-input:focus { outline: none; border-color: #FF9500; box-shadow: 0 0 0 3px rgba(255,149,0,0.15); } .ds-input.error { border-color: #FF4444; }"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Public navbar link with active-state underline.",
+      "html": "<a href=\"#\" class=\"ds-nav-link ds-nav-link--active\">Services</a>",
+      "css": ".ds-nav-link { font-family: 'Barlow Condensed', sans-serif; color: #9A8E82; text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding-bottom: 2px; border-bottom: 2px solid transparent; transition: color 0.2s; } .ds-nav-link:hover { color: #F0EDE8; } .ds-nav-link--active { color: #F0EDE8; border-bottom-color: #FF9500; }"
+    },
+    {
+      "name": "Fuel Gauge",
+      "kind": "custom",
+      "refersTo": "fuel-gauge",
+      "description": "Per-mechanic workload bar in the admin dashboard; pulses when over capacity.",
+      "html": "<div class=\"ds-fuel-gauge\"><div class=\"ds-fuel-gauge-fill ds-fuel-gauge-fill--over\" style=\"width: 92%\"></div></div>",
+      "css": ".ds-fuel-gauge { width: 100%; height: 8px; background: #2A2420; border-radius: 4px; overflow: hidden; } .ds-fuel-gauge-fill { height: 100%; background: #FF9500; border-radius: 4px; } .ds-fuel-gauge-fill--over { animation: ds-gauge-pulse 2s ease-in-out infinite; } @keyframes ds-gauge-pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night Shift Garage",
+    "overview": "FixRight's public site is a garage bay that's still lit and working after the sun's gone down — warm charcoal darkness (#1E1A16) pierced by amber shop-light (#FF9500), with the occasional cyan flicker of a diagnostic scanner. It reads as rugged and precise at once: a shop that's been doing this for 28 years and still runs its diagnostics exactly right. The admin panel is the same garage from the inside — same palette, same materials — but built as a working tool rather than a storefront: rounder corners, denser information, no glow-and-tilt flourish, because Omar and his mechanics need speed, not seduction.\n\nThe system explicitly rejects the generic \"local auto shop\" template look: no stock blue-on-white palettes, no default Bootstrap card grids, no icon-pack-and-stock-photo assembly. Every surface should feel like it was built for this specific shop's specific workflow (phone-in bookings, mechanic assignment, HST invoicing) — not a repurposed CRM or website builder theme.",
+    "keyCharacteristics": [
+      "Dark, warm charcoal base with amber as the dominant signal color — never a light theme",
+      "Flat surfaces at rest; depth communicated through border + glow on interaction, not drop shadows",
+      "Sharp 3px corners on the public site (tool/garage precision); rounder 12px corners in the admin panel (workspace ergonomics)",
+      "Barlow Condensed for anything shouting a label or headline (uppercase, tracked); Inter for anything meant to be read at length",
+      "Cyan is a diagnostic accent only — rare, reserved for scan-line/HUD/tech-signal moments, never a general-purpose color"
+    ],
+    "rules": [
+      { "name": "The One Glow Rule", "body": "Amber glow is the system's only elevation signal on hover. Don't invent a second hover-glow color.", "section": "colors" },
+      { "name": "The Cyan Is Rare Rule", "body": "Diagnostic cyan appears in fewer than 10% of any given screen. If cyan starts showing up on buttons or general UI chrome, it's been misused.", "section": "colors" },
+      { "name": "The All-Caps-Means-Barlow Rule", "body": "Any uppercase, letter-spaced text in the system is set in Barlow Condensed, never Inter uppercased.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows and glow exist only as a response to state — hover, focus, or active.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the base palette dark and warm (#1E1A16 family) — this is a night-shift-garage system, never a light theme.",
+      "Do use the sharp 3px radius on the public site and the rounder 12px radius in /workshop-portal as two deliberate, register-specific shape languages — don't unify them.",
+      "Do reserve diagnostic cyan (#00D4FF) for HUD/scan-line/diagnostic-icon moments only.",
+      "Do set uppercase/tracked text in Barlow Condensed, never Inter.",
+      "Do communicate depth via tonal layering + interactive amber glow, never a resting-state drop shadow.",
+      "Do keep Omar's real phone number (519.471.9462) and shop address specific and visible."
+    ],
+    "donts": [
+      "Don't ship a generic \"local auto shop\" template look.",
+      "Don't let the admin panel read as an off-the-shelf SaaS dashboard template.",
+      "Don't use border-left/border-right colored stripes as an accent anywhere.",
+      "Don't use gradient text (background-clip: text).",
+      "Don't add drop shadows to cards at rest.",
+      "Don't use cyan as a general-purpose accent or CTA color.",
+      "Don't blur the public/admin boundary."
+    ]
+  }
+}

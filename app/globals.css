@@ -5,12 +5,21 @@
   --color-bg-surface: #2A2420;
   --color-bg-alternate: #242424;
   --color-accent-amber: #FF9500;
+  --color-accent-amber-hover: #E08400;
   --color-accent-gold: #E8C547;
   --color-accent-cyan: #00D4FF;
   --color-text-primary: #F0EDE8;
   --color-text-secondary: #9A8E82;
+  --color-text-muted: #7A7068;
   --color-border: #3A3430;
+  --color-danger: #EF4444;
   --color-glow-amber: rgba(255, 149, 0, 0.15);
+  --color-admin-bg-surface: #1E1C18;
+  --color-admin-border: #2A2420;
+  --color-admin-sidebar-top: #0D0B08;
+  --color-admin-sidebar-bottom: #141210;
+  --radius-sharp: 3px;
+  --radius-admin: 12px;
   --font-heading: var(--font-barlow);
   --font-body: var(--font-inter);
 }

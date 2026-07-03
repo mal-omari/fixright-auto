@@ -1,0 +1,41 @@
+.card {
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.15s;
+}
+
+.public {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sharp);
+  padding: 24px;
+}
+
+.admin {
+  background: var(--color-admin-bg-surface);
+  border: 1px solid var(--color-admin-border);
+  border-radius: var(--radius-admin);
+  padding: 24px;
+}
+
+.interactive.public:hover {
+  border-color: rgba(255, 149, 0, 0.5);
+  box-shadow: 0 0 32px rgba(255, 149, 0, 0.12);
+}
+
+.interactive.admin {
+  cursor: pointer;
+}
+
+.interactive.admin:hover {
+  border-color: rgba(255, 149, 0, 0.5);
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .interactive.admin:hover {
+    transform: none;
+  }
+}

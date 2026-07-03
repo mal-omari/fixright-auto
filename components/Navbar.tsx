@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Phone, Menu, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Button } from '@/components/ui/Button'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -167,28 +168,9 @@ export default function Navbar() {
               519.471.9462
             </a>
             <div style={{ width: '1px', height: '18px', background: '#3A3430' }} />
-            <Link
-              ref={bookBtnRef}
-              href="/book"
-              style={{
-                background: '#FF9500',
-                color: '#111111',
-                padding: '9px 20px',
-                fontFamily: 'var(--font-heading), sans-serif',
-                fontSize: '12px',
-                fontWeight: 600,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                borderRadius: '3px',
-                transition: 'background 0.2s, transform 0.2s',
-                display: 'inline-block',
-              }}
-              onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#E08400')}
-              onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FF9500')}
-            >
+            <Button ref={bookBtnRef} href="/book" size="compact">
               Book Now
-            </Link>
+            </Button>
           </div>
 
           {/* Mobile hamburger */}
@@ -287,26 +269,9 @@ export default function Navbar() {
               }}
             >
               <div style={{ width: '100%', height: '1px', background: '#3A3430', marginBottom: '32px' }} />
-              <Link
-                href="/book"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'center',
-                  background: '#FF9500',
-                  color: '#111111',
-                  padding: '16px 0',
-                  fontFamily: 'var(--font-heading), sans-serif',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                  borderRadius: '3px',
-                }}
-              >
+              <Button href="/book" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '16px 0', fontSize: '14px' }}>
                 Book Your Appointment
-              </Link>
+              </Button>
               <a
                 href="tel:5194719462"
                 style={{

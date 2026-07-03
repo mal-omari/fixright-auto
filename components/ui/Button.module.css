@@ -1,0 +1,60 @@
+.btn {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sharp);
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent-amber);
+  outline-offset: 2px;
+}
+
+.primary {
+  background: var(--color-accent-amber);
+  color: #111111;
+}
+
+.primary:hover,
+.primary:focus-visible {
+  background: var(--color-accent-amber-hover);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-accent-amber);
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 149, 0, 0.4);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 12px;
+}
+
+.ghost:hover,
+.ghost:focus-visible {
+  text-decoration-color: var(--color-accent-amber);
+}
+
+.default {
+  padding: 12px 28px;
+  font-size: 12px;
+}
+
+.compact {
+  padding: 9px 20px;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
