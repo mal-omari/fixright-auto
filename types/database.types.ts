@@ -352,6 +352,10 @@ export type Database = {
       }
     }
     Functions: {
+      find_or_create_customer: {
+        Args: { p_email: string; p_name: string; p_phone: string }
+        Returns: string
+      }
       next_invoice_number: { Args: never; Returns: string }
     }
     Enums: {

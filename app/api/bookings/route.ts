@@ -64,35 +64,16 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const { data: existingCustomer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('phone', customer_phone)
-        .maybeSingle()
-
-      let customerId = existingCustomer?.id ?? null
-
-      if (!customerId) {
-        const { data: newCustomer, error: insertError } = await supabase
-          .from('customers')
-          .insert({ name: customer_name, phone: customer_phone, email: customer_email ?? null })
-          .select('id')
-          .single()
-
-        if (insertError) {
-          // Another request may have created the customer concurrently — re-fetch by phone.
-          const { data: retryCustomer } = await supabase
-            .from('customers')
-            .select('id')
-            .eq('phone', customer_phone)
-            .maybeSingle()
-          customerId = retryCustomer?.id ?? null
-        } else {
-          customerId = newCustomer?.id ?? null
-        }
-      }
-
-      if (customerId) {
+      // customers table is authenticated-only (RLS); this RPC is the only
+      // anon-callable path and only ever returns an id, never PII rows.
+      const { data: customerId, error: rpcError } = await supabase.rpc('find_or_create_customer', {
+        p_name: customer_name,
+        p_phone: customer_phone,
+        p_email: customer_email ?? null,
+      })
+      if (rpcError) {
+        console.error('Customer link RPC error:', rpcError)
+      } else if (customerId) {
         await supabase.from('bookings').update({ customer_id: customerId }).eq('id', data.id)
       }
     } catch (customerError) {
