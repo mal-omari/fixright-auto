@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
   try {
     const { invoiceId } = await req.json()
 
+    console.log('Receipt route hit, invoice id:', invoiceId)
+    console.log('Resend API key exists:', !!process.env.RESEND_API_KEY)
+
     if (!invoiceId) {
       return NextResponse.json({ error: 'invoiceId is required' }, { status: 400 })
     }
@@ -21,7 +24,10 @@ export async function POST(req: NextRequest) {
       .eq('id', invoiceId)
       .single()
 
+    console.log('Customer email:', invoice?.customer_email)
+
     if (error || !invoice) {
+      console.error('Invoice fetch error:', error)
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
@@ -29,9 +35,10 @@ export async function POST(req: NextRequest) {
     const vehicle = [invoice.vehicle_year, invoice.vehicle_make, invoice.vehicle_model].filter(Boolean).join(' ') || '—'
 
     if (invoice.customer_email) {
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from: FROM_ADDRESS,
-        to: [invoice.customer_email],
+        // TODO: change to ofomari59@gmail.com after domain verified
+        to: ['12mfao@gmail.com'],
         subject: `Payment Received — FixRight Automotive — ${invoice.invoice_number}`,
         html: generateReceiptEmail({
           invoiceNumber: invoice.invoice_number,
@@ -40,6 +47,7 @@ export async function POST(req: NextRequest) {
           paidDate,
         }),
       })
+      console.log('Resend receipt result:', JSON.stringify(result))
     }
 
     const { error: updateError } = await supabase

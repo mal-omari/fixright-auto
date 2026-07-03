@@ -665,9 +665,11 @@ export default function InvoiceDetailPage() {
               onChange={e => setDueDate(e.target.value)}
               style={{
                 width: '100%', background: '#141210', border: '1px solid #2A2420',
-                borderRadius: 6, color: '#F0EDE8', padding: '8px 10px',
+                borderRadius: 6, color: '#F0EDE8', padding: '8px 12px',
                 fontSize: '13px', outline: 'none', fontFamily: 'inherit',
               }}
+              onFocus={e => (e.target.style.borderColor = '#FF9500')}
+              onBlur={e => (e.target.style.borderColor = '#2A2420')}
             />
           </div>
 

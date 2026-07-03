@@ -387,7 +387,9 @@ export default function BookingDetailPage() {
                 type="date"
                 value={confirmedDate}
                 onChange={e => setConfirmedDate(e.target.value)}
-                style={inputStyle}
+                style={{ ...inputStyle, paddingRight: 12 }}
+                onFocus={e => (e.target.style.borderColor = '#FF9500')}
+                onBlur={e => (e.target.style.borderColor = '#2A2420')}
               />
             </div>
 

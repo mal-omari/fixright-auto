@@ -160,13 +160,17 @@ function BookingsContent() {
             <input
               type="date" value={dateFrom}
               onChange={e => { setDateFrom(e.target.value); setPage(1) }}
-              style={{ ...inputStyle, width: 148 }}
+              style={{ ...inputStyle, width: 148, paddingRight: 12 }}
+              onFocus={e => (e.target.style.borderColor = '#FF9500')}
+              onBlur={e => (e.target.style.borderColor = '#2A2420')}
             />
             <span style={{ color: '#3A3430', fontSize: '12px' }}>—</span>
             <input
               type="date" value={dateTo}
               onChange={e => { setDateTo(e.target.value); setPage(1) }}
-              style={{ ...inputStyle, width: 148 }}
+              style={{ ...inputStyle, width: 148, paddingRight: 12 }}
+              onFocus={e => (e.target.style.borderColor = '#FF9500')}
+              onBlur={e => (e.target.style.borderColor = '#2A2420')}
             />
           </div>
           {hasFilters && (

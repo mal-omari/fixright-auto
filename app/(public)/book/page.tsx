@@ -386,7 +386,7 @@ export default function BookPage() {
                           style={{ ...inputStyle(!!errors.model), paddingRight: '36px', cursor: form.make ? 'pointer' : 'not-allowed', opacity: form.make ? 1 : 0.5 }}
                           value={form.model} onChange={e => set('model', e.target.value)} disabled={!form.make}
                           onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.model ? '#FF4444' : '#3A3430')}>
-                          <option value="">{form.make ? 'Model' : 'Select make first'}</option>
+                          <option value="">Model</option>
                           {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                         <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9A8E82', fontSize: '10px' }}>▼</div>
@@ -451,7 +451,6 @@ export default function BookPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {SERVICES.map(svc => {
                   const selected = form.service === svc
-                  const hrs = serviceHours[svc]
                   return (
                     <button
                       key={svc}
@@ -465,19 +464,10 @@ export default function BookPage() {
                         color: selected ? '#FF9500' : '#9A8E82',
                         fontSize: '13px', fontWeight: selected ? 600 : 400,
                         cursor: 'pointer', transition: 'all 0.15s', width: '100%',
-                        position: 'relative',
+                        height: '52px', display: 'flex', alignItems: 'center',
                       }}
                     >
                       {svc}
-                      {hrs && (
-                        <span style={{
-                          position: 'absolute', bottom: 8, right: 10,
-                          fontFamily: 'var(--font-heading), sans-serif',
-                          fontSize: '10px', color: selected ? '#FF9500' : '#4A4540',
-                        }}>
-                          ~{hrs}h
-                        </span>
-                      )}
                     </button>
                   )
                 })}
@@ -494,7 +484,7 @@ export default function BookPage() {
                   <CalendarDays size={16} /> Select Your Preferred Date
                 </label>
                 <input
-                  style={{ ...inputStyle(!!errors.preferredDate), height: '56px', fontSize: '15px' }}
+                  style={{ ...inputStyle(!!errors.preferredDate), height: '56px', fontSize: '15px', background: '#141210', paddingRight: '14px' }}
                   value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today}
                   onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.preferredDate ? '#FF4444' : '#3A3430')} />
                 {errors.preferredDate && <p style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.preferredDate}</p>}

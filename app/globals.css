@@ -157,6 +157,13 @@ h1, h2, h3 {
 .hud-pulse { animation: hudFade 3s ease-in-out infinite; }
 .gauge-pulse { animation: gaugePulse 2s ease-in-out infinite; }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
+  cursor: pointer;
+  opacity: 1;
+  padding: 4px;
+}
+
 html { scroll-behavior: smooth; }
 
 ::-webkit-scrollbar { width: 6px; }

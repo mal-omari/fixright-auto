@@ -197,7 +197,7 @@ export default function NewBookingPage() {
                   <label style={lStyle}>Model</label>
                   <SelectWrap>
                     <select value={form.vehicle_model} onChange={e => set('vehicle_model', e.target.value)} style={sel} disabled={!form.vehicle_make}>
-                      <option value="">{form.vehicle_make ? 'Model' : 'Pick make first'}</option>
+                      <option value="">Model</option>
                       {availModels.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </SelectWrap>
@@ -265,7 +265,12 @@ export default function NewBookingPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={lStyle}>Preferred Date</label>
-                  <input type="date" value={form.preferred_date} onChange={e => set('preferred_date', e.target.value)} style={iStyle} />
+                  <input
+                    type="date" value={form.preferred_date} onChange={e => set('preferred_date', e.target.value)}
+                    style={{ ...iStyle, paddingRight: 12 }}
+                    onFocus={e => (e.target.style.borderColor = '#FF9500')}
+                    onBlur={e => (e.target.style.borderColor = '#2A2420')}
+                  />
                 </div>
                 <div>
                   <label style={lStyle}>Preferred Time</label>
