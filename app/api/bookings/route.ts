@@ -64,6 +64,22 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      const { data: customer } = await supabase
+        .from('customers')
+        .upsert(
+          { name: customer_name, phone: customer_phone, email: customer_email ?? null },
+          { onConflict: 'phone' }
+        )
+        .select()
+        .single()
+      if (customer) {
+        await supabase.from('bookings').update({ customer_id: customer.id }).eq('id', data.id)
+      }
+    } catch (customerError) {
+      console.error('Customer link error:', customerError)
+    }
+
+    try {
       console.log('Attempting to send email via Resend...')
       console.log('API Key exists:', !!process.env.RESEND_API_KEY)
       console.log('API Key prefix:', process.env.RESEND_API_KEY?.substring(0, 8))

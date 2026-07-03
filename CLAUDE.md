@@ -43,12 +43,15 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 
 ## Database Schema (Supabase)
 ### Tables
-- bookings: id, customer_name, customer_phone, customer_email, vehicle_year, 
-  vehicle_make, vehicle_model, vehicle_mileage, vehicle_vin, service_id, 
-  service_description (holds service name), estimated_hours, actual_hours,
+- bookings: id, customer_id (FK to customers, nullable), customer_name,
+  customer_phone, customer_email, vehicle_year, vehicle_make, vehicle_model,
+  vehicle_mileage, vehicle_vin, service_id, service_description (holds
+  service name), estimated_hours, actual_hours,
   status (pending/confirmed/in_progress/completed/cancelled), mechanic_id,
   notes, source (web/phone/walkin), preferred_date, preferred_time,
   confirmed_date, confirmed_time, created_at, updated_at
+- customers: id, name, phone (unique), email, address, notes, is_vip,
+  created_at, updated_at
 - services: id, name, description, estimated_hours, category, is_active
 - mechanics: id, name, email, phone, is_active
 - invoices: id, invoice_number (FR-YYYY-NNNN), booking_id, customer_name,
@@ -94,6 +97,17 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 - Booking detail: status management, mechanic assignment, auto-fill hours,
   confirmed date/time fields, Create Invoice button (shows when completed)
 - New booking form: phone-ins, pre-confirmed, mechanic assignment
+- Customers list (/workshop-portal/customers): search by name/phone, stats
+  bar (total/new this month/returning), sortable table (visits, last visit,
+  total spent), VIP star toggle
+- Customer detail (/workshop-portal/customers/[id]): inline-editable profile,
+  VIP toggle, service history, vehicle history grouped by year/make/model,
+  internal notes
+- Phone-number lookup on New Booking: search by phone auto-fills returning
+  customers and links the booking's customer_id; unmatched numbers get a
+  new customers row created on save
+- Public /book submissions and admin-created bookings both auto-link (or
+  auto-create) a customers row by phone via upsert(onConflict: 'phone')
 - Schedule: weekly Mon-Sat view, timezone-aware (America/Toronto),
   solid cards (confirmed) vs dashed cards (preferred only)
 - Services management: stats bar (active count, category count), inline-editable
@@ -130,7 +144,6 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 - Revenue/workload reporting charts in admin dashboard
 - Polish pass: public site hero enhancements, reactive elements
 - AI scheduler (after 2-3 weeks of real booking data)
-- Customer profiles and vehicle service history
 - Ruflo integration for better Claude Code sessions
 
 ## Rules — Always Follow These

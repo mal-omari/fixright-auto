@@ -1,16 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
-import { ArrowLeft, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Search } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 
 type Mechanic = Tables<'mechanics'>
 type Service = Tables<'services'>
+type Customer = Tables<'customers'>
 
 const TIMES = ['Morning (8:00am – 11:00am)', 'Afternoon (12:00pm – 4:00pm)', 'Flexible']
 const SOURCES = ['phone', 'walkin', 'web', 'referral', 'google', 'other']
@@ -43,7 +44,7 @@ function SelectWrap({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function NewBookingPage() {
+function NewBookingForm() {
   const router = useRouter()
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -51,6 +52,7 @@ export default function NewBookingPage() {
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
+    customer_id: '',
     customer_name: '',
     customer_phone: '',
     customer_email: '',
@@ -70,6 +72,52 @@ export default function NewBookingPage() {
   })
 
   const [serviceAutoFilled, setServiceAutoFilled] = useState(false)
+
+  const searchParams = useSearchParams()
+  const [lookupPhone, setLookupPhone] = useState('')
+  const [looking, setLooking] = useState(false)
+  const [searchedOnce, setSearchedOnce] = useState(false)
+  const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null)
+  const [visitCount, setVisitCount] = useState(0)
+
+  async function lookupCustomer(phoneArg?: string) {
+    const phone = (phoneArg ?? lookupPhone).trim()
+    if (!phone) return
+    setLooking(true)
+    const supabase = createClient()
+    const { data: customer } = await supabase.from('customers').select('*').eq('phone', phone).maybeSingle()
+
+    if (customer) {
+      const { count } = await supabase
+        .from('bookings')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', customer.id)
+      setFoundCustomer(customer)
+      setVisitCount(count ?? 0)
+      setForm(prev => ({
+        ...prev,
+        customer_id: customer.id,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_email: customer.email ?? '',
+      }))
+    } else {
+      setFoundCustomer(null)
+      setVisitCount(0)
+      setForm(prev => ({ ...prev, customer_id: '', customer_phone: phone }))
+    }
+    setSearchedOnce(true)
+    setLooking(false)
+  }
+
+  useEffect(() => {
+    const phoneParam = searchParams.get('phone')
+    if (phoneParam) {
+      setLookupPhone(phoneParam)
+      lookupCustomer(phoneParam)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const supabase = createClient()
@@ -110,6 +158,7 @@ export default function NewBookingPage() {
     setSubmitting(true); setError('')
     const supabase = createClient()
     const { data, error: err } = await supabase.from('bookings').insert({
+      customer_id: form.customer_id || null,
       customer_name: form.customer_name.trim(),
       customer_phone: form.customer_phone.trim(),
       customer_email: form.customer_email.trim() || null,
@@ -128,8 +177,30 @@ export default function NewBookingPage() {
       status: form.status,
     }).select().single()
 
+    if (err) {
+      setSubmitting(false)
+      setError(err.message); toast.error(err.message); return
+    }
+
+    if (!form.customer_id) {
+      try {
+        const { data: customer } = await supabase
+          .from('customers')
+          .upsert(
+            { name: form.customer_name.trim(), phone: form.customer_phone.trim(), email: form.customer_email.trim() || null },
+            { onConflict: 'phone' }
+          )
+          .select()
+          .single()
+        if (customer) {
+          await supabase.from('bookings').update({ customer_id: customer.id }).eq('id', data.id)
+        }
+      } catch (customerErr) {
+        console.error('Customer link error:', customerErr)
+      }
+    }
+
     setSubmitting(false)
-    if (err) { setError(err.message); toast.error(err.message); return }
     toast.success('Booking created successfully')
     router.push(`/workshop-portal/bookings/${data.id}`)
   }
@@ -148,6 +219,69 @@ export default function NewBookingPage() {
       <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', marginBottom: 24 }}>New Booking</h1>
 
       <form onSubmit={submit}>
+        <div style={card}>
+          <div style={secTitle}>Customer Lookup</div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginBottom: searchedOnce ? 14 : 0 }}>
+            <div style={{ flex: 1 }}>
+              <label style={lStyle}>Phone Number</label>
+              <input
+                value={lookupPhone}
+                onChange={e => setLookupPhone(e.target.value)}
+                style={iStyle}
+                placeholder="519-555-0100"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => lookupCustomer()}
+              disabled={looking || !lookupPhone.trim()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: '#2A2420', color: '#F0EDE8', border: '1px solid #3A3430',
+                borderRadius: 8, padding: '10px 20px', fontSize: '13px', fontWeight: 600,
+                cursor: looking ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              <Search size={14} />
+              {looking ? 'Searching…' : 'Search'}
+            </button>
+          </div>
+          {searchedOnce && foundCustomer && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
+              background: 'rgba(40,200,80,0.08)', border: '1px solid rgba(40,200,80,0.25)',
+              borderRadius: 8, padding: '12px 14px',
+            }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#F0EDE8' }}>{foundCustomer.name}</div>
+                <div style={{ fontSize: '12px', color: '#9A8E82', marginTop: 2 }}>{foundCustomer.email || 'No email on file'}</div>
+              </div>
+              <span style={{
+                background: 'rgba(40,200,80,0.15)', color: '#28C850',
+                padding: '4px 12px', borderRadius: 20, fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+              }}>
+                Returning customer — {visitCount} previous visit{visitCount === 1 ? '' : 's'}
+              </span>
+            </div>
+          )}
+          {searchedOnce && !foundCustomer && (
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)',
+              borderRadius: 8, padding: '12px 14px',
+            }}>
+              <span style={{
+                background: 'rgba(255,149,0,0.15)', color: '#FF9500',
+                padding: '4px 12px', borderRadius: 20, fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+              }}>
+                New customer
+              </span>
+            </div>
+          )}
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
           {/* Left column */}
@@ -352,5 +486,13 @@ export default function NewBookingPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function NewBookingPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, color: '#4A4540', fontSize: '13px' }}>Loading…</div>}>
+      <NewBookingForm />
+    </Suspense>
   )
 }
