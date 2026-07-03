@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       .eq('id', invoiceId)
       .single()
 
-    console.log('Customer email:', invoice?.customer_email)
+    console.log('Customer email exists:', !!invoice?.customer_email)
 
     if (error || !invoice) {
       console.error('Invoice fetch error:', error)
