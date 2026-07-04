@@ -9,7 +9,7 @@ Strategic + visual design specs live at project root:
 A futuristic automotive service website for FixRight Automotive, London Ontario.
 Owner: Omar (ofomari59@gmail.com). Shop has 3 mechanics, 28 years experience, 
 6,000+ customers. Family owned and operated.
-Public site currently at fixright-auto.vercel.app (moving to fixrightauto.ca).
+Public site at fixrightautomotive.com (live!)
 Admin portal at /workshop-portal (hidden from public, not linked anywhere on site).
 
 ## Tech Stack
@@ -130,9 +130,9 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 - New booking → email sent to 12mfao@gmail.com (TEMPORARY until domain verified)
 - Booking confirmed → confirmation email to customer (if email provided)
 - Using Resend sandbox (onboarding@resend.dev from address)
-- TEMPORARY: emails go to 12mfao@gmail.com until fixrightauto.ca verified
-- TODO: verify fixrightauto.ca in Resend, update to address to ofomari59@gmail.com,
-  update from address to bookings@fixrightauto.ca
+- TEMPORARY: emails go to 12mfao@gmail.com until fixrightautomotive.com verified
+- TODO: verify fixrightautomotive.com in Resend, update to address to ofomari59@gmail.com,
+  update from address to bookings@fixrightautomotive.com
 
 ## Phase Status
 - ✅ Phase 1: Public website
@@ -140,15 +140,22 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 - ✅ Phase 3: Invoicing system
 - ✅ Phase 4: Supabase Auth
 - ✅ Phase 5: Email notifications (partial — sandbox until domain verified)
-- ⬜ Phase 6: Domain cutover to fixrightauto.ca (BLOCKED — need Netfirms access)
-  Call Netfirms: 1-888-638-3476 to recover account
-  Domain expires: September 2026 — URGENT
+- ✅ Phase 6: Domain cutover to fixrightautomotive.com (LIVE)
 
 ## Still To Build
-- Phase 6: Domain cutover (Netfirms access required first)
+- Resend domain verification for fixrightautomotive.com (update email from
+  address to bookings@fixrightautomotive.com)
+- Admin page responsive fixes (mobile)
+- Contact form real submission (currently fake/no backend)
+- HTTP security headers in next.config.ts
+- /impeccable polish on public site
+- QuickBooks data import (waiting for Omar to get access)
+- Service reminders / automated emails
 - Revenue/workload reporting charts in admin dashboard
 - Polish pass: public site hero enhancements, reactive elements
 - AI scheduler (after 2-3 weeks of real booking data)
+- Customer portal
+- Omar account migration (Supabase, Vercel, Resend to his accounts)
 - Ruflo integration for better Claude Code sessions
 
 ## Rules — Always Follow These
@@ -161,6 +168,7 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 7. Use getTodayEastern() for all date calculations (timezone: America/Toronto)
 8. Commit message format: "feat:", "fix:", "refactor:", "docs:" prefix always
 9. Omar's phone: 519.471.9462 — never use placeholder
+   Domain: fixrightautomotive.com (Namecheap, DNS → Vercel)
 10. Address: 2117 Aldersbrook Rd, London ON N6G 3X1
 11. Hero background is CSS background-image NOT next/image
 12. Invoice line items use React.memo to prevent input re-render bug
