@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateInvoiceEmail } from '@/lib/emails/generateInvoiceEmail'
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding@resend.dev>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <bookings@fixrightautomotive.com>'
 
 export async function POST(req: NextRequest) {
   try {

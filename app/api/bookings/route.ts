@@ -4,7 +4,7 @@ import { resend } from '@/lib/resend'
 import { generateBookingReceivedEmail } from '@/lib/emails/generateBookingReceived'
 import { rateLimit } from '@/lib/rate-limit'
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding@resend.dev>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <bookings@fixrightautomotive.com>'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_RE = /^[0-9+()./\-\s]{7,30}$/
@@ -102,8 +102,7 @@ export async function POST(req: NextRequest) {
     try {
       await resend.emails.send({
         from: FROM_ADDRESS,
-        // TODO: change to ofomari59@gmail.com after domain verified
-        to: ['12mfao@gmail.com'],
+        to: ['ofomari59@gmail.com'],
         subject: `New Booking Request — ${customer_name} — ${service_description ?? 'Service'}`,
         html: generateBookingReceivedEmail({
           customerName: customer_name,

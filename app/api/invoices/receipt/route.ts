@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateReceiptEmail } from '@/lib/emails/generateReceiptEmail'
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding@resend.dev>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <bookings@fixrightautomotive.com>'
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,8 +33,7 @@ export async function POST(req: NextRequest) {
     if (invoice.customer_email) {
       await resend.emails.send({
         from: FROM_ADDRESS,
-        // TODO: change to ofomari59@gmail.com after domain verified
-        to: ['12mfao@gmail.com'],
+        to: [invoice.customer_email],
         subject: `Payment Received — FixRight Automotive — ${invoice.invoice_number}`,
         html: generateReceiptEmail({
           invoiceNumber: invoice.invoice_number,

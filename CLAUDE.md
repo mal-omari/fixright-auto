@@ -127,24 +127,21 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
   notification toggles
 
 ### Email Notifications (Phase 5)
-- New booking → email sent to 12mfao@gmail.com (TEMPORARY until domain verified)
+- fixrightautomotive.com is verified in Resend (domain cutover complete)
+- From address everywhere: 'FixRight Auto <bookings@fixrightautomotive.com>'
+- New booking → email sent to ofomari59@gmail.com
 - Booking confirmed → confirmation email to customer (if email provided)
-- Using Resend sandbox (onboarding@resend.dev from address)
-- TEMPORARY: emails go to 12mfao@gmail.com until fixrightautomotive.com verified
-- TODO: verify fixrightautomotive.com in Resend, update to address to ofomari59@gmail.com,
-  update from address to bookings@fixrightautomotive.com
+- Payment receipt → confirmation email to customer (if email provided)
 
 ## Phase Status
 - ✅ Phase 1: Public website
 - ✅ Phase 2: Admin panel  
 - ✅ Phase 3: Invoicing system
 - ✅ Phase 4: Supabase Auth
-- ✅ Phase 5: Email notifications (partial — sandbox until domain verified)
+- ✅ Phase 5: Email notifications (fixrightautomotive.com verified in Resend)
 - ✅ Phase 6: Domain cutover to fixrightautomotive.com (LIVE)
 
 ## Still To Build
-- Resend domain verification for fixrightautomotive.com (update email from
-  address to bookings@fixrightautomotive.com)
 - Admin page responsive fixes (mobile)
 - Contact form real submission (currently fake/no backend)
 - HTTP security headers in next.config.ts
@@ -172,11 +169,12 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 10. Address: 2117 Aldersbrook Rd, London ON N6G 3X1
 11. Hero background is CSS background-image NOT next/image
 12. Invoice line items use React.memo to prevent input re-render bug
-13. Email TO address is 12mfao@gmail.com temporarily (update after domain verified)
+13. Email from address is 'FixRight Auto <bookings@fixrightautomotive.com>'; new booking
+    notifications go to ofomari59@gmail.com, receipts/confirmations go to the customer
 14. Never block booking submission due to email failure — catch Resend errors silently
 
 ## Environment Variables Required
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - RESEND_API_KEY
-- RESEND_FROM_EMAIL (empty until domain verified)
+- RESEND_FROM_EMAIL ('FixRight Auto <bookings@fixrightautomotive.com>')
