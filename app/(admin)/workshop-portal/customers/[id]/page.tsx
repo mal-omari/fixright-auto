@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { ArrowLeft, Star, Plus, Pencil, Check, X, Car, Wrench, Calendar, DollarSign } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Customer = Tables<'customers'>
 type Booking = Tables<'bookings'>
@@ -56,6 +57,7 @@ function fmtTimestamp(d: string | null) {
 }
 
 export default function CustomerDetailPage() {
+  const isMobile = useIsMobile()
   const { id } = useParams<{ id: string }>()
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -197,7 +199,7 @@ export default function CustomerDetailPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 1000 }}>
+    <div style={{ padding: isMobile ? 16 : 24, maxWidth: 1000 }}>
       <Link
         href="/workshop-portal/customers"
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '12px', marginBottom: 20 }}
@@ -209,7 +211,7 @@ export default function CustomerDetailPage() {
       <div style={card}>
         {editing ? (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={lStyle}>Name</label>
                 <input value={editName} onChange={e => setEditName(e.target.value)} style={iStyle} />
@@ -250,7 +252,7 @@ export default function CustomerDetailPage() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'flex-start', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                 <h1 style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '26px', fontWeight: 700, color: '#F0EDE8', margin: 0 }}>
@@ -295,7 +297,7 @@ export default function CustomerDetailPage() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 }}>
+      <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 }}>
         {[
           { label: 'Total Visits', value: bookings.length.toString(), icon: Calendar, color: '#4A9EFF' },
           { label: 'Total Spent', value: fmtAmount(totalSpent), icon: DollarSign, color: '#28C850' },
@@ -327,7 +329,7 @@ export default function CustomerDetailPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr>
-                  {['Date', 'Service', 'Vehicle', 'Status', 'Invoice', 'Amount'].map(h => (
+                  {(isMobile ? ['Date', 'Service', 'Status'] : ['Date', 'Service', 'Vehicle', 'Status', 'Invoice', 'Amount']).map(h => (
                     <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                       {h}
                     </th>
@@ -341,20 +343,26 @@ export default function CustomerDetailPage() {
                     <tr key={b.id} style={{ borderTop: '1px solid #2A2420' }}>
                       <td style={{ padding: '10px 12px', color: '#9A8E82', whiteSpace: 'nowrap' }}>{fmtDate(b.preferred_date)}</td>
                       <td style={{ padding: '10px 12px', color: '#F0EDE8' }}>{b.service_description || '—'}</td>
-                      <td style={{ padding: '10px 12px', color: '#9A8E82', whiteSpace: 'nowrap' }}>
-                        {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
-                      </td>
+                      {!isMobile && (
+                        <td style={{ padding: '10px 12px', color: '#9A8E82', whiteSpace: 'nowrap' }}>
+                          {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
+                        </td>
+                      )}
                       <td style={{ padding: '10px 12px' }}><StatusBadge status={b.status} /></td>
-                      <td style={{ padding: '10px 12px' }}>
-                        {inv ? (
-                          <Link href={`/workshop-portal/invoices/${inv.id}`} style={{ color: '#FF9500', fontSize: '12px', textDecoration: 'none' }}>
-                            View Invoice
-                          </Link>
-                        ) : '—'}
-                      </td>
-                      <td style={{ padding: '10px 12px', color: '#F0EDE8', fontWeight: 600 }}>
-                        {inv && inv.status === 'paid' ? fmtAmount(inv.total) : '—'}
-                      </td>
+                      {!isMobile && (
+                        <td style={{ padding: '10px 12px' }}>
+                          {inv ? (
+                            <Link href={`/workshop-portal/invoices/${inv.id}`} style={{ color: '#FF9500', fontSize: '12px', textDecoration: 'none' }}>
+                              View Invoice
+                            </Link>
+                          ) : '—'}
+                        </td>
+                      )}
+                      {!isMobile && (
+                        <td style={{ padding: '10px 12px', color: '#F0EDE8', fontWeight: 600 }}>
+                          {inv && inv.status === 'paid' ? fmtAmount(inv.total) : '—'}
+                        </td>
+                      )}
                     </tr>
                   )
                 })}
@@ -372,7 +380,7 @@ export default function CustomerDetailPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {vehicleGroups.map(v => (
-              <div key={v.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#141210', borderRadius: 8, border: '1px solid #2A2420' }}>
+              <div key={v.key} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: isMobile ? 8 : 0, padding: '10px 14px', background: '#141210', borderRadius: 8, border: '1px solid #2A2420' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Car size={16} style={{ color: '#6B6560' }} />
                   <span style={{ color: '#F0EDE8', fontSize: '13px', fontWeight: 600 }}>

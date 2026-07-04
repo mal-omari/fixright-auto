@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { Check, Building2, DollarSign, Wrench, Bell } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Mechanic = Tables<'mechanics'>
 
@@ -65,6 +66,7 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 }
 
 export default function SettingsPage() {
+  const isMobile = useIsMobile()
   const [labourRate, setLabourRate] = useState('95')
   const [editingRate, setEditingRate] = useState(false)
   const [rateInput, setRateInput] = useState('95')
@@ -129,7 +131,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 700 }}>
+    <div style={{ padding: isMobile ? 16 : 24, maxWidth: 700 }}>
 
       {/* Shop Info */}
       <div style={card}>
@@ -161,8 +163,8 @@ export default function SettingsPage() {
         <div style={{ marginBottom: 20 }}>
           <label style={lStyle}>Default Hourly Rate (CAD)</label>
           {editingRate ? (
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <div style={{ position: 'relative', width: 180 }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 10, alignItems: isMobile ? 'stretch' : 'center' }}>
+              <div style={{ position: 'relative', width: isMobile ? '100%' : 180 }}>
                 <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#6B6560', fontSize: '14px' }}>$</span>
                 <input
                   type="number" min="0" step="5"
@@ -172,17 +174,19 @@ export default function SettingsPage() {
                   autoFocus
                 />
               </div>
-              <span style={{ fontSize: '12px', color: '#6B6560' }}>/ hr</span>
-              <SaveBtn onClick={saveRate} saved={rateSaved} />
-              <button
-                onClick={() => { setEditingRate(false); setRateInput(labourRate) }}
-                style={{ background: 'none', border: '1px solid #2A2420', color: '#6B6560', padding: '9px 14px', borderRadius: 8, cursor: 'pointer', fontSize: '12px' }}
-              >
-                Cancel
-              </button>
+              {!isMobile && <span style={{ fontSize: '12px', color: '#6B6560' }}>/ hr</span>}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <SaveBtn onClick={saveRate} saved={rateSaved} />
+                <button
+                  onClick={() => { setEditingRate(false); setRateInput(labourRate) }}
+                  style={{ background: 'none', border: '1px solid #2A2420', color: '#6B6560', padding: '9px 14px', borderRadius: 8, cursor: 'pointer', fontSize: '12px' }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ fontSize: '32px', fontWeight: 700, color: '#F0EDE8' }}>
                 ${parseFloat(labourRate).toFixed(2)}<span style={{ fontSize: '16px', color: '#6B6560', fontWeight: 400 }}>/hr</span>
               </div>
@@ -217,7 +221,9 @@ export default function SettingsPage() {
               <div
                 key={m.id}
                 style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center',
+                  gap: isMobile ? 10 : 0,
                   padding: '14px 0', borderBottom: '1px solid #2A2420',
                 }}
               >

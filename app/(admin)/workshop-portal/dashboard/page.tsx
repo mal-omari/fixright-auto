@@ -8,6 +8,7 @@ import { StatCard } from '@/components/admin/StatCard'
 import { FuelGauge } from '@/components/admin/FuelGauge'
 import { Plus, Calendar, FileText, CalendarDays, Clock, Wrench, CheckCircle } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Booking = Tables<'bookings'>
 type Mechanic = Tables<'mechanics'>
@@ -56,6 +57,7 @@ function addDaysToDateStr(dateStr: string, n: number): string {
 }
 
 export default function DashboardPage() {
+  const isMobile = useIsMobile()
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<Booking[]>([])
   const [workload, setWorkload] = useState<MechanicWorkload[]>([])
@@ -170,7 +172,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200 }}>
+    <div style={{ padding: isMobile ? 16 : 24, maxWidth: 1200 }}>
 
       {/* Metric cards */}
       <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
@@ -262,7 +264,7 @@ export default function DashboardPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: '#141210' }}>
-                  {['Customer', 'Vehicle', 'Service', 'Date', 'Status', ''].map(h => (
+                  {(isMobile ? ['Customer', 'Status', 'Date', ''] : ['Customer', 'Vehicle', 'Service', 'Date', 'Status', '']).map(h => (
                     <th
                       key={h}
                       style={{
@@ -302,29 +304,40 @@ export default function DashboardPage() {
                         <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>{b.customer_phone}</div>
                       )}
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#9A8E82', whiteSpace: 'nowrap' }}>
-                      {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
-                    </td>
-                    <td style={{ padding: '14px 16px', maxWidth: 160 }}>
-                      <span style={{ color: '#9A8E82', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {b.service_description ?? '—'}
-                      </span>
-                      {b.estimated_hours && (
-                        <span style={{
-                          display: 'inline-block', marginTop: 3,
-                          background: 'rgba(255,149,0,0.1)', color: '#FF9500',
-                          fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
-                        }}>
-                          {b.estimated_hours}h
+                    {!isMobile && (
+                      <td style={{ padding: '14px 16px', color: '#9A8E82', whiteSpace: 'nowrap' }}>
+                        {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
+                      </td>
+                    )}
+                    {!isMobile && (
+                      <td style={{ padding: '14px 16px', maxWidth: 160 }}>
+                        <span style={{ color: '#9A8E82', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {b.service_description ?? '—'}
                         </span>
-                      )}
-                    </td>
+                        {b.estimated_hours && (
+                          <span style={{
+                            display: 'inline-block', marginTop: 3,
+                            background: 'rgba(255,149,0,0.1)', color: '#FF9500',
+                            fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                          }}>
+                            {b.estimated_hours}h
+                          </span>
+                        )}
+                      </td>
+                    )}
+                    {isMobile && (
+                      <td style={{ padding: '14px 16px' }}>
+                        <StatusBadge status={b.status} />
+                      </td>
+                    )}
                     <td style={{ padding: '14px 16px', color: '#9A8E82', whiteSpace: 'nowrap' }}>
                       {fmtDate(b.preferred_date)}
                     </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <StatusBadge status={b.status} />
-                    </td>
+                    {!isMobile && (
+                      <td style={{ padding: '14px 16px' }}>
+                        <StatusBadge status={b.status} />
+                      </td>
+                    )}
                     <td style={{ padding: '14px 16px' }}>
                       <span style={{ fontSize: '12px', color: '#FF9500', fontWeight: 500 }}>View →</span>
                     </td>
@@ -337,7 +350,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, flexWrap: 'wrap' }}>
         <Link
           href="/workshop-portal/new-booking"
           style={{

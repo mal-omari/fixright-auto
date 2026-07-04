@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Search, X, Users, UserPlus, Repeat, Star } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Customer = Tables<'customers'>
 type Booking = Tables<'bookings'>
@@ -38,6 +39,7 @@ function fmtDate(d: string | null) {
 }
 
 export default function CustomersPage() {
+  const isMobile = useIsMobile()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
@@ -121,7 +123,7 @@ export default function CustomersPage() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: isMobile ? 16 : 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0 }}>Customers</h1>
@@ -132,7 +134,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Stats bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
         {[
           { label: 'Total Customers', value: customers.length.toString(), icon: Users, color: '#4A9EFF' },
           { label: 'New This Month', value: newThisMonth.toString(), icon: UserPlus, color: '#28C850' },
@@ -189,7 +191,10 @@ export default function CustomersPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {['Name', 'Phone', 'Email', 'Total Visits', 'Last Visit', 'Total Spent', 'VIP', 'Actions'].map(h => (
+                {(isMobile
+                  ? ['Name', 'Phone', 'Last Visit']
+                  : ['Name', 'Phone', 'Email', 'Total Visits', 'Last Visit', 'Total Spent', 'VIP', 'Actions']
+                ).map(h => (
                   <th
                     key={h}
                     style={{
@@ -206,11 +211,11 @@ export default function CustomersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
+                  <td colSpan={isMobile ? 3 : 8} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 48, textAlign: 'center' }}>
+                  <td colSpan={isMobile ? 3 : 8} style={{ padding: 48, textAlign: 'center' }}>
                     <Users size={32} style={{ color: '#2A2420', marginBottom: 12 }} />
                     <div style={{ color: '#4A4540', fontSize: '14px' }}>No customers yet</div>
                   </td>
@@ -225,35 +230,39 @@ export default function CustomersPage() {
                 >
                   <td style={{ padding: '0 16px', height: 60, fontWeight: 600, color: '#F0EDE8' }}>{row.customer.name}</td>
                   <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>{row.customer.phone}</td>
-                  <td style={{ padding: '0 16px', height: 60, color: '#9A8E82' }}>{row.customer.email || '—'}</td>
-                  <td style={{ padding: '0 16px', height: 60, color: '#F0EDE8' }}>{row.visits}</td>
+                  {!isMobile && <td style={{ padding: '0 16px', height: 60, color: '#9A8E82' }}>{row.customer.email || '—'}</td>}
+                  {!isMobile && <td style={{ padding: '0 16px', height: 60, color: '#F0EDE8' }}>{row.visits}</td>}
                   <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>{fmtDate(row.lastVisit)}</td>
-                  <td style={{ padding: '0 16px', height: 60, fontWeight: 700, color: '#F0EDE8' }}>{fmtAmount(row.totalSpent)}</td>
-                  <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={() => toggleVip(row.customer.id, row.customer.is_vip ?? false)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}
-                      aria-label={row.customer.is_vip ? 'Remove VIP' : 'Mark VIP'}
-                    >
-                      <Star
-                        size={16}
-                        style={{ color: row.customer.is_vip ? '#FF9500' : '#3A3430' }}
-                        fill={row.customer.is_vip ? '#FF9500' : 'none'}
-                      />
-                    </button>
-                  </td>
-                  <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
-                    <Link
-                      href={`/workshop-portal/customers/${row.customer.id}`}
-                      style={{
-                        fontSize: '12px', color: '#FF9500', textDecoration: 'none',
-                        border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
-                        padding: '4px 10px', fontWeight: 500,
-                      }}
-                    >
-                      View
-                    </Link>
-                  </td>
+                  {!isMobile && <td style={{ padding: '0 16px', height: 60, fontWeight: 700, color: '#F0EDE8' }}>{fmtAmount(row.totalSpent)}</td>}
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => toggleVip(row.customer.id, row.customer.is_vip ?? false)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}
+                        aria-label={row.customer.is_vip ? 'Remove VIP' : 'Mark VIP'}
+                      >
+                        <Star
+                          size={16}
+                          style={{ color: row.customer.is_vip ? '#FF9500' : '#3A3430' }}
+                          fill={row.customer.is_vip ? '#FF9500' : 'none'}
+                        />
+                      </button>
+                    </td>
+                  )}
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
+                      <Link
+                        href={`/workshop-portal/customers/${row.customer.id}`}
+                        style={{
+                          fontSize: '12px', color: '#FF9500', textDecoration: 'none',
+                          border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
+                          padding: '4px 10px', fontWeight: 500,
+                        }}
+                      >
+                        View
+                      </Link>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

@@ -1,6 +1,7 @@
 'use client'
 
 import { BarChart2 } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 export interface DailyBreakdownRow {
   date: string
@@ -26,8 +27,11 @@ function dayName(dateStr: string) {
 }
 
 const COLUMNS = ['Date', 'Day', 'Jobs Completed', 'Revenue', 'Invoices Sent']
+const MOBILE_COLUMNS = ['Date', 'Jobs Completed', 'Revenue']
 
 export function DailyBreakdownTable({ rows }: Props) {
+  const isMobile = useIsMobile()
+  const columns = isMobile ? MOBILE_COLUMNS : COLUMNS
   const totals = rows.reduce((acc, r) => ({
     jobsCompleted: acc.jobsCompleted + r.jobsCompleted,
     revenue: acc.revenue + r.revenue,
@@ -56,11 +60,11 @@ export function DailyBreakdownTable({ rows }: Props) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {COLUMNS.map((h, i) => (
+                {columns.map((h, i) => (
                   <th
                     key={h}
                     style={{
-                      textAlign: i < 2 ? 'left' : 'right', padding: '10px 16px',
+                      textAlign: (isMobile ? i < 1 : i < 2) ? 'left' : 'right', padding: '10px 16px',
                       fontFamily: 'var(--font-heading), sans-serif',
                       fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em',
                       color: '#6B6560', textTransform: 'uppercase', whiteSpace: 'nowrap',
@@ -75,16 +79,16 @@ export function DailyBreakdownTable({ rows }: Props) {
               {rows.map(r => (
                 <tr key={r.date} style={{ borderTop: '1px solid #1E1C18' }}>
                   <td style={{ padding: '12px 16px', color: '#F0EDE8', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
-                  <td style={{ padding: '12px 16px', color: '#9A8E82' }}>{dayName(r.date)}</td>
+                  {!isMobile && <td style={{ padding: '12px 16px', color: '#9A8E82' }}>{dayName(r.date)}</td>}
                   <td style={{ padding: '12px 16px', color: '#9A8E82', textAlign: 'right' }}>{r.jobsCompleted}</td>
                   <td style={{ padding: '12px 16px', color: '#F0EDE8', fontWeight: 600, textAlign: 'right' }}>{fmtAmount(r.revenue)}</td>
-                  <td style={{ padding: '12px 16px', color: '#9A8E82', textAlign: 'right' }}>{r.invoicesSent}</td>
+                  {!isMobile && <td style={{ padding: '12px 16px', color: '#9A8E82', textAlign: 'right' }}>{r.invoicesSent}</td>}
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr style={{ borderTop: '2px solid #2A2420', background: '#141210' }}>
-                <td colSpan={2} style={{
+                <td colSpan={isMobile ? 1 : 2} style={{
                   padding: '12px 16px',
                   fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em',
@@ -94,7 +98,7 @@ export function DailyBreakdownTable({ rows }: Props) {
                 </td>
                 <td style={{ padding: '12px 16px', color: '#F0EDE8', fontWeight: 700, textAlign: 'right' }}>{totals.jobsCompleted}</td>
                 <td style={{ padding: '12px 16px', color: '#FF9500', fontWeight: 700, textAlign: 'right' }}>{fmtAmount(totals.revenue)}</td>
-                <td style={{ padding: '12px 16px', color: '#F0EDE8', fontWeight: 700, textAlign: 'right' }}>{totals.invoicesSent}</td>
+                {!isMobile && <td style={{ padding: '12px 16px', color: '#F0EDE8', fontWeight: 700, textAlign: 'right' }}>{totals.invoicesSent}</td>}
               </tr>
             </tfoot>
           </table>

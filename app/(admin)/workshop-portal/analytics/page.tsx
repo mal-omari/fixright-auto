@@ -16,6 +16,7 @@ import type { ServiceStat } from '@/components/admin/TopServicesTable'
 import { DailyBreakdownTable } from '@/components/admin/DailyBreakdownTable'
 import type { DailyBreakdownRow } from '@/components/admin/DailyBreakdownTable'
 import { DollarSign, CheckCircle, TrendingUp, FileText } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const OTHER_LABEL = 'Other'
@@ -97,6 +98,7 @@ function fmtMoney(n: number) {
 }
 
 export default function AnalyticsPage() {
+  const isMobile = useIsMobile()
   const [preset, setPreset] = useState<PresetKey>('month')
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [invoices, setInvoices] = useState<InvoiceRow[]>([])
@@ -245,7 +247,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200 }}>
+    <div style={{ padding: isMobile ? 16 : 24, maxWidth: 1200 }}>
       <div style={{
         fontFamily: 'var(--font-heading), sans-serif',
         fontSize: '22px', fontWeight: 700, color: '#F0EDE8', marginBottom: 20,
@@ -256,7 +258,7 @@ export default function AnalyticsPage() {
       <AnalyticsDateFilter value={preset} onChange={setPreset} />
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         <StatCard
           label="Total Revenue"
           value={stats.totalRevenue}

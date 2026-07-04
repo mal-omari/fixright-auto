@@ -2,6 +2,7 @@
 
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BarChart2 } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 export interface DailyRevenuePoint {
   date: string
@@ -38,10 +39,11 @@ function ChartTooltip({ active, payload }: {
 }
 
 export function RevenueOverTimeChart({ data }: Props) {
+  const isMobile = useIsMobile()
   const hasData = data.some(d => d.revenue > 0)
 
   return (
-    <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, padding: 24, marginBottom: 24 }}>
+    <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, padding: isMobile ? 16 : 24, marginBottom: 24 }}>
       <div style={{
         fontFamily: 'var(--font-heading), sans-serif',
         fontSize: '11px', fontWeight: 600, letterSpacing: '0.15em',
@@ -51,7 +53,7 @@ export function RevenueOverTimeChart({ data }: Props) {
       </div>
 
       {hasData ? (
-        <ResponsiveContainer width="100%" height={280}>
+        <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
           <AreaChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueOverTimeFill" x1="0" y1="0" x2="0" y2="1">

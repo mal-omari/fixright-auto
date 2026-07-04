@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { BarChart2 } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 export interface ServiceRevenueSlice {
   name: string
@@ -43,6 +44,11 @@ function fmtAmount(n: number) {
   return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+function truncateLabel(name: string, isMobile: boolean) {
+  if (!isMobile || name.length <= 12) return name
+  return name.slice(0, 12) + '…'
+}
+
 function EmptyState() {
   return (
     <div style={{
@@ -72,27 +78,29 @@ function SliceTooltip({ active, payload }: {
 }
 
 export function RevenueBreakdownCharts({ serviceRevenue, labourParts }: Props) {
+  const isMobile = useIsMobile()
   const serviceTotal = serviceRevenue.reduce((s, d) => s + d.value, 0)
   const lpTotal = labourParts.labour + labourParts.parts
   const labourPct = lpTotal > 0 ? Math.round((labourParts.labour / lpTotal) * 100) : 0
   const partsPct = lpTotal > 0 ? 100 - labourPct : 0
+  const donutHeight = isMobile ? 180 : 220
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 24 }}>
       {/* Revenue by Service Type */}
       <div style={CARD_STYLE}>
         <div style={TITLE_STYLE}>Revenue by Service Type</div>
         {serviceTotal > 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: '55%', flexShrink: 0 }}>
-              <ResponsiveContainer width="100%" height={220}>
+            <div style={{ width: '55%', flexShrink: 0, maxWidth: isMobile ? 180 : undefined }}>
+              <ResponsiveContainer width="100%" height={donutHeight}>
                 <PieChart>
                   <Pie
                     data={serviceRevenue}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={55}
-                    outerRadius={90}
+                    innerRadius={isMobile ? 45 : 55}
+                    outerRadius={isMobile ? 75 : 90}
                     paddingAngle={2}
                     stroke="none"
                   >
@@ -117,7 +125,7 @@ export function RevenueBreakdownCharts({ serviceRevenue, labourParts }: Props) {
                   <span style={{
                     color: '#9A8E82', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
                   }}>
-                    {entry.name}
+                    {truncateLabel(entry.name, isMobile)}
                   </span>
                   <span style={{ color: '#F0EDE8', fontWeight: 600, flexShrink: 0 }}>
                     {Math.round((entry.value / serviceTotal) * 100)}%
@@ -134,7 +142,7 @@ export function RevenueBreakdownCharts({ serviceRevenue, labourParts }: Props) {
         <div style={TITLE_STYLE}>Labour vs Parts Split</div>
         {lpTotal > 0 ? (
           <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={donutHeight}>
               <PieChart>
                 <Pie
                   data={[{ name: 'Labour', value: labourParts.labour }, { name: 'Parts', value: labourParts.parts }]}

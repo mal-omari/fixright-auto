@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Plus, Trash2, Download, Check, Loader2, Send } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
@@ -195,6 +196,7 @@ const PartsRow = memo(function PartsRow({ item, onChange, onRemove }: PartsRowPr
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function InvoiceDetailPage() {
+  const isMobile = useIsMobile()
   const { id } = useParams<{ id: string }>()
   const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [labourItems, setLabourItems] = useState<DraftItem[]>([])
@@ -573,7 +575,7 @@ export default function InvoiceDetailPage() {
   }
 
   return (
-    <div style={{ padding: 24, paddingBottom: 100 }}>
+    <div style={{ padding: isMobile ? 16 : 24, paddingBottom: 100 }}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/workshop-portal/invoices" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '12px', marginBottom: 10 }}>
@@ -601,11 +603,11 @@ export default function InvoiceDetailPage() {
       </div>
 
       {/* Two column */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr', gap: 16, marginBottom: 16 }}>
         {/* Left */}
         <div style={card}>
           <span style={sectionHead}>Customer &amp; Vehicle</span>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 24, marginBottom: 20 }}>
             <div>
               <span style={metaLabel}>Bill To</span>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#F0EDE8', marginBottom: 4 }}>{invoice.customer_name ?? '—'}</div>
@@ -876,10 +878,11 @@ export default function InvoiceDetailPage() {
       </div>
 
       {/* Totals */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: isMobile ? 'stretch' : 'flex-end', marginBottom: 24 }}>
         <div style={{
           background: '#1E1C18', border: '1px solid #2A2420',
-          borderRadius: 12, padding: '20px 28px', minWidth: 280,
+          borderRadius: 12, padding: isMobile ? '20px' : '20px 28px', minWidth: isMobile ? 'auto' : 280,
+          width: isMobile ? '100%' : 'auto',
         }}>
           {[
             { label: 'Labour Subtotal', value: labourSubtotal },

@@ -193,7 +193,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, overflow: 'auto', background: '#1A1714' }}>
+        <main style={{ flex: 1, overflow: 'auto', overflowX: 'hidden', maxWidth: '100%', background: '#1A1714' }}>
           {children}
         </main>
       </div>

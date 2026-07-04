@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BarChart2 } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 export interface DayOfWeekCount {
   day: string
@@ -77,6 +78,7 @@ function CountTooltip({ active, payload, label }: {
 }
 
 export function BookingsAnalysisCharts({ byDay, byStatus }: Props) {
+  const isMobile = useIsMobile()
   const hasDayData = byDay.some(d => d.count > 0)
   const maxCount = Math.max(0, ...byDay.map(d => d.count))
 
@@ -84,7 +86,7 @@ export function BookingsAnalysisCharts({ byDay, byStatus }: Props) {
   const hasStatusData = statusData.some(d => d.count > 0)
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 24 }}>
       {/* Bookings per day of week */}
       <div style={CARD_STYLE}>
         <div style={TITLE_STYLE}>Bookings Per Day of Week</div>

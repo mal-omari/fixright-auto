@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 const SHOP_CAPACITY = 24
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -74,7 +75,9 @@ function initials(name: string) {
 }
 
 export default function SchedulePage() {
+  const isMobile = useIsMobile()
   const [weekStart, setWeekStart] = useState(() => getWeekStart(getTodayEastern()))
+  const [mobilePage, setMobilePage] = useState(0)
   const [bookings, setBookings] = useState<ScheduleBooking[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -82,6 +85,9 @@ export default function SchedulePage() {
   const weekFrom = weekDays[0]
   const weekTo = weekDays[5]
   const today = getTodayEastern()
+  const visibleDayIndices = isMobile
+    ? [mobilePage * 3, mobilePage * 3 + 1, mobilePage * 3 + 2]
+    : [0, 1, 2, 3, 4, 5]
 
   useEffect(() => {
     setLoading(true)
@@ -113,9 +119,9 @@ export default function SchedulePage() {
       })
   }, [weekFrom, weekTo])
 
-  function prevWeek() { setWeekStart(d => addDaysStr(d, -7)) }
-  function nextWeek() { setWeekStart(d => addDaysStr(d, 7)) }
-  function goToday() { setWeekStart(getWeekStart(getTodayEastern())) }
+  function prevWeek() { setWeekStart(d => addDaysStr(d, -7)); setMobilePage(0) }
+  function nextWeek() { setWeekStart(d => addDaysStr(d, 7)); setMobilePage(0) }
+  function goToday() { setWeekStart(getWeekStart(getTodayEastern())); setMobilePage(0) }
 
   const dayBookings = (dateStr: string) => bookings.filter(b =>
     b.confirmed_date === dateStr || (!b.confirmed_date && b.preferred_date === dateStr)
@@ -125,7 +131,7 @@ export default function SchedulePage() {
   const weekLabel = `Week of ${fmtHeader(weekDays[0])} — ${fmtHeader(weekDays[5])}`
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: isMobile ? 16 : 24 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
@@ -156,11 +162,44 @@ export default function SchedulePage() {
         </div>
       </div>
 
+      {isMobile && !loading && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <button
+            onClick={() => setMobilePage(p => Math.max(0, p - 1))}
+            disabled={mobilePage === 0}
+            style={{
+              background: '#1E1C18', border: '1px solid #2A2420',
+              color: mobilePage === 0 ? '#2A2420' : '#9A8E82',
+              padding: '8px 10px', borderRadius: 8,
+              cursor: mobilePage === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center',
+            }}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span style={{ fontSize: '12px', color: '#6B6560' }}>
+            {fmtHeader(weekDays[visibleDayIndices[0]])} – {fmtHeader(weekDays[visibleDayIndices[visibleDayIndices.length - 1]])}
+          </span>
+          <button
+            onClick={() => setMobilePage(p => Math.min(1, p + 1))}
+            disabled={mobilePage === 1}
+            style={{
+              background: '#1E1C18', border: '1px solid #2A2420',
+              color: mobilePage === 1 ? '#2A2420' : '#9A8E82',
+              padding: '8px 10px', borderRadius: 8,
+              cursor: mobilePage === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center',
+            }}
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ color: '#6B6560', fontSize: '13px' }}>Loading schedule…</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
-          {weekDays.map((iso, i) => {
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${visibleDayIndices.length}, 1fr)`, gap: 12 }}>
+          {visibleDayIndices.map(i => {
+            const iso = weekDays[i]
             const isToday = iso === today
             const hours = dayHours(iso)
             const pct = Math.min((hours / SHOP_CAPACITY) * 100, 100)

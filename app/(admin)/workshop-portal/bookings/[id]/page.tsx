@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Car, User, FileText } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Booking = Tables<'bookings'>
 type Mechanic = Tables<'mechanics'>
@@ -44,6 +45,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function BookingDetailPage() {
+  const isMobile = useIsMobile()
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [booking, setBooking] = useState<Booking | null>(null)
@@ -233,7 +235,7 @@ export default function BookingDetailPage() {
   }
 
   return (
-    <div style={{ padding: 24, paddingBottom: 100 }}>
+    <div style={{ padding: isMobile ? 16 : 24, paddingBottom: isMobile ? 140 : 100 }}>
       {/* Breadcrumb */}
       <div style={{ marginBottom: 20 }}>
         <Link
@@ -247,7 +249,7 @@ export default function BookingDetailPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr', gap: 20 }}>
         {/* Left */}
         <div>
           <div style={card}>
@@ -339,7 +341,10 @@ export default function BookingDetailPage() {
 
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Status</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div style={isMobile
+                ? { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }
+                : { display: 'flex', flexWrap: 'wrap', gap: 8 }
+              }>
                 {STATUS_OPTIONS.map(opt => {
                   const active = status === opt.value
                   return (
@@ -355,6 +360,7 @@ export default function BookingDetailPage() {
                         color: active ? opt.color : '#6B6560',
                         cursor: 'pointer', transition: 'all 0.15s',
                         letterSpacing: '0.04em',
+                        textAlign: 'center',
                       }}
                     >
                       {opt.label}
@@ -480,19 +486,23 @@ export default function BookingDetailPage() {
         style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           background: '#141210', borderTop: '1px solid #1E1C18',
-          padding: '12px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: isMobile ? '10px 16px' : '12px 24px',
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between',
+          gap: isMobile ? 10 : 0,
           zIndex: 30,
         }}
       >
-        <Link
-          href="/workshop-portal/bookings"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '13px' }}
-        >
-          <ArrowLeft size={14} /> Back to Bookings
-        </Link>
+        {!isMobile && (
+          <Link
+            href="/workshop-portal/bookings"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '13px' }}
+          >
+            <ArrowLeft size={14} /> Back to Bookings
+          </Link>
+        )}
 
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 10 }}>
           {status === 'completed' && (
             <button
               onClick={createInvoice}

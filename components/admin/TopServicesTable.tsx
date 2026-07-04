@@ -1,6 +1,7 @@
 'use client'
 
 import { BarChart2 } from 'lucide-react'
+import { useIsMobile } from '@/lib/hooks'
 
 export interface ServiceStat {
   name: string
@@ -19,8 +20,11 @@ function fmtAmount(n: number) {
 }
 
 const COLUMNS = ['Service Name', 'Bookings', 'Completed', 'Revenue', 'Avg Job Value']
+const MOBILE_COLUMNS = ['Service Name', 'Bookings', 'Revenue']
 
 export function TopServicesTable({ services }: Props) {
+  const isMobile = useIsMobile()
+  const columns = isMobile ? MOBILE_COLUMNS : COLUMNS
   return (
     <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
       <div style={{ padding: '20px 24px 16px' }}>
@@ -43,7 +47,7 @@ export function TopServicesTable({ services }: Props) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {COLUMNS.map((h, i) => (
+                {columns.map((h, i) => (
                   <th
                     key={h}
                     style={{
@@ -71,16 +75,20 @@ export function TopServicesTable({ services }: Props) {
                     {s.name}
                   </td>
                   <td style={{ padding: '14px 16px', color: '#9A8E82', textAlign: 'right' }}>{s.bookings}</td>
-                  <td style={{ padding: '14px 16px', color: '#9A8E82', textAlign: 'right' }}>{s.completed}</td>
+                  {!isMobile && (
+                    <td style={{ padding: '14px 16px', color: '#9A8E82', textAlign: 'right' }}>{s.completed}</td>
+                  )}
                   <td style={{
                     padding: '14px 16px', textAlign: 'right', fontWeight: 600,
                     color: i === 0 ? '#FF9500' : '#F0EDE8',
                   }}>
                     {fmtAmount(s.revenue)}
                   </td>
-                  <td style={{ padding: '14px 16px', color: '#9A8E82', textAlign: 'right' }}>
-                    {fmtAmount(s.avgJobValue)}
-                  </td>
+                  {!isMobile && (
+                    <td style={{ padding: '14px 16px', color: '#9A8E82', textAlign: 'right' }}>
+                      {fmtAmount(s.avgJobValue)}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

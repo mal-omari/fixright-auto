@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { Plus, Wrench, Layers, Search } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Service = Tables<'services'>
 
@@ -86,6 +87,7 @@ function EditableCell({ value, suffix, onSave }: EditableCellProps) {
 }
 
 export default function ServicesPage() {
+  const isMobile = useIsMobile()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -179,8 +181,8 @@ export default function ServicesPage() {
   }, [services, search, categoryFilter, statusFilter])
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <div style={{ padding: isMobile ? 16 : 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0 }}>Services Management</h1>
           <p style={{ fontSize: '12px', color: '#6B6560', marginTop: 4 }}>
@@ -306,7 +308,10 @@ export default function ServicesPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {['Name', 'Category', 'Est. Hours', 'Base Rate', 'Status', 'Actions'].map(h => (
+                {(isMobile
+                  ? ['Name', 'Category', 'Active']
+                  : ['Name', 'Category', 'Est. Hours', 'Base Rate', 'Status', 'Actions']
+                ).map(h => (
                   <th
                     key={h}
                     style={{
@@ -323,9 +328,9 @@ export default function ServicesPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td></tr>
+                <tr><td colSpan={isMobile ? 3 : 6} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td></tr>
               ) : filteredServices.length === 0 ? (
-                <tr><td colSpan={6} style={{ padding: 48, textAlign: 'center', color: '#4A4540' }}>No services found</td></tr>
+                <tr><td colSpan={isMobile ? 3 : 6} style={{ padding: 48, textAlign: 'center', color: '#4A4540' }}>No services found</td></tr>
               ) : filteredServices.map(svc => {
                 const cat = categoryStyle(svc.category)
                 return (
@@ -343,12 +348,16 @@ export default function ServicesPage() {
                         {cat.label}
                       </span>
                     </td>
-                    <td style={{ padding: '0 16px', height: 56 }}>
-                      <EditableCell value={svc.estimated_hours} suffix="h" onSave={v => updateField(svc.id, 'estimated_hours', v)} />
-                    </td>
-                    <td style={{ padding: '0 16px', height: 56 }}>
-                      <EditableCell value={svc.base_price ?? 0} suffix="/hr ($)" onSave={v => updateField(svc.id, 'base_price', v)} />
-                    </td>
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 56 }}>
+                        <EditableCell value={svc.estimated_hours} suffix="h" onSave={v => updateField(svc.id, 'estimated_hours', v)} />
+                      </td>
+                    )}
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 56 }}>
+                        <EditableCell value={svc.base_price ?? 0} suffix="/hr ($)" onSave={v => updateField(svc.id, 'base_price', v)} />
+                      </td>
+                    )}
                     <td style={{ padding: '0 16px', height: 56 }}>
                       <button
                         onClick={() => toggleActive(svc.id, svc.is_active)}
@@ -370,7 +379,9 @@ export default function ServicesPage() {
                         />
                       </button>
                     </td>
-                    <td style={{ padding: '0 16px', height: 56, color: '#4A4540', fontSize: '12px' }}>—</td>
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 56, color: '#4A4540', fontSize: '12px' }}>—</td>
+                    )}
                   </tr>
                 )
               })}
@@ -421,7 +432,7 @@ export default function ServicesPage() {
                   <option value="body">Body</option>
                 </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 16 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', color: '#6B6560', marginBottom: 6, textTransform: 'uppercase' }}>
                     Estimated Hours *

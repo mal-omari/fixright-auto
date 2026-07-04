@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 import { Search, X, ChevronUp, ChevronDown, Plus } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Booking = Tables<'bookings'>
 type SortKey = 'customer_name' | 'preferred_date' | 'status' | 'created_at'
@@ -30,6 +31,7 @@ function formatDate(d: string | null) {
 }
 
 function BookingsContent() {
+  const isMobile = useIsMobile()
   const searchParams = useSearchParams()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
@@ -111,8 +113,8 @@ function BookingsContent() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <div style={{ padding: isMobile ? 16 : 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{
             fontFamily: 'var(--font-heading), sans-serif',
@@ -146,8 +148,8 @@ function BookingsContent() {
           borderRadius: 12, padding: 16, marginBottom: 16,
         }}
       >
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ position: 'relative', minWidth: 240, flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, flexWrap: 'wrap', alignItems: isMobile ? 'stretch' : 'center', marginBottom: 14 }}>
+          <div style={{ position: 'relative', minWidth: isMobile ? 'auto' : 240, flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540' }} />
             <input
               placeholder="Search name, phone, vehicle…"
@@ -156,19 +158,19 @@ function BookingsContent() {
               style={{ ...inputStyle, paddingLeft: 32, width: '100%' }}
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: 8 }}>
             <input
               type="date" value={dateFrom}
               onChange={e => { setDateFrom(e.target.value); setPage(1) }}
-              style={{ ...inputStyle, width: 148, paddingRight: 12 }}
+              style={{ ...inputStyle, width: isMobile ? '100%' : 148, paddingRight: 12 }}
               onFocus={e => (e.target.style.borderColor = '#FF9500')}
               onBlur={e => (e.target.style.borderColor = '#2A2420')}
             />
-            <span style={{ color: '#3A3430', fontSize: '12px' }}>—</span>
+            {!isMobile && <span style={{ color: '#3A3430', fontSize: '12px' }}>—</span>}
             <input
               type="date" value={dateTo}
               onChange={e => { setDateTo(e.target.value); setPage(1) }}
-              style={{ ...inputStyle, width: 148, paddingRight: 12 }}
+              style={{ ...inputStyle, width: isMobile ? '100%' : 148, paddingRight: 12 }}
               onFocus={e => (e.target.style.borderColor = '#FF9500')}
               onBlur={e => (e.target.style.borderColor = '#2A2420')}
             />
@@ -177,7 +179,7 @@ function BookingsContent() {
             <button
               onClick={clearFilters}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 background: 'none', border: '1px solid #2A2420',
                 color: '#6B6560', padding: '8px 12px', fontSize: '12px',
                 borderRadius: 8, cursor: 'pointer',
@@ -198,7 +200,7 @@ function BookingsContent() {
                 style={{
                   padding: '5px 14px', borderRadius: 20,
                   fontFamily: 'var(--font-heading), sans-serif',
-                  fontSize: '11px', fontWeight: active ? 600 : 500,
+                  fontSize: isMobile ? '10px' : '11px', fontWeight: active ? 600 : 500,
                   background: active ? `${color}20` : 'transparent',
                   border: `1px solid ${active ? color : '#2A2420'}`,
                   color: active ? color : '#6B6560',
@@ -220,14 +222,17 @@ function BookingsContent() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {[
+                {(isMobile ? [
+                  { label: 'Customer', key: 'customer_name' as SortKey, sortable: true },
+                  { label: 'Status', key: 'status' as SortKey, sortable: true },
+                ] : [
                   { label: 'Customer', key: 'customer_name' as SortKey, sortable: true },
                   { label: 'Vehicle', key: null, sortable: false },
                   { label: 'Service', key: null, sortable: false },
                   { label: 'Date', key: 'preferred_date' as SortKey, sortable: true },
                   { label: 'Status', key: 'status' as SortKey, sortable: true },
                   { label: 'Actions', key: null, sortable: false },
-                ].map(col => (
+                ]).map(col => (
                   <th
                     key={col.label}
                     onClick={col.sortable && col.key ? () => toggleSort(col.key!) : undefined}
@@ -253,11 +258,11 @@ function BookingsContent() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
+                  <td colSpan={isMobile ? 2 : 6} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
                 </tr>
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: 48, textAlign: 'center' }}>
+                  <td colSpan={isMobile ? 2 : 6} style={{ padding: 48, textAlign: 'center' }}>
                     <div style={{ color: '#4A4540', fontSize: '14px' }}>No bookings found</div>
                     <div style={{ color: '#3A3430', fontSize: '12px', marginTop: 6 }}>Try adjusting your filters</div>
                   </td>
@@ -287,49 +292,57 @@ function BookingsContent() {
                       <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>{b.customer_phone}</div>
                     )}
                   </td>
-                  <td style={{ padding: '0 16px', height: 64, color: '#9A8E82', whiteSpace: 'nowrap' }}>
-                    {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
-                  </td>
-                  <td style={{ padding: '0 16px', height: 64, maxWidth: 160 }}>
-                    <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#9A8E82' }}>
-                      {b.service_description ?? '—'}
-                    </span>
-                    {b.estimated_hours && (
-                      <span style={{
-                        display: 'inline-block', marginTop: 3,
-                        background: 'rgba(255,149,0,0.1)', color: '#FF9500',
-                        fontFamily: 'var(--font-heading), sans-serif',
-                        fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
-                      }}>
-                        {b.estimated_hours}h
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 64, color: '#9A8E82', whiteSpace: 'nowrap' }}>
+                      {[b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}
+                    </td>
+                  )}
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 64, maxWidth: 160 }}>
+                      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#9A8E82' }}>
+                        {b.service_description ?? '—'}
                       </span>
-                    )}
-                  </td>
-                  <td style={{ padding: '0 16px', height: 64 }}>
-                    <div style={{ color: '#9A8E82', whiteSpace: 'nowrap' }}>{formatDate(b.preferred_date)}</div>
-                    {b.preferred_time && (
-                      <div style={{ fontSize: '11px', color: '#4A4540', marginTop: 2, textTransform: 'capitalize' }}>
-                        {b.preferred_time}
-                      </div>
-                    )}
-                  </td>
+                      {b.estimated_hours && (
+                        <span style={{
+                          display: 'inline-block', marginTop: 3,
+                          background: 'rgba(255,149,0,0.1)', color: '#FF9500',
+                          fontFamily: 'var(--font-heading), sans-serif',
+                          fontSize: '10px', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                        }}>
+                          {b.estimated_hours}h
+                        </span>
+                      )}
+                    </td>
+                  )}
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 64 }}>
+                      <div style={{ color: '#9A8E82', whiteSpace: 'nowrap' }}>{formatDate(b.preferred_date)}</div>
+                      {b.preferred_time && (
+                        <div style={{ fontSize: '11px', color: '#4A4540', marginTop: 2, textTransform: 'capitalize' }}>
+                          {b.preferred_time}
+                        </div>
+                      )}
+                    </td>
+                  )}
                   <td style={{ padding: '0 16px', height: 64 }}>
                     <StatusBadge status={b.status} />
                   </td>
-                  <td style={{ padding: '0 16px', height: 64 }} onClick={e => e.stopPropagation()}>
-                    <Link
-                      href={`/workshop-portal/bookings/${b.id}`}
-                      style={{
-                        fontFamily: 'var(--font-heading), sans-serif',
-                        fontSize: '11px', color: '#FF9500', textDecoration: 'none',
-                        border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
-                        padding: '5px 12px', display: 'inline-block', fontWeight: 600,
-                        letterSpacing: '0.06em',
-                      }}
-                    >
-                      View
-                    </Link>
-                  </td>
+                  {!isMobile && (
+                    <td style={{ padding: '0 16px', height: 64 }} onClick={e => e.stopPropagation()}>
+                      <Link
+                        href={`/workshop-portal/bookings/${b.id}`}
+                        style={{
+                          fontFamily: 'var(--font-heading), sans-serif',
+                          fontSize: '11px', color: '#FF9500', textDecoration: 'none',
+                          border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
+                          padding: '5px 12px', display: 'inline-block', fontWeight: 600,
+                          letterSpacing: '0.06em',
+                        }}
+                      >
+                        View
+                      </Link>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -344,8 +357,8 @@ function BookingsContent() {
               fontSize: '12px', color: '#6B6560',
             }}
           >
-            <span>Page {page} of {totalPages}</span>
-            <div style={{ display: 'flex', gap: 8 }}>
+            {!isMobile && <span>Page {page} of {totalPages}</span>}
+            <div style={{ display: 'flex', gap: 8, marginLeft: isMobile ? 'auto' : 0 }}>
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}

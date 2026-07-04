@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Search, X, Plus, TrendingUp, AlertCircle, CheckCircle, DollarSign } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Invoice = Tables<'invoices'>
 
@@ -33,6 +34,7 @@ function fmtDate(d: string | null) {
 }
 
 export default function InvoicesPage() {
+  const isMobile = useIsMobile()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -85,8 +87,8 @@ export default function InvoicesPage() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <div style={{ padding: isMobile ? 16 : 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#F0EDE8', margin: 0 }}>Invoices</h1>
           <p style={{ fontSize: '12px', color: '#6B6560', marginTop: 4 }}>
@@ -108,7 +110,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
         {[
           { label: 'Total Outstanding', value: fmtAmount(totalOutstanding), icon: TrendingUp, color: '#FFC107' },
           { label: 'Paid This Month', value: fmtAmount(totalPaidThisMonth), icon: CheckCircle, color: '#28C850' },
@@ -134,7 +136,7 @@ export default function InvoicesPage() {
 
       {/* Filter bar */}
       <div style={{ background: '#1E1C18', border: '1px solid #2A2420', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, alignItems: isMobile ? 'stretch' : 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <div style={{ position: 'relative', minWidth: 220, flex: 1 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#4A4540' }} />
             <input
@@ -187,7 +189,10 @@ export default function InvoicesPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#141210' }}>
-                {['Invoice #', 'Customer', 'Vehicle', 'Date', 'Due Date', 'Amount', 'Status', 'Actions'].map(h => (
+                {(isMobile
+                  ? ['Invoice #', 'Customer', 'Amount', 'Status']
+                  : ['Invoice #', 'Customer', 'Vehicle', 'Date', 'Due Date', 'Amount', 'Status', 'Actions']
+                ).map(h => (
                   <th
                     key={h}
                     style={{
@@ -204,11 +209,11 @@ export default function InvoicesPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
+                  <td colSpan={isMobile ? 4 : 8} style={{ padding: 40, textAlign: 'center', color: '#4A4540' }}>Loading…</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 48, textAlign: 'center' }}>
+                  <td colSpan={isMobile ? 4 : 8} style={{ padding: 48, textAlign: 'center' }}>
                     <DollarSign size={32} style={{ color: '#2A2420', marginBottom: 12 }} />
                     <div style={{ color: '#4A4540', fontSize: '14px' }}>No invoices found</div>
                     <div style={{ color: '#3A3430', fontSize: '12px', marginTop: 6 }}>Create invoices from completed bookings</div>
@@ -233,17 +238,23 @@ export default function InvoicesPage() {
                       <div style={{ fontWeight: 600, color: '#F0EDE8' }}>{inv.customer_name ?? '—'}</div>
                       {inv.customer_phone && <div style={{ fontSize: '11px', color: '#6B6560', marginTop: 2 }}>{inv.customer_phone}</div>}
                     </td>
-                    <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>
-                      {[inv.vehicle_year, inv.vehicle_make, inv.vehicle_model].filter(Boolean).join(' ') || '—'}
-                    </td>
-                    <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>
-                      {fmtDate(inv.created_at.split('T')[0])}
-                    </td>
-                    <td style={{ padding: '0 16px', height: 60, whiteSpace: 'nowrap' }}>
-                      <span style={{ color: inv.status === 'overdue' ? '#FF4444' : '#9A8E82' }}>
-                        {fmtDate(inv.due_date)}
-                      </span>
-                    </td>
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>
+                        {[inv.vehicle_year, inv.vehicle_make, inv.vehicle_model].filter(Boolean).join(' ') || '—'}
+                      </td>
+                    )}
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 60, color: '#9A8E82', whiteSpace: 'nowrap' }}>
+                        {fmtDate(inv.created_at.split('T')[0])}
+                      </td>
+                    )}
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 60, whiteSpace: 'nowrap' }}>
+                        <span style={{ color: inv.status === 'overdue' ? '#FF4444' : '#9A8E82' }}>
+                          {fmtDate(inv.due_date)}
+                        </span>
+                      </td>
+                    )}
                     <td style={{ padding: '0 16px', height: 60 }}>
                       <span style={{ fontSize: '14px', fontWeight: 700, color: '#F0EDE8' }}>
                         {fmtAmount(inv.total)}
@@ -261,33 +272,35 @@ export default function InvoicesPage() {
                         {inv.status}
                       </span>
                     </td>
-                    <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <Link
-                          href={`/workshop-portal/invoices/${inv.id}`}
-                          style={{
-                            fontSize: '12px', color: '#FF9500', textDecoration: 'none',
-                            border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
-                            padding: '4px 10px', fontWeight: 500,
-                          }}
-                        >
-                          View
-                        </Link>
-                        {inv.status !== 'paid' && (
-                          <button
-                            onClick={() => markPaid(inv.id)}
+                    {!isMobile && (
+                      <td style={{ padding: '0 16px', height: 60 }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Link
+                            href={`/workshop-portal/invoices/${inv.id}`}
                             style={{
-                              fontSize: '12px', color: '#28C850',
-                              border: '1px solid rgba(40,200,80,0.3)', borderRadius: 6,
+                              fontSize: '12px', color: '#FF9500', textDecoration: 'none',
+                              border: '1px solid rgba(255,149,0,0.3)', borderRadius: 6,
                               padding: '4px 10px', fontWeight: 500,
-                              background: 'none', cursor: 'pointer',
                             }}
                           >
-                            Mark Paid
-                          </button>
-                        )}
-                      </div>
-                    </td>
+                            View
+                          </Link>
+                          {inv.status !== 'paid' && (
+                            <button
+                              onClick={() => markPaid(inv.id)}
+                              style={{
+                                fontSize: '12px', color: '#28C850',
+                                border: '1px solid rgba(40,200,80,0.3)', borderRadius: 6,
+                                padding: '4px 10px', fontWeight: 500,
+                                background: 'none', cursor: 'pointer',
+                              }}
+                            >
+                              Mark Paid
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 )
               })}

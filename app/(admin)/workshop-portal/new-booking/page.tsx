@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
 import { ArrowLeft, CheckCircle, Search } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
+import { useIsMobile } from '@/lib/hooks'
 
 type Mechanic = Tables<'mechanics'>
 type Service = Tables<'services'>
@@ -45,6 +46,7 @@ function SelectWrap({ children }: { children: React.ReactNode }) {
 }
 
 function NewBookingForm() {
+  const isMobile = useIsMobile()
   const router = useRouter()
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -228,7 +230,7 @@ function NewBookingForm() {
   const availModels = form.vehicle_make ? (vehicleModels[form.vehicle_make] ?? []) : []
 
   return (
-    <div style={{ padding: 24, maxWidth: 900 }}>
+    <div style={{ padding: isMobile ? 16 : 24, maxWidth: 900 }}>
       <Link
         href="/workshop-portal/bookings"
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B6560', textDecoration: 'none', fontSize: '12px', marginBottom: 20 }}
@@ -240,7 +242,7 @@ function NewBookingForm() {
       <form onSubmit={submit}>
         <div style={card}>
           <div style={secTitle}>Customer Lookup</div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginBottom: searchedOnce ? 14 : 0 }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, alignItems: isMobile ? 'stretch' : 'flex-end', marginBottom: searchedOnce ? 14 : 0 }}>
             <div style={{ flex: 1 }}>
               <label style={lStyle}>Phone Number</label>
               <input
@@ -255,7 +257,7 @@ function NewBookingForm() {
               onClick={() => lookupCustomer()}
               disabled={looking || !lookupPhone.trim()}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 background: '#2A2420', color: '#F0EDE8', border: '1px solid #3A3430',
                 borderRadius: 8, padding: '10px 20px', fontSize: '13px', fontWeight: 600,
                 cursor: looking ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
@@ -301,14 +303,14 @@ function NewBookingForm() {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
 
           {/* Left column */}
           <div>
             {/* Customer */}
             <div style={card}>
               <div style={secTitle}>Customer Info</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={lStyle}>Full Name *</label>
                   <input value={form.customer_name} onChange={e => set('customer_name', e.target.value)} style={iStyle} placeholder="John Smith" required />
@@ -327,7 +329,7 @@ function NewBookingForm() {
             {/* Vehicle */}
             <div style={card}>
               <div style={secTitle}>Vehicle Info</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={lStyle}>Year</label>
                   <SelectWrap>
@@ -415,7 +417,7 @@ function NewBookingForm() {
             {/* Timing & Assignment */}
             <div style={card}>
               <div style={secTitle}>Timing & Assignment</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={lStyle}>Preferred Date</label>
                   <input
@@ -434,7 +436,7 @@ function NewBookingForm() {
                   </SelectWrap>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={lStyle}>Source</label>
                   <SelectWrap>
@@ -477,12 +479,12 @@ function NewBookingForm() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
           <button
             type="submit"
             disabled={submitting}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               background: submitting ? '#CC7700' : '#FF9500', color: '#0D0B08',
               border: 'none', borderRadius: 8, padding: '13px 24px',
               fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em',
@@ -495,7 +497,7 @@ function NewBookingForm() {
           <Link
             href="/workshop-portal/bookings"
             style={{
-              display: 'inline-flex', alignItems: 'center',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               background: 'none', border: '1px solid #2A2420', color: '#9A8E82',
               borderRadius: 8, padding: '13px 20px', fontSize: '13px', textDecoration: 'none',
             }}
