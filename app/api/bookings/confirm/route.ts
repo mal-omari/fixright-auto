@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateBookingConfirmedEmail } from '@/lib/emails/generateBookingConfirmed'
 
@@ -7,13 +7,15 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAdmin(req)
+    if (auth.response) return auth.response
+    const supabase = auth.supabase
+
     const { bookingId } = await req.json()
 
-    if (!bookingId) {
+    if (!bookingId || typeof bookingId !== 'string') {
       return NextResponse.json({ error: 'bookingId is required' }, { status: 400 })
     }
-
-    const supabase = await createClient()
 
     const { data: booking, error } = await supabase
       .from('bookings')
@@ -59,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error('Booking confirm email error:', e)
+    console.error('Booking confirm email error:', e instanceof Error ? e.message : 'unknown')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

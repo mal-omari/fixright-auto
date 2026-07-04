@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateReceiptEmail } from '@/lib/emails/generateReceiptEmail'
 
@@ -7,16 +7,15 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <onboarding
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAdmin(req)
+    if (auth.response) return auth.response
+    const supabase = auth.supabase
+
     const { invoiceId } = await req.json()
 
-    console.log('Receipt route hit, invoice id:', invoiceId)
-    console.log('Resend API key exists:', !!process.env.RESEND_API_KEY)
-
-    if (!invoiceId) {
+    if (!invoiceId || typeof invoiceId !== 'string') {
       return NextResponse.json({ error: 'invoiceId is required' }, { status: 400 })
     }
-
-    const supabase = await createClient()
 
     const { data: invoice, error } = await supabase
       .from('invoices')
@@ -24,10 +23,7 @@ export async function POST(req: NextRequest) {
       .eq('id', invoiceId)
       .single()
 
-    console.log('Customer email exists:', !!invoice?.customer_email)
-
     if (error || !invoice) {
-      console.error('Invoice fetch error:', error)
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
@@ -35,7 +31,7 @@ export async function POST(req: NextRequest) {
     const vehicle = [invoice.vehicle_year, invoice.vehicle_make, invoice.vehicle_model].filter(Boolean).join(' ') || '—'
 
     if (invoice.customer_email) {
-      const result = await resend.emails.send({
+      await resend.emails.send({
         from: FROM_ADDRESS,
         // TODO: change to ofomari59@gmail.com after domain verified
         to: ['12mfao@gmail.com'],
@@ -47,7 +43,6 @@ export async function POST(req: NextRequest) {
           paidDate,
         }),
       })
-      console.log('Resend receipt result:', JSON.stringify(result))
     }
 
     const { error: updateError } = await supabase
@@ -61,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, skipped: invoice.customer_email ? undefined : 'no customer email on file' })
   } catch (e) {
-    console.error('Invoice receipt error:', e)
+    console.error('Invoice receipt error:', e instanceof Error ? e.message : 'unknown')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

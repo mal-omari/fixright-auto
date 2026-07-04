@@ -1,3 +1,5 @@
+import { escapeHtml } from './escapeHtml'
+
 interface BookingConfirmedData {
   customerName: string
   serviceName?: string | null
@@ -23,9 +25,9 @@ function formatTime(timeStr?: string | null): string {
 }
 
 export function generateBookingConfirmedEmail(data: BookingConfirmedData): string {
-  const vehicle = [data.vehicleYear, data.vehicleMake, data.vehicleModel].filter(Boolean).join(' ') || '—'
+  const vehicle = escapeHtml([data.vehicleYear, data.vehicleMake, data.vehicleModel].filter(Boolean).join(' ')) || '—'
   const date = formatDate(data.confirmedDate || data.preferredDate)
-  const time = formatTime(data.confirmedTime || data.preferredTime)
+  const time = escapeHtml(formatTime(data.confirmedTime || data.preferredTime))
 
   return `
     <!DOCTYPE html>
@@ -40,17 +42,17 @@ export function generateBookingConfirmedEmail(data: BookingConfirmedData): strin
         <div style="text-align:center;margin-bottom:16px;">
           <span style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:rgba(255,149,0,0.12);color:#FF9500;font-size:28px;font-weight:bold;">&#10003;</span>
         </div>
-        <p style="color:#1A1714;font-size:15px;">Hi ${data.customerName},</p>
+        <p style="color:#1A1714;font-size:15px;">Hi ${escapeHtml(data.customerName)},</p>
         <p style="color:#1A1714;font-size:15px;">Great news! We've confirmed your appointment at FixRight Automotive.</p>
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Appointment Details</h2>
-        <p style="color:#1A1714;"><strong>Service:</strong> ${data.serviceName || '—'}</p>
+        <p style="color:#1A1714;"><strong>Service:</strong> ${escapeHtml(data.serviceName) || '—'}</p>
         <p style="color:#1A1714;"><strong>Vehicle:</strong> ${vehicle}</p>
         <p style="color:#1A1714;"><strong>Date:</strong> ${date}</p>
         <p style="color:#1A1714;"><strong>Time:</strong> ${time}</p>
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">What to Expect</h2>
-        ${data.estimatedHours ? `<p style="color:#1A1714;">Estimated time: ${data.estimatedHours} hours</p>` : ''}
+        ${data.estimatedHours ? `<p style="color:#1A1714;">Estimated time: ${escapeHtml(data.estimatedHours)} hours</p>` : ''}
         <p style="color:#1A1714;">Please arrive 5 minutes early.</p>
         <p style="color:#1A1714;">We'll call you if we need anything before your appointment.</p>
 

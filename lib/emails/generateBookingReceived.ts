@@ -1,3 +1,5 @@
+import { escapeHtml } from './escapeHtml'
+
 interface BookingReceivedData {
   customerName: string
   customerPhone: string
@@ -24,7 +26,7 @@ function formatTime(timeStr?: string | null): string {
 }
 
 export function generateBookingReceivedEmail(data: BookingReceivedData): string {
-  const vehicle = [data.vehicleYear, data.vehicleMake, data.vehicleModel].filter(Boolean).join(' ') || '—'
+  const vehicle = escapeHtml([data.vehicleYear, data.vehicleMake, data.vehicleModel].filter(Boolean).join(' ')) || '—'
 
   return `
     <!DOCTYPE html>
@@ -37,21 +39,21 @@ export function generateBookingReceivedEmail(data: BookingReceivedData): string 
       </div>
       <div style="background:#ffffff;padding:32px;max-width:600px;margin:0 auto;">
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:0;">Customer Information</h2>
-        <p style="color:#1A1714;"><strong>Name:</strong> ${data.customerName}</p>
-        <p style="color:#1A1714;"><strong>Phone:</strong> ${data.customerPhone}</p>
-        ${data.customerEmail ? `<p style="color:#1A1714;"><strong>Email:</strong> ${data.customerEmail}</p>` : ''}
+        <p style="color:#1A1714;"><strong>Name:</strong> ${escapeHtml(data.customerName)}</p>
+        <p style="color:#1A1714;"><strong>Phone:</strong> ${escapeHtml(data.customerPhone)}</p>
+        ${data.customerEmail ? `<p style="color:#1A1714;"><strong>Email:</strong> ${escapeHtml(data.customerEmail)}</p>` : ''}
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Vehicle</h2>
         <p style="color:#1A1714;"><strong>Vehicle:</strong> ${vehicle}</p>
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Service Requested</h2>
-        <p style="color:#1A1714;"><strong>Service:</strong> ${data.serviceName || '—'}</p>
-        ${data.notes ? `<p style="color:#1A1714;white-space:pre-line;"><strong>Notes:</strong> ${data.notes}</p>` : ''}
+        <p style="color:#1A1714;"><strong>Service:</strong> ${escapeHtml(data.serviceName) || '—'}</p>
+        ${data.notes ? `<p style="color:#1A1714;white-space:pre-line;"><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : ''}
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Preferred Timing</h2>
         <p style="color:#1A1714;"><strong>Date:</strong> ${formatDate(data.preferredDate)}</p>
-        <p style="color:#1A1714;"><strong>Time:</strong> ${formatTime(data.preferredTime)}</p>
-        ${data.source ? `<p style="color:#1A1714;"><strong>How they heard about us:</strong> ${data.source}</p>` : ''}
+        <p style="color:#1A1714;"><strong>Time:</strong> ${escapeHtml(formatTime(data.preferredTime))}</p>
+        ${data.source ? `<p style="color:#1A1714;"><strong>How they heard about us:</strong> ${escapeHtml(data.source)}</p>` : ''}
 
         <div style="margin-top:32px;text-align:center;">
           <a href="https://fixright-auto.vercel.app/workshop-portal/dashboard"

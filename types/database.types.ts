@@ -352,6 +352,23 @@ export type Database = {
       }
     }
     Functions: {
+      create_public_booking: {
+        Args: {
+          p_customer_email?: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_estimated_hours?: number
+          p_notes?: string
+          p_preferred_date?: string
+          p_preferred_time?: string
+          p_service_description?: string
+          p_source?: string
+          p_vehicle_make?: string
+          p_vehicle_model?: string
+          p_vehicle_year?: number
+        }
+        Returns: string
+      }
       find_or_create_customer: {
         Args: { p_email: string; p_name: string; p_phone: string }
         Returns: string
