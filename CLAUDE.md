@@ -143,8 +143,6 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 
 ## Still To Build
 - Admin page responsive fixes (mobile)
-- Contact form real submission (currently fake/no backend)
-- HTTP security headers in next.config.ts
 - /impeccable polish on public site
 - QuickBooks data import (waiting for Omar to get access)
 - Service reminders / automated emails
