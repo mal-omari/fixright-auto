@@ -179,3 +179,30 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-track { background: var(--color-bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-accent-amber); }
+
+/* Admin: stat card grid collapses to 2x2 below the desktop breakpoint */
+@media (max-width: 1023px) {
+  .admin-stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Admin: minimum touch target size for interactive controls */
+.admin-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Admin: invisible 44px hit area for small visual controls (e.g. sidebar toggle) */
+.admin-hit-slop-44 {
+  position: relative;
+}
+.admin-hit-slop-44::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}

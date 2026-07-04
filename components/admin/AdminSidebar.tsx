@@ -23,11 +23,10 @@ const NAV = [
 
 interface Props {
   isOpen: boolean
-  isMobile: boolean
   onToggle: () => void
 }
 
-export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
+export function AdminSidebar({ isOpen, onToggle }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [tooltip, setTooltip] = useState<{ label: string; y: number } | null>(null)
@@ -52,16 +51,15 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
         minWidth: W,
         maxWidth: W,
         background: 'linear-gradient(180deg, #0D0B08 0%, #141210 100%)',
-        minHeight: '100vh',
-        height: isMobile ? '100vh' : undefined,
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         flexShrink: 0,
         borderRight: '1px solid #1E1C18',
-        position: isMobile ? 'fixed' : 'relative',
+        position: 'fixed',
         left: 0,
         top: 0,
-        zIndex: isMobile ? 50 : undefined,
+        zIndex: 50,
         transition: 'width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease',
         overflow: 'hidden',
       }}
@@ -142,6 +140,7 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
         <button
           onClick={onToggle}
           aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          className="admin-hit-slop-44"
           style={{
             position: 'absolute',
             right: -12,
@@ -304,8 +303,9 @@ export function AdminSidebar({ isOpen, isMobile, onToggle }: Props) {
             fontSize: '12px',
             borderRadius: '6px',
             cursor: 'pointer',
-            width: isOpen ? '100%' : 40,
-            height: 40,
+            width: isOpen ? '100%' : 44,
+            height: 44,
+            minHeight: 44,
             transition: 'border-color 0.15s, color 0.15s',
           }}
           onMouseEnter={e => {

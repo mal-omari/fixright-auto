@@ -791,29 +791,31 @@ export default function InvoiceDetailPage() {
         {/* Labour */}
         <div style={{ marginBottom: 28 }}>
           <span style={sectionHead}>Labour</span>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: '#141210' }}>
-                <th style={colHeader}>Description</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Hours</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Rate / hr</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
-                <th style={{ ...colHeader, width: 32 }} />
-              </tr>
-            </thead>
-            <tbody>
-              {labourItems.map(item => (
-                <LabourRow key={item.id} item={item} onChange={updateLabour} onRemove={removeLabour} />
-              ))}
-              {labourItems.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: '16px 4px', color: '#4A4540', fontSize: '12px', fontStyle: 'italic' }}>
-                    No labour items yet
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ background: '#141210' }}>
+                  <th style={colHeader}>Description</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Hours</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Rate / hr</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
+                  <th style={{ ...colHeader, width: 32 }} />
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {labourItems.map(item => (
+                  <LabourRow key={item.id} item={item} onChange={updateLabour} onRemove={removeLabour} />
+                ))}
+                {labourItems.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '16px 4px', color: '#4A4540', fontSize: '12px', fontStyle: 'italic' }}>
+                      No labour items yet
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           <button
             onClick={addLabourItem}
             style={{
@@ -832,29 +834,31 @@ export default function InvoiceDetailPage() {
         {/* Parts */}
         <div style={{ paddingTop: 20, borderTop: '1px solid #2A2420' }}>
           <span style={sectionHead}>Parts</span>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: '#141210' }}>
-                <th style={colHeader}>Description</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Qty</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Unit Price</th>
-                <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
-                <th style={{ ...colHeader, width: 32 }} />
-              </tr>
-            </thead>
-            <tbody>
-              {partsItems.map(item => (
-                <PartsRow key={item.id} item={item} onChange={updateParts} onRemove={removeParts} />
-              ))}
-              {partsItems.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: '16px 4px', color: '#4A4540', fontSize: '12px', fontStyle: 'italic' }}>
-                    No parts items yet
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ background: '#141210' }}>
+                  <th style={colHeader}>Description</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Qty</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Unit Price</th>
+                  <th style={{ ...colHeader, textAlign: 'right' }}>Total</th>
+                  <th style={{ ...colHeader, width: 32 }} />
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {partsItems.map(item => (
+                  <PartsRow key={item.id} item={item} onChange={updateParts} onRemove={removeParts} />
+                ))}
+                {partsItems.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '16px 4px', color: '#4A4540', fontSize: '12px', fontStyle: 'italic' }}>
+                      No parts items yet
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           <button
             onClick={addPartsItem}
             style={{

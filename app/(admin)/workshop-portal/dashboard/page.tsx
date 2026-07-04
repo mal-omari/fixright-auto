@@ -173,7 +173,7 @@ export default function DashboardPage() {
     <div style={{ padding: 24, maxWidth: 1200 }}>
 
       {/* Metric cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         {METRIC_CARDS.map((card, i) => (
           <StatCard
             key={i}

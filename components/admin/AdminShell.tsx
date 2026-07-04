@@ -22,6 +22,8 @@ function getPageTitle(pathname: string): string {
   return 'Workshop Portal'
 }
 
+const MOBILE_BREAKPOINT = 1024
+
 function useDateTime() {
   const [dt, setDt] = useState<Date | null>(null)
   useEffect(() => {
@@ -67,7 +69,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       }
     )
 
-    const mobile = window.innerWidth < 768
+    const mobile = window.innerWidth < MOBILE_BREAKPOINT
     setIsMobile(mobile)
     if (mobile) {
       setSidebarOpen(false)
@@ -77,7 +79,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
 
     function handleResize() {
-      const m = window.innerWidth < 768
+      const m = window.innerWidth < MOBILE_BREAKPOINT
       setIsMobile(m)
       if (m) setSidebarOpen(false)
     }
@@ -91,7 +93,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => {
       const next = !prev
-      if (window.innerWidth >= 768) localStorage.setItem('fixright_sidebar_open', String(next))
+      if (window.innerWidth >= MOBILE_BREAKPOINT) localStorage.setItem('fixright_sidebar_open', String(next))
       return next
     })
   }, [])
@@ -114,8 +116,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     ? dt.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true })
     : ''
 
+  const contentOffset = isMobile ? 68 : (sidebarOpen ? 260 : 68)
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#1A1714' }}>
+    <div style={{ minHeight: '100vh', background: '#1A1714' }}>
       {/* Mobile backdrop */}
       {isMobile && sidebarOpen && (
         <div
@@ -128,15 +132,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      <AdminSidebar isOpen={sidebarOpen} isMobile={isMobile} onToggle={toggleSidebar} />
+      <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
       {/* Main area */}
       <div
         style={{
-          flex: 1,
+          marginLeft: contentOffset,
           display: 'flex',
           flexDirection: 'column',
+          minHeight: '100vh',
           minWidth: 0,
+          transition: 'margin-left 0.3s ease',
         }}
       >
         {/* Header bar */}
@@ -166,9 +172,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </span>
             )}
             <button
+              className="admin-touch-target"
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#6B6560', display: 'flex', alignItems: 'center', padding: 4,
+                color: '#6B6560', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
               <Bell size={18} />
