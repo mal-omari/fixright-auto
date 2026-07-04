@@ -18,10 +18,30 @@ const HOURS = [
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', phone: '', message: '' })
   const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSent(true)
+    setSubmitting(true)
+    setError(null)
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      if (!res.ok) throw new Error('Request failed')
+
+      setSent(true)
+      setForm({ name: '', phone: '', message: '' })
+    } catch {
+      setError('Something went wrong. Please call us at 519.471.9462')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const inputStyle: React.CSSProperties = {
@@ -167,10 +187,8 @@ export default function ContactPage() {
             {sent ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <div style={{ fontSize: '40px', marginBottom: '16px' }}>✓</div>
-                <p style={{ color: '#FF9500', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>Message received!</p>
-                <p style={{ color: '#9A8E82', fontSize: '14px' }}>
-                  We&apos;ll get back to you shortly. Or call us directly at{' '}
-                  <a href="tel:5194719462" style={{ color: '#FF9500', textDecoration: 'none' }}>519.471.9462</a>
+                <p style={{ color: '#FF9500', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>
+                  Message sent! Omar will call you back shortly.
                 </p>
               </div>
             ) : (
@@ -195,6 +213,7 @@ export default function ContactPage() {
                     onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
                     placeholder="519-555-0100"
                     type="tel"
+                    required
                     onFocus={e => (e.target.style.borderColor = '#FF9500')}
                     onBlur={e => (e.target.style.borderColor = '#3A3430')}
                   />
@@ -211,20 +230,26 @@ export default function ContactPage() {
                     onBlur={e => (e.target.style.borderColor = '#3A3430')}
                   />
                 </div>
+                {error && (
+                  <p style={{ color: '#EF4444', fontSize: '13px', margin: 0 }}>{error}</p>
+                )}
                 <button
                   type="submit"
+                  disabled={submitting}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     background: '#FF9500', color: '#111008', padding: '13px 24px',
                     fontSize: '13px', fontWeight: 700, letterSpacing: '0.12em',
-                    textTransform: 'uppercase', border: 'none', borderRadius: '3px', cursor: 'pointer',
+                    textTransform: 'uppercase', border: 'none', borderRadius: '3px',
+                    cursor: submitting ? 'default' : 'pointer',
+                    opacity: submitting ? 0.7 : 1,
                     transition: 'background 0.2s',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#E08400')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '#FF9500')}
+                  onMouseEnter={e => { if (!submitting) e.currentTarget.style.background = '#E08400' }}
+                  onMouseLeave={e => { if (!submitting) e.currentTarget.style.background = '#FF9500' }}
                 >
                   <Send size={14} />
-                  Send Message
+                  {submitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             )}
