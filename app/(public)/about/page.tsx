@@ -2,23 +2,24 @@ import GarageScene from "@/components/GarageScene";
 import Footer from "@/components/Footer";
 import BookingCTA from "@/components/BookingCTA";
 import { Button } from "@/components/ui/Button";
+import { yearsInBusiness } from "@/lib/utils";
 import { Heart, Star, DollarSign, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About Us | FixRight Automotive London Ontario",
-  description: "Meet Omar and the FixRight team — 28 years of honest auto care in London Ontario. Family owned, Ontario certified, no pressure.",
+  description: `Meet Omar and the FixRight team — ${yearsInBusiness()} years of honest auto care in London Ontario. Family owned, Ontario certified, no pressure.`,
 };
 
 const values = [
   { icon: Heart, label: 'Honest', desc: 'We tell you exactly what your vehicle needs — nothing more, nothing less.' },
-  { icon: Star, label: 'Experienced', desc: '28+ years of hands-on expertise across all makes and models.' },
+  { icon: Star, label: 'Experienced', desc: `${yearsInBusiness()}+ years of hands-on expertise across all makes and models.` },
   { icon: DollarSign, label: 'Fair', desc: 'Dealership-level work at independent shop prices. Always transparent.' },
   { icon: ShieldCheck, label: 'Reliable', desc: 'Every repair backed by our workmanship guarantee. We stand behind our work.' },
 ]
 
 const team = [
-  { initials: 'OM', name: 'Omar', role: 'Owner & Head Mechanic', years: '28 yrs experience' },
+  { initials: 'OM', name: 'Omar', role: 'Owner & Head Mechanic', years: `${yearsInBusiness()} yrs experience` },
   { initials: 'TM', name: 'Team Member', role: 'Senior Technician', years: '12 yrs experience' },
   { initials: 'TM', name: 'Team Member', role: 'Service Technician', years: '8 yrs experience' },
 ]
@@ -69,10 +70,10 @@ export default function AboutPage() {
                 Hi, I&apos;m Omar — owner of FixRight Automotive. I started this garage over two decades ago with one belief: people deserve an auto shop they can actually trust.
               </p>
               <p>
-                With over 28 years of combined experience, our team treats every vehicle like it&apos;s our own. We&apos;ve built lasting relationships with thousands of London families because we do what we say, charge what we quote, and stand behind every repair.
+                With over {yearsInBusiness()} years of combined experience, our team treats every vehicle like it&apos;s our own. We&apos;ve built lasting relationships with thousands of London families because we do what we say, charge what we quote, and stand behind every repair.
               </p>
               <p style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>
-                No pressure. No runaround. Just results you can count on — for 28 years and counting.
+                No pressure. No runaround. Just results you can count on — for {yearsInBusiness()} years and counting.
               </p>
             </div>
             <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>

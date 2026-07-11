@@ -7,7 +7,7 @@ Strategic + visual design specs live at project root:
 
 ## What This Is
 A futuristic automotive service website for FixRight Automotive, London Ontario.
-Owner: Omar (ofomari59@gmail.com). Shop has 3 mechanics, 28 years experience, 
+Owner: Omar (ofomari59@gmail.com). Shop has 3 mechanics, founded 1996,
 6,000+ customers. Family owned and operated.
 Public site at fixrightautomotive.com (live!)
 Admin portal at /workshop-portal (hidden from public, not linked anywhere on site).
@@ -169,6 +169,7 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 13. Email from address is 'FixRight Auto <bookings@fixrightautomotive.com>'; new booking
     notifications go to ofomari59@gmail.com, receipts/confirmations go to the customer
 14. Never block booking submission due to email failure — catch Resend errors silently
+15. Founded 1996, years in business calculated dynamically via yearsInBusiness() helper, never hardcode a year count
 
 ## Environment Variables Required
 - NEXT_PUBLIC_SUPABASE_URL

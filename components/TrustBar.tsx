@@ -3,12 +3,13 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { yearsInBusiness } from '@/lib/utils'
 
 const stats = [
-  { value: 28, suffix: '', label: 'Years Experience' },
+  { value: yearsInBusiness(), suffix: '', label: 'Years Experience' },
   { value: 6000, suffix: '+', label: 'Vehicles Serviced' },
   { value: 3, suffix: '', label: 'Certified Mechanics' },
-  { value: 19, suffix: '', label: 'Years in London' },
+  { value: yearsInBusiness(), suffix: '', label: 'Years in London' },
   { value: null, display: 'FAMILY', label: 'Owned & Operated' },
 ]
 

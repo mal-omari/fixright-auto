@@ -5,6 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone } from 'lucide-react'
 import Link from 'next/link'
+import { yearsInBusiness } from '@/lib/utils'
 
 // ── Dust particles ──────────────────────────────────────────────────────────
 const generateDust = (count: number) => Array.from({ length: count }, (_, i) => ({
@@ -374,7 +375,7 @@ export default function Hero() {
             marginBottom: 8,
           }}
         >
-          28 Years. 6,000+ Vehicles. One Promise.
+          {yearsInBusiness()} Years. 6,000+ Vehicles. One Promise.
         </p>
 
         <p

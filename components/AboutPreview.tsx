@@ -5,6 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { yearsInBusiness } from '@/lib/utils'
 
 export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -45,7 +46,7 @@ export default function AboutPreview() {
           MEET YOUR MECHANIC
         </h2>
         <p className="about-preview-item mx-auto mb-4 max-w-2xl text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-          Hi, I&apos;m Omar — owner of FixRight Automotive. With over 28 years of combined experience, our team treats every vehicle like it&apos;s our own. We built this garage on a simple promise: honest work, fair prices, and respect for our customers.
+          Hi, I&apos;m Omar — owner of FixRight Automotive. With over {yearsInBusiness()} years of combined experience, our team treats every vehicle like it&apos;s our own. We built this garage on a simple promise: honest work, fair prices, and respect for our customers.
         </p>
         <p className="about-preview-item mb-8 text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
           No pressure. No runaround. Just results you can count on.
