@@ -22,6 +22,7 @@
   --radius-admin: 12px;
   --font-heading: var(--font-barlow);
   --font-body: var(--font-inter);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -50,6 +51,18 @@ h1, h2, h3 {
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Keyboard focus is always visible; amber is the system's one focus color */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent-amber);
+  outline-offset: 2px;
 }
 
 /* Float for SVG garage scene */
@@ -174,6 +187,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .svg-float,
+  .light-flicker,
+  .lift-glow,
+  .hud-blink,
+  .hud-pulse,
+  .gauge-pulse {
+    animation: none;
+  }
+}
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg-primary); }

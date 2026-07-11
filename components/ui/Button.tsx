@@ -4,7 +4,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from 
 import styles from './Button.module.css'
 
 type ButtonVariant = 'primary' | 'ghost'
-type ButtonSize = 'default' | 'compact'
+type ButtonSize = 'default' | 'compact' | 'large'
 
 interface CommonProps {
   variant?: ButtonVariant

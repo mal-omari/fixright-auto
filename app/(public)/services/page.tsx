@@ -1,7 +1,7 @@
 import ServicesGrid from "@/components/services/ServicesGrid";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
-import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 
 export default function ServicesPage() {
   return (
-    <main style={{ background: '#1E1A16' }}>
+    <main style={{ background: 'var(--color-bg-primary)' }}>
       {/* Page hero banner */}
       <section
         style={{
-          background: '#2A2420',
-          borderBottom: '1px solid #3A3430',
+          background: 'var(--color-bg-surface)',
+          borderBottom: '1px solid var(--color-border)',
           padding: '80px 24px 60px',
           textAlign: 'center',
         }}
@@ -28,7 +28,7 @@ export default function ServicesPage() {
             fontSize: '11px',
             letterSpacing: '0.35em',
             textTransform: 'uppercase',
-            color: '#FF9500',
+            color: 'var(--color-accent-amber)',
             marginBottom: '16px',
           }}
         >
@@ -37,16 +37,16 @@ export default function ServicesPage() {
         <h1
           style={{
             fontSize: 'clamp(2.5rem, 6vw, 56px)',
-            fontWeight: 800,
-            color: '#F0EDE8',
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
             letterSpacing: '0.04em',
             marginBottom: '16px',
           }}
         >
           OUR SERVICES
         </h1>
-        <div style={{ width: '48px', height: '3px', background: '#FF9500', borderRadius: '2px', margin: '0 auto 20px' }} />
-        <p style={{ color: '#9A8E82', fontSize: '16px', maxWidth: '520px', margin: '0 auto', lineHeight: '1.7' }}>
+        <div style={{ width: '48px', height: '3px', background: 'var(--color-accent-amber)', margin: '0 auto 20px' }} />
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '16px', maxWidth: '520px', margin: '0 auto', lineHeight: '1.7' }}>
           Dealership-quality work at honest prices. Every service backed by our workmanship guarantee.
         </p>
       </section>
@@ -57,36 +57,22 @@ export default function ServicesPage() {
       {/* Diagnostic CTA */}
       <section
         style={{
-          background: '#2A2420',
-          borderTop: '1px solid #3A3430',
-          borderBottom: '1px solid #3A3430',
+          background: 'var(--color-bg-surface)',
+          borderTop: '1px solid var(--color-border)',
+          borderBottom: '1px solid var(--color-border)',
           padding: '56px 24px',
           textAlign: 'center',
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#F0EDE8', marginBottom: '12px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '12px' }}>
           Not sure what you need?
         </h2>
-        <p style={{ color: '#9A8E82', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
+        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
           Book a diagnostic and we&apos;ll tell you exactly what&apos;s going on — no charge for the assessment.
         </p>
-        <Link
-          href="/book"
-          style={{
-            display: 'inline-block',
-            background: '#FF9500',
-            color: '#111008',
-            padding: '14px 36px',
-            fontSize: '13px',
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            textDecoration: 'none',
-            borderRadius: '3px',
-          }}
-        >
+        <Button href="/book" size="large">
           Book a Diagnostic
-        </Link>
+        </Button>
       </section>
 
       <BookingCTA />

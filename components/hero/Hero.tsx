@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone } from 'lucide-react'
@@ -23,50 +23,53 @@ const HUD_DEFS = [
     style: { top: '8%', left: '24px' } as React.CSSProperties,
     label: 'DIAGNOSTIC SYSTEM',
     values: ['● ACTIVE', '● SCANNING...', '● ALL SYSTEMS OK', '● READY'],
-    dotColor: '#00FF88',
-    valueColor: '#FF9500',
+    valueColor: 'var(--color-accent-amber)',
   },
   {
     id: 'brake',
     style: { top: '8%', right: '24px' } as React.CSSProperties,
     label: 'BRAKE SYSTEM',
     values: ['▓▓▓▓▓▓░░ 78%', '▓▓▓▓░░░░ 52%', '▓▓▓▓▓▓▓░ 91%'],
-    dotColor: null,
-    valueColor: '#FF9500',
+    valueColor: 'var(--color-accent-amber)',
   },
   {
     id: 'temp',
     style: { top: '45%', left: '24px', transform: 'translateY(-50%)' } as React.CSSProperties,
     label: 'ENGINE TEMP',
     values: ['94°C ↑', '87°C', '101°C ↑↑', '91°C'],
-    dotColor: null,
-    valueColor: '#FF9500',
+    valueColor: 'var(--color-accent-amber)',
   },
   {
     id: 'oil',
     style: { top: '45%', right: '24px', transform: 'translateY(-50%)' } as React.CSSProperties,
     label: 'OIL LIFE',
     values: ['12% — SERVICE DUE', '8% — SERVICE DUE', '24% — MONITOR'],
-    dotColor: null,
-    valueColor: '#EF4444',
+    valueColor: 'var(--color-danger)',
   },
   {
     id: 'battery',
     style: { bottom: '120px', left: '24px' } as React.CSSProperties,
     label: 'BATTERY',
     values: ['12.6V ✓', '12.4V ✓', '12.8V ✓'],
-    dotColor: null,
-    valueColor: '#00D4FF',
+    valueColor: 'var(--color-accent-cyan)',
   },
   {
     id: 'jobs',
     style: { bottom: '120px', right: '24px' } as React.CSSProperties,
     label: "TODAY'S JOBS",
     values: ['3 VEHICLES', '4 VEHICLES', '2 VEHICLES'],
-    dotColor: null,
-    valueColor: '#FF9500',
+    valueColor: 'var(--color-accent-amber)',
   },
 ]
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const subscribeReducedMotion = (onChange: () => void) => {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  mq.addEventListener('change', onChange)
+  return () => mq.removeEventListener('change', onChange)
+}
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -77,14 +80,19 @@ export default function Hero() {
   )
   const [hudVisible, setHudVisible] = useState(false)
   const [dust, setDust] = useState(() => generateDust(20))
+  const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false)
   const lastMoveRef = useRef(0)
 
-  // Reduce particle count on low-end devices
+  // Scale particle count to the device; deferred a frame to avoid a
+  // synchronous setState inside the effect body.
   useEffect(() => {
-    const isLowEnd = navigator.hardwareConcurrency <= 4 ||
-      !window.matchMedia('(min-device-pixel-ratio: 2)').matches
-    setDust(generateDust(isLowEnd ? 20 : 70))
-  }, [])
+    if (reduced) return
+    const raf = requestAnimationFrame(() => {
+      const isLowEnd = navigator.hardwareConcurrency <= 4 || window.devicePixelRatio < 2
+      setDust(generateDust(isLowEnd ? 20 : 70))
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [reduced])
 
   // ── Spotlight + magnetic ────────────────────────────────────────────────
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -112,39 +120,54 @@ export default function Hero() {
         const s = (100 - dist) / 100
         gsap.to(btn, { x: dx * s * 0.35, y: dy * s * 0.35, duration: 0.3, ease: 'power2.out' })
       } else {
-        gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' })
+        gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'power3.out' })
       }
     }
   }, [])
 
   const handleMouseLeave = useCallback(() => {
     const btn = bookBtnRef.current
-    if (btn) gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' })
+    if (btn) gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'power3.out' })
     if (spotlightRef.current) spotlightRef.current.style.background = 'transparent'
   }, [])
 
   // ── GSAP setup ─────────────────────────────────────────────────────────
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
-    const ctx = gsap.context(() => {
-      gsap.fromTo('.hero-label', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 })
-      gsap.fromTo('.hero-title-1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 })
-      gsap.fromTo('.hero-title-2', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.5 })
-      gsap.fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.7 })
-      gsap.fromTo('.hero-body', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.9 })
-      gsap.fromTo('.hero-cta-1', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.1 })
-      gsap.fromTo('.hero-cta-2', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.2 })
-      gsap.fromTo('.hero-scroll', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: 1.5 })
-    }, sectionRef)
+    const reduced = prefersReducedMotion()
 
-    setTimeout(() => setHudVisible(true), 1300)
+    // Content is visible by default. The entrance tweens are created inside a
+    // rAF callback so environments where rAF never ticks (headless renderers,
+    // crawlers) never apply the hidden from-state and ship a blank hero.
+    let ctx: gsap.Context | undefined
+    let raf = 0
+    if (!reduced) {
+      raf = requestAnimationFrame(() => {
+        ctx = gsap.context(() => {
+          gsap.fromTo('.hero-label', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 })
+          gsap.fromTo('.hero-title-1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 })
+          gsap.fromTo('.hero-title-2', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.5 })
+          gsap.fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.7 })
+          gsap.fromTo('.hero-body', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.9 })
+          gsap.fromTo('.hero-cta-1', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.1 })
+          gsap.fromTo('.hero-cta-2', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 1.2 })
+          gsap.fromTo('.hero-scroll', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: 1.5 })
+        }, sectionRef)
+      })
+    }
+
+    const hudTimer = setTimeout(() => setHudVisible(true), reduced ? 0 : 1300)
 
     const section = sectionRef.current
-    section?.addEventListener('mousemove', handleMouseMove)
-    section?.addEventListener('mouseleave', handleMouseLeave)
+    if (!reduced) {
+      section?.addEventListener('mousemove', handleMouseMove)
+      section?.addEventListener('mouseleave', handleMouseLeave)
+    }
 
     return () => {
-      ctx.revert()
+      cancelAnimationFrame(raf)
+      ctx?.revert()
+      clearTimeout(hudTimer)
       section?.removeEventListener('mousemove', handleMouseMove)
       section?.removeEventListener('mouseleave', handleMouseLeave)
     }
@@ -173,7 +196,8 @@ export default function Hero() {
       style={{
         position: 'relative',
         width: '100%',
-        height: '100vh',
+        height: 'calc(100svh - 64px)',
+        minHeight: '560px',
         overflow: 'hidden',
         backgroundImage: "url('https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=1920&q=80')",
         backgroundSize: 'cover',
@@ -215,19 +239,21 @@ export default function Hero() {
       />
 
       {/* Scan beam */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 4 }}>
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(255,149,0,0.4), transparent)',
-            animation: 'scanBeam 8s linear infinite',
-            opacity: 0.6,
-          }}
-        />
-      </div>
+      {!reduced && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 4 }}>
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,149,0,0.4), transparent)',
+              animation: 'scanBeam 8s linear infinite',
+              opacity: 0.6,
+            }}
+          />
+        </div>
+      )}
 
       {/* HUD elements */}
       {HUD_DEFS.map((h, idx) => (
@@ -250,7 +276,7 @@ export default function Hero() {
             transition: `opacity 0.4s ease ${idx * 0.15}s`,
           }}
         >
-          <div style={{ color: '#9A8E82', fontSize: '10px', marginBottom: 4, letterSpacing: '0.1em' }}>
+          <div style={{ color: 'var(--color-text-secondary)', fontSize: '10px', marginBottom: 4, letterSpacing: '0.1em' }}>
             {h.label}
           </div>
           <div style={{ fontWeight: 700, color: h.valueColor, transition: 'opacity 0.3s' }}>
@@ -261,7 +287,7 @@ export default function Hero() {
 
       {/* Dust particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 6 }}>
-        {dust.map(p => (
+        {!reduced && dust.map(p => (
           <div
             key={p.id}
             style={{
@@ -271,7 +297,7 @@ export default function Hero() {
               width: `${p.size}px`,
               height: `${p.size}px`,
               borderRadius: '50%',
-              background: '#FF9500',
+              background: 'var(--color-accent-amber)',
               opacity: 0,
               ['--drift' as string]: p.drift,
               animation: `dustRise ${p.duration} ease-out ${p.delay} infinite`,
@@ -283,7 +309,7 @@ export default function Hero() {
       {/* Bottom fade */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-48"
-        style={{ background: 'linear-gradient(to top, #1E1A16, transparent)', zIndex: 7 }}
+        style={{ background: 'linear-gradient(to top, var(--color-bg-primary), transparent)', zIndex: 7 }}
       />
 
       {/* Content */}
@@ -294,18 +320,17 @@ export default function Hero() {
           className="hero-label mb-4"
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-            opacity: 0,
           }}
         >
-          <div style={{ flex: 1, maxWidth: 60, height: 1, background: '#FF9500', opacity: 0.5 }} />
+          <div style={{ flex: 1, maxWidth: 60, height: 1, background: 'var(--color-accent-amber)', opacity: 0.5 }} />
           <span style={{
             fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: '#FF9500',
+            textTransform: 'uppercase', color: 'var(--color-accent-amber)',
           }}>
             LONDON ONTARIO&apos;S TRUSTED GARAGE
           </span>
-          <div style={{ flex: 1, maxWidth: 60, height: 1, background: '#FF9500', opacity: 0.5 }} />
+          <div style={{ flex: 1, maxWidth: 60, height: 1, background: 'var(--color-accent-amber)', opacity: 0.5 }} />
         </div>
 
         {/* Main headline */}
@@ -316,11 +341,10 @@ export default function Hero() {
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: 'clamp(64px, 10vw, 96px)',
               fontWeight: 700,
-              color: '#F0EDE8',
+              color: 'var(--color-text-primary)',
               letterSpacing: '0.05em',
               lineHeight: 0.95,
               textTransform: 'uppercase',
-              opacity: 0,
             }}
           >
             FIXRIGHT
@@ -331,11 +355,10 @@ export default function Hero() {
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: 'clamp(64px, 10vw, 96px)',
               fontWeight: 300,
-              color: '#F0EDE8',
+              color: 'var(--color-text-primary)',
               letterSpacing: '0.05em',
               lineHeight: 0.95,
               textTransform: 'uppercase',
-              opacity: 0,
               marginBottom: 24,
             }}
           >
@@ -347,8 +370,8 @@ export default function Hero() {
           className="hero-sub"
           style={{
             fontFamily: 'var(--font-body), sans-serif',
-            fontSize: '18px', fontWeight: 400, color: '#9A8E82',
-            marginBottom: 8, opacity: 0,
+            fontSize: '18px', fontWeight: 400, color: 'var(--color-text-secondary)',
+            marginBottom: 8,
           }}
         >
           28 Years. 6,000+ Vehicles. One Promise.
@@ -358,8 +381,8 @@ export default function Hero() {
           className="hero-body"
           style={{
             fontFamily: 'var(--font-body), sans-serif',
-            fontSize: '16px', fontWeight: 300, color: '#7A7068',
-            marginBottom: 40, opacity: 0,
+            fontSize: '16px', fontWeight: 300, color: 'var(--color-text-muted)',
+            marginBottom: 40,
           }}
         >
           Honest diagnostics. Fair pricing. No dealer markup.
@@ -372,7 +395,7 @@ export default function Hero() {
             className="hero-cta-1"
             style={{
               display: 'inline-block',
-              background: '#FF9500',
+              background: 'var(--color-accent-amber)',
               color: '#111111',
               padding: '0 36px',
               height: 48,
@@ -386,10 +409,9 @@ export default function Hero() {
               borderRadius: '3px',
               transition: 'background 0.2s',
               willChange: 'transform',
-              opacity: 0,
             }}
-            onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#E08400')}
-            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#FF9500')}
+            onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = 'var(--color-accent-amber-hover)')}
+            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = 'var(--color-accent-amber)')}
           >
             Book Your Service
           </Link>
@@ -401,8 +423,8 @@ export default function Hero() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: '1px solid #3A3430',
-              color: '#F0EDE8',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-primary)',
               padding: '0 32px',
               height: 48,
               fontFamily: 'var(--font-heading), sans-serif',
@@ -412,16 +434,15 @@ export default function Hero() {
               textDecoration: 'none',
               borderRadius: '3px',
               transition: 'border-color 0.2s, background 0.2s',
-              opacity: 0,
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLAnchorElement
-              el.style.borderColor = '#FF9500'
+              el.style.borderColor = 'var(--color-accent-amber)'
               el.style.background = 'rgba(255,149,0,0.08)'
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLAnchorElement
-              el.style.borderColor = '#3A3430'
+              el.style.borderColor = 'var(--color-border)'
               el.style.background = 'transparent'
             }}
           >
@@ -432,11 +453,11 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="hero-scroll absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={{ zIndex: 10, opacity: 0 }}>
-        <span style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9A8E82' }}>
+      <div className="hero-scroll absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={{ zIndex: 10 }}>
+        <span style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
           Scroll
         </span>
-        <div className="h-10 w-px" style={{ background: 'linear-gradient(to bottom, #9A8E82, transparent)' }} />
+        <div className="h-10 w-px" style={{ background: 'linear-gradient(to bottom, var(--color-text-secondary), transparent)' }} />
       </div>
     </section>
   )

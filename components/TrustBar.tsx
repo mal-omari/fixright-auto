@@ -18,37 +18,49 @@ export default function TrustBar() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
-    const ctx = gsap.context(() => {
-      stats.forEach((stat, i) => {
-        if (stat.value === null) return
-        const el = countRefs.current[i]
-        if (!el) return
-        const obj = { n: 0 }
-        gsap.to(obj, {
-          n: stat.value,
-          duration: 2.5,
-          ease: 'power2.out',
-          onUpdate() {
-            el.textContent = Math.round(obj.n).toLocaleString() + (stat.suffix ?? '')
-          },
-          scrollTrigger: {
-            trigger: barRef.current,
-            start: 'top 85%',
-            once: true,
-          },
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    // Final values are server-rendered; the count-up is set up inside a rAF
+    // callback so rAF-less environments (crawlers, headless renderers) keep
+    // the real numbers instead of freezing at zero.
+    let ctx: gsap.Context | undefined
+    const raf = requestAnimationFrame(() => {
+      ctx = gsap.context(() => {
+        stats.forEach((stat, i) => {
+          if (stat.value === null) return
+          const el = countRefs.current[i]
+          if (!el) return
+          el.textContent = `0${stat.suffix ?? ''}`
+          const obj = { n: 0 }
+          gsap.to(obj, {
+            n: stat.value,
+            duration: 2.5,
+            ease: 'power2.out',
+            onUpdate() {
+              el.textContent = Math.round(obj.n).toLocaleString() + (stat.suffix ?? '')
+            },
+            scrollTrigger: {
+              trigger: barRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          })
         })
-      })
-    }, barRef)
-    return () => ctx.revert()
+      }, barRef)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      ctx?.revert()
+    }
   }, [])
 
   return (
     <div
       ref={barRef}
       style={{
-        background: '#2A2420',
-        borderTop: '1px solid #3A3430',
-        borderBottom: '1px solid #3A3430',
+        background: 'var(--color-bg-surface)',
+        borderTop: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--color-border)',
       }}
     >
       <div className="mx-auto max-w-6xl px-6 py-12">
@@ -58,11 +70,11 @@ export default function TrustBar() {
               <span
                 ref={el => { countRefs.current[i] = el }}
                 className="text-3xl font-bold md:text-4xl"
-                style={{ color: '#FF9500', fontVariantNumeric: 'tabular-nums' }}
+                style={{ color: 'var(--color-accent-amber)', fontVariantNumeric: 'tabular-nums' }}
               >
-                {stat.value !== null ? `0${stat.suffix ?? ''}` : (stat.display ?? '')}
+                {stat.value !== null ? stat.value.toLocaleString() + (stat.suffix ?? '') : (stat.display ?? '')}
               </span>
-              <span className="text-xs tracking-[0.18em] uppercase" style={{ color: '#9A8E82' }}>
+              <span className="text-xs tracking-[0.18em] uppercase" style={{ color: 'var(--color-text-secondary)' }}>
                 {stat.label}
               </span>
             </div>

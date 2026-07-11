@@ -27,7 +27,7 @@ export default function Footer() {
     <footer
       style={{
         background: '#111008',
-        borderTop: '1px solid #2A2420',
+        borderTop: '1px solid var(--color-bg-surface)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -49,63 +49,67 @@ export default function Footer() {
           {/* Brand column */}
           <div>
             <div className="mb-4">
-              <span style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '0.05em', color: '#FF9500' }}>
+              <span style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--color-accent-amber)' }}>
                 FIXRIGHT
               </span>
-              <span style={{ display: 'block', fontSize: '11px', fontWeight: 500, letterSpacing: '0.25em', color: '#F0EDE8', marginTop: '2px' }}>
+              <span style={{ display: 'block', fontFamily: 'var(--font-heading), sans-serif', fontSize: '11px', fontWeight: 500, letterSpacing: '0.25em', color: 'var(--color-text-primary)', marginTop: '2px' }}>
                 AUTOMOTIVE
               </span>
             </div>
-            <p className="mb-4 text-sm leading-relaxed" style={{ color: '#9A8E82' }}>
+            <p className="mb-4 text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
               London Ontario&apos;s trusted independent garage since 1996.
             </p>
-            <p className="mb-6 text-sm italic font-medium" style={{ color: '#FF9500' }}>
+            <p className="mb-6 text-sm italic font-medium" style={{ color: 'var(--color-accent-amber)' }}>
               &quot;Honest work. Fair prices. Every time.&quot;
             </p>
-            {/* Social placeholders */}
+            {/* Social placeholders — non-interactive until real profiles exist */}
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button
+              <span
+                role="img"
+                aria-label="Facebook page coming soon"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '36px', height: '36px', borderRadius: '4px',
-                  background: '#2A2420', border: '1px solid #3A3430',
-                  color: '#9A8E82', cursor: 'default',
+                  width: '36px', height: '36px', borderRadius: 'var(--radius-sharp)',
+                  background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-secondary)',
                 }}
                 title="Facebook (coming soon)"
               >
                 <FacebookIcon />
-              </button>
-              <button
+              </span>
+              <span
+                role="img"
+                aria-label="Google profile coming soon"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '36px', height: '36px', borderRadius: '4px',
-                  background: '#2A2420', border: '1px solid #3A3430',
-                  color: '#9A8E82', cursor: 'default',
+                  width: '36px', height: '36px', borderRadius: 'var(--radius-sharp)',
+                  background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-secondary)',
                 }}
                 title="Google (coming soon)"
               >
                 <GoogleIcon />
-              </button>
+              </span>
             </div>
           </div>
 
           {/* Hours & Contact */}
           <div>
-            <h3 className="mb-5 text-xs font-bold tracking-[0.2em] uppercase" style={{ color: '#FF9500' }}>
+            <h3 className="mb-5 text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--color-accent-amber)' }}>
               Hours & Contact
             </h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Clock size={14} color="#9A8E82" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div className="text-sm" style={{ color: '#9A8E82' }}>
+                <Clock size={14} color="var(--color-text-secondary)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   <div>Mon – Fri: 8:00am – 5:00pm</div>
                   <div>Saturday: 9:00am – 2:00pm</div>
                   <div>Sunday: Closed</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin size={14} color="#9A8E82" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div className="text-sm" style={{ color: '#9A8E82' }}>
+                <MapPin size={14} color="var(--color-text-secondary)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   2117 Aldersbrook Rd<br />
                   (At Wonderland Rd &amp; Fanshawe Park Rd)<br />
                   London ON N6G 3X1
@@ -114,9 +118,9 @@ export default function Footer() {
               <a
                 href="tel:5194719462"
                 className="flex items-center gap-3 text-sm transition-colors"
-                style={{ color: '#9A8E82', textDecoration: 'none' }}
-                onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#FF9500')}
-                onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#9A8E82')}
+                style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+                onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent-amber)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-secondary)')}
               >
                 <Phone size={14} />
                 519.471.9462
@@ -126,7 +130,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="mb-5 text-xs font-bold tracking-[0.2em] uppercase" style={{ color: '#FF9500' }}>
+            <h3 className="mb-5 text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--color-accent-amber)' }}>
               Quick Links
             </h3>
             <ul className="space-y-3">
@@ -141,9 +145,9 @@ export default function Footer() {
                   <Link
                     href={link.href}
                     className="text-sm transition-colors"
-                    style={{ color: '#9A8E82', textDecoration: 'none' }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#FF9500')}
-                    onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#9A8E82')}
+                    style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+                    onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent-amber)')}
+                    onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-secondary)')}
                   >
                     {link.label}
                   </Link>
@@ -156,12 +160,12 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-center sm:flex-row"
-          style={{ borderColor: '#2A2420' }}
+          style={{ borderColor: 'var(--color-bg-surface)' }}
         >
-          <p className="text-xs" style={{ color: '#4A4540' }}>
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             © {new Date().getFullYear()} FixRight Automotive. All rights reserved.
           </p>
-          <p className="text-xs" style={{ color: '#4A4540' }}>
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             London, Ontario · Est. 1996
           </p>
         </div>

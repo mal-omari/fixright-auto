@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
-    <main style={{ background: '#1E1A16' }}>
+    <main style={{ background: 'var(--color-bg-primary)' }}>
       <Hero />
       <TrustBar />
       <WhyFixRight />

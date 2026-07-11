@@ -25,6 +25,11 @@
   border-color: var(--color-danger);
 }
 
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .input {
     transition: none;

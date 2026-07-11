@@ -7,15 +7,16 @@ export default function GarageScene() {
       style={{
         aspectRatio: '4 / 3',
         background: '#0E0E0E',
-        border: '1px solid #2A2A2A',
-        borderRadius: '2px',
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-sharp)',
       }}
     >
       <svg
         viewBox="0 0 500 375"
         xmlns="http://www.w3.org/2000/svg"
         className="svg-float h-full w-full"
-        aria-label="Illustrated garage scene"
+        role="img"
+        aria-label="Illustrated garage scene: a car raised on a lift under an amber shop light, with passing diagnostic and safety certification checks"
       >
         {/* Background subtle grid */}
         {Array.from({ length: 9 }, (_, i) => (

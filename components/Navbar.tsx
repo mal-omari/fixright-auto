@@ -48,10 +48,21 @@ export default function Navbar() {
     setMenuOpen(false)
   }, [pathname])
 
+  // Close the mobile menu on Escape
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
+
   // Magnetic effect on Book Now button
   const handleNavMouseMove = (e: React.MouseEvent) => {
     const btn = bookBtnRef.current
     if (!btn) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const br = btn.getBoundingClientRect()
     const bx = br.left + br.width / 2
     const by = br.top + br.height / 2
@@ -78,7 +89,7 @@ export default function Navbar() {
           background: 'rgba(30,26,22,0.95)',
           backdropFilter: 'blur(12px) saturate(180%)',
           WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-          borderBottom: '1px solid #3A3430',
+          borderBottom: '1px solid var(--color-border)',
           transform: visible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.3s ease',
           willChange: 'transform',
@@ -106,13 +117,13 @@ export default function Navbar() {
           >
             <span style={{
               fontFamily: 'var(--font-heading), sans-serif',
-              fontSize: '20px', fontWeight: 700, letterSpacing: '0.05em', color: '#FF9500', lineHeight: 1,
+              fontSize: '20px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--color-accent-amber)', lineHeight: 1,
             }}>
               FIXRIGHT
             </span>
             <span style={{
               fontFamily: 'var(--font-heading), sans-serif',
-              fontSize: '11px', fontWeight: 400, letterSpacing: '0.2em', color: '#F0EDE8', lineHeight: 1,
+              fontSize: '11px', fontWeight: 400, letterSpacing: '0.2em', color: 'var(--color-text-primary)', lineHeight: 1,
             }}>
               AUTOMOTIVE
             </span>
@@ -128,7 +139,7 @@ export default function Navbar() {
                   href={link.href}
                   style={{
                     fontFamily: 'var(--font-heading), sans-serif',
-                    color: active ? '#F0EDE8' : '#9A8E82',
+                    color: active ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
                     textDecoration: 'none',
                     fontSize: '13px',
                     fontWeight: 500,
@@ -137,10 +148,10 @@ export default function Navbar() {
                     transition: 'color 0.2s',
                     position: 'relative',
                     paddingBottom: '2px',
-                    borderBottom: active ? '2px solid #FF9500' : '2px solid transparent',
+                    borderBottom: active ? '2px solid var(--color-accent-amber)' : '2px solid transparent',
                   }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#F0EDE8' }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#9A8E82' }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-primary)' }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-secondary)' }}
                 >
                   {link.label}
                 </Link>
@@ -156,7 +167,7 @@ export default function Navbar() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
-                color: '#FF9500',
+                color: 'var(--color-accent-amber)',
                 textDecoration: 'none',
                 fontFamily: 'var(--font-heading), sans-serif',
                 fontSize: '13px',
@@ -167,7 +178,7 @@ export default function Navbar() {
               <Phone size={13} />
               519.471.9462
             </a>
-            <div style={{ width: '1px', height: '18px', background: '#3A3430' }} />
+            <div style={{ width: '1px', height: '18px', background: 'var(--color-border)' }} />
             <Button ref={bookBtnRef} href="/book" size="compact">
               Book Now
             </Button>
@@ -177,8 +188,9 @@ export default function Navbar() {
           <button
             onClick={() => setMenuOpen(true)}
             className="flex lg:hidden"
-            style={{ background: 'none', border: 'none', color: '#FF9500', cursor: 'pointer', padding: '8px' }}
+            style={{ background: 'none', border: 'none', color: 'var(--color-accent-amber)', cursor: 'pointer', padding: '10px' }}
             aria-label="Open menu"
+            aria-expanded={menuOpen}
           >
             <Menu size={24} />
           </button>
@@ -210,15 +222,16 @@ export default function Navbar() {
           >
             <button
               aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
               style={{
                 position: 'absolute',
-                top: '20px',
-                right: '24px',
+                top: '14px',
+                right: '18px',
                 background: 'none',
                 border: 'none',
-                color: '#FF9500',
+                color: 'var(--color-accent-amber)',
                 cursor: 'pointer',
-                padding: '8px',
+                padding: '10px',
               }}
             >
               <X size={24} />
@@ -241,12 +254,12 @@ export default function Navbar() {
                       fontWeight: 600,
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
-                      color: '#F0EDE8',
+                      color: 'var(--color-text-primary)',
                       textDecoration: 'none',
                       transition: 'color 0.2s',
                     }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#FF9500')}
-                    onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = '#F0EDE8')}
+                    onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent-amber)')}
+                    onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-primary)')}
                   >
                     {link.label.toUpperCase()}
                   </Link>
@@ -268,7 +281,7 @@ export default function Navbar() {
                 alignItems: 'center',
               }}
             >
-              <div style={{ width: '100%', height: '1px', background: '#3A3430', marginBottom: '32px' }} />
+              <div style={{ width: '100%', height: '1px', background: 'var(--color-border)', marginBottom: '32px' }} />
               <Button href="/book" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '16px 0', fontSize: '14px' }}>
                 Book Your Appointment
               </Button>
@@ -280,7 +293,7 @@ export default function Navbar() {
                   gap: '8px',
                   marginTop: '24px',
                   fontFamily: 'var(--font-heading), sans-serif',
-                  color: '#FF9500',
+                  color: 'var(--color-accent-amber)',
                   textDecoration: 'none',
                   fontSize: '16px',
                   fontWeight: 500,

@@ -17,16 +17,21 @@ interface Service {
   iconColor: string
 }
 
+// Icon accents follow DESIGN.md: amber is the working color; cyan is reserved
+// for the diagnostic signal; gold marks certification. No other hues.
 const services: Service[] = [
-  { icon: Wrench,      name: 'Oil Change',               description: 'Full synthetic or conventional oil changes with filter replacement and fluid top-up.',                       iconBg: 'rgba(255,149,0,0.12)', iconColor: '#FF9500' },
-  { icon: Activity,    name: 'Brake Service',             description: 'Pads, rotors, calipers, and brake fluid flush. We inspect the full brake system.',                          iconBg: 'rgba(239,68,68,0.12)', iconColor: '#EF4444' },
-  { icon: Settings,    name: 'Engine & Transmission',     description: 'Complete engine diagnostics, repair, and full transmission service by certified technicians.',             iconBg: 'rgba(74,158,255,0.12)', iconColor: '#4A9EFF' },
-  { icon: Thermometer, name: 'Heating & A/C',             description: 'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',         iconBg: 'rgba(0,212,255,0.12)', iconColor: '#00D4FF' },
-  { icon: Zap,         name: 'Electrical & Diagnostics',  description: 'OBD-II scanning, starter, alternator, ignition, and complete electrical diagnostics.',                     iconBg: 'rgba(232,197,71,0.12)', iconColor: '#E8C547' },
-  { icon: RotateCcw,   name: 'Tire Services',             description: 'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',          iconBg: 'rgba(74,222,128,0.12)', iconColor: '#4ADE80' },
-  { icon: ShieldCheck, name: 'Safety Certification',      description: 'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',                      iconBg: 'rgba(167,139,250,0.12)', iconColor: '#A78BFA' },
-  { icon: Layers,      name: 'Body & Rust Work',          description: 'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',    iconBg: 'rgba(251,146,60,0.12)', iconColor: '#FB923C' },
+  { icon: Wrench,      name: 'Oil Change',               description: 'Full synthetic or conventional oil changes with filter replacement and fluid top-up.',                       iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
+  { icon: Activity,    name: 'Brake Service',             description: 'Pads, rotors, calipers, and brake fluid flush. We inspect the full brake system.',                          iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
+  { icon: Settings,    name: 'Engine & Transmission',     description: 'Complete engine diagnostics, repair, and full transmission service by certified technicians.',             iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
+  { icon: Thermometer, name: 'Heating & A/C',             description: 'Full HVAC diagnostics, refrigerant recharge, and climate control repair. Ready for every season.',         iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
+  { icon: Zap,         name: 'Electrical & Diagnostics',  description: 'OBD-II scanning, starter, alternator, ignition, and complete electrical diagnostics.',                     iconBg: 'rgba(0,212,255,0.1)',  iconColor: 'var(--color-accent-cyan)' },
+  { icon: RotateCcw,   name: 'Tire Services',             description: 'Tire sales, installation, rotation, and repair. Right tires at fair prices, installed properly.',          iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
+  { icon: ShieldCheck, name: 'Safety Certification',      description: 'Ontario MTO safety inspections to keep your vehicle road-legal and fully compliant.',                      iconBg: 'rgba(232,197,71,0.12)', iconColor: 'var(--color-accent-gold)' },
+  { icon: Layers,      name: 'Body & Rust Work',          description: 'Rust removal, underbody protection, undercoating, and accident repair to restore structural integrity.',    iconBg: 'rgba(255,149,0,0.12)', iconColor: 'var(--color-accent-amber)' },
 ]
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function ServiceCard({ service }: { service: Service }) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -34,7 +39,7 @@ function ServiceCard({ service }: { service: Service }) {
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current
-    if (!card) return
+    if (!card || prefersReducedMotion()) return
     const rect = card.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
     const cy = rect.top + rect.height / 2
@@ -55,7 +60,7 @@ function ServiceCard({ service }: { service: Service }) {
 
   const handleMouseEnter = useCallback(() => {
     const card = cardRef.current
-    if (!card) return
+    if (!card || prefersReducedMotion()) return
     card.style.animation = 'rumble 0.3s ease-out 1'
   }, [])
 
@@ -99,12 +104,12 @@ function ServiceCard({ service }: { service: Service }) {
           style={{
             fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em',
-            textTransform: 'uppercase', color: '#F0EDE8', marginBottom: 4,
+            textTransform: 'uppercase', color: 'var(--color-text-primary)', marginBottom: 4,
           }}
         >
           {service.name}
         </h3>
-        <p style={{ fontSize: '12px', fontWeight: 400, color: '#9A8E82', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
           {service.description}
         </p>
       </div>
@@ -117,33 +122,30 @@ export default function ServicesGrid() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.service-card',
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1, y: 0, duration: 0.65, stagger: { each: 0.08 }, ease: 'power2.out',
-          scrollTrigger: { trigger: gridRef.current, start: 'top 78%', once: true },
-        }
-      )
-    }, gridRef)
-    return () => ctx.revert()
+    if (prefersReducedMotion()) return
+    let ctx: gsap.Context | undefined
+    const raf = requestAnimationFrame(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.service-card',
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1, y: 0, duration: 0.65, stagger: { each: 0.08 }, ease: 'power2.out',
+            scrollTrigger: { trigger: gridRef.current, start: 'top 78%', once: true },
+          }
+        )
+      }, gridRef)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      ctx?.revert()
+    }
   }, [])
 
   return (
-    <section id="services" style={{ background: '#1E1A16' }} className="px-6 py-24">
+    <section id="services" style={{ background: 'var(--color-bg-primary)' }} className="px-6 py-24">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 text-center">
-          <h2 style={{
-            fontFamily: 'var(--font-heading), sans-serif',
-            fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 600,
-            letterSpacing: '0.05em', textTransform: 'uppercase', color: '#F0EDE8',
-          }}>
-            OUR SERVICES
-          </h2>
-          <div className="mx-auto mt-4 h-1 w-16" style={{ background: '#FF9500', borderRadius: '1px' }} />
-        </div>
-        <div ref={gridRef} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div ref={gridRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service, i) => (
             <ServiceCard key={i} service={service} />
           ))}

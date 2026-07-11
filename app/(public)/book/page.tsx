@@ -97,10 +97,10 @@ function getTodayEastern(): string {
 function inputStyle(hasError?: boolean): React.CSSProperties {
   return {
     width: '100%',
-    background: '#1E1A16',
-    border: `1px solid ${hasError ? '#FF4444' : '#3A3430'}`,
+    background: 'var(--color-bg-primary)',
+    border: `1px solid ${hasError ? 'var(--color-danger)' : 'var(--color-border)'}`,
     borderRadius: '3px',
-    color: '#F0EDE8',
+    color: 'var(--color-text-primary)',
     padding: '12px 14px',
     fontSize: '14px',
     outline: 'none',
@@ -120,7 +120,7 @@ function labelStyle(): React.CSSProperties {
     fontWeight: 600,
     letterSpacing: '0.1em',
     textTransform: 'uppercase' as const,
-    color: '#9A8E82',
+    color: 'var(--color-text-secondary)',
   }
 }
 
@@ -259,23 +259,23 @@ export default function BookPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-6 py-24" style={{ background: '#1E1A16' }}>
+      <div className="flex min-h-screen items-center justify-center px-6 py-24" style={{ background: 'var(--color-bg-primary)' }}>
         <div className="mx-auto max-w-md text-center">
           <div className="mb-6 flex justify-center">
-            <CheckCircle size={72} color="#FF9500" strokeWidth={1} />
+            <CheckCircle size={72} color="var(--color-accent-amber)" strokeWidth={1} />
           </div>
-          <h1 className="mb-4 text-3xl" style={{ color: '#F0EDE8', fontFamily: 'var(--font-heading), sans-serif', fontWeight: 700 }}>
+          <h1 className="mb-4 text-3xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-heading), sans-serif', fontWeight: 700 }}>
             BOOKING RECEIVED!
           </h1>
-          <p className="mb-6 leading-relaxed" style={{ color: '#9A8E82' }}>
+          <p className="mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             Thanks {form.firstName}! We&apos;ll call you within the hour to confirm your appointment.
           </p>
-          <div className="mb-8 rounded p-4" style={{ background: '#2A2420', border: '1px solid #3A3430' }}>
-            <p className="text-sm" style={{ color: '#9A8E82' }}>Questions? Call us directly:</p>
+          <div className="mb-8 rounded p-4" style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Questions? Call us directly:</p>
             <a
               href="tel:5194719462"
               className="mt-1 flex items-center justify-center gap-2 text-xl font-bold"
-              style={{ color: '#FF9500', textDecoration: 'none' }}
+              style={{ color: 'var(--color-accent-amber)', textDecoration: 'none' }}
             >
               <Phone size={20} />
               519.471.9462
@@ -284,7 +284,7 @@ export default function BookPage() {
           <Link
             href="/"
             style={{
-              display: 'inline-block', background: '#FF9500', color: '#111008',
+              display: 'inline-block', background: 'var(--color-accent-amber)', color: '#111008',
               padding: '12px 28px',
               fontFamily: 'var(--font-heading), sans-serif',
               fontWeight: 600, fontSize: '13px',
@@ -302,25 +302,25 @@ export default function BookPage() {
   const availableModels = form.make ? (vehicleModels[form.make] ?? []) : []
 
   return (
-    <div className="min-h-screen px-6 py-24" style={{ background: '#1E1A16' }}>
+    <div className="min-h-screen px-6 py-24" style={{ background: 'var(--color-bg-primary)' }}>
       <div className="mx-auto max-w-xl">
         {/* Header */}
         <div className="mb-10 text-center">
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: '#FF9500', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: 'var(--color-accent-amber)', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
               FIXRIGHT{' '}
             </span>
-            <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: '#F0EDE8', fontSize: '13px', fontWeight: 400, letterSpacing: '0.2em' }}>
+            <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: 'var(--color-text-primary)', fontSize: '13px', fontWeight: 400, letterSpacing: '0.2em' }}>
               AUTOMOTIVE
             </span>
           </Link>
           <h1 className="mt-6" style={{
             fontFamily: 'var(--font-heading), sans-serif',
-            fontSize: '28px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em',
+            fontSize: '28px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>
             Book a Service
           </h1>
-          <p className="mt-2 text-sm" style={{ color: '#9A8E82' }}>
+          <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             Fill in the form below — we&apos;ll confirm by phone within the hour.
           </p>
         </div>
@@ -334,54 +334,55 @@ export default function BookPage() {
                 style={{
                   fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: i === step ? '#FF9500' : i < step ? '#9A8E82' : '#4A4540',
+                  color: i === step ? 'var(--color-accent-amber)' : i < step ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
                 }}
               >
                 {label}
               </span>
             ))}
           </div>
-          <div style={{ height: '3px', background: '#2A2420', borderRadius: '2px' }}>
+          <div style={{ height: '3px', background: 'var(--color-bg-surface)' }}>
             <div
               style={{
                 height: '100%',
-                width: `${(step / (STEPS.length - 1)) * 100}%`,
-                background: '#FF9500',
-                borderRadius: '2px',
-                transition: 'width 0.3s ease',
+                width: '100%',
+                transform: `scaleX(${step / (STEPS.length - 1)})`,
+                transformOrigin: 'left',
+                background: 'var(--color-accent-amber)',
+                transition: 'transform 0.3s ease',
               }}
             />
           </div>
         </div>
 
         {/* Form card */}
-        <form onSubmit={handleSubmit} style={{ background: '#2A2420', border: '1px solid #3A3430', borderRadius: '3px', padding: '32px' }}>
+        <form onSubmit={handleSubmit} style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)', borderRadius: '3px', padding: '32px' }}>
 
           {/* Step 1 — Contact */}
           {step === 0 && (
             <div>
-              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact Info</h2>
+              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact Info</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label style={labelStyle()} htmlFor="firstName">First Name *</label>
                   <Input id="firstName" error={!!errors.firstName} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="John" maxLength={MAX.name} aria-invalid={!!errors.firstName} aria-describedby={errors.firstName ? 'firstName-error' : undefined} />
-                  {errors.firstName && <p id="firstName-error" role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.firstName}</p>}
+                  {errors.firstName && <p id="firstName-error" role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.firstName}</p>}
                 </div>
                 <div>
                   <label style={labelStyle()} htmlFor="lastName">Last Name *</label>
                   <Input id="lastName" error={!!errors.lastName} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Smith" maxLength={MAX.name} aria-invalid={!!errors.lastName} aria-describedby={errors.lastName ? 'lastName-error' : undefined} />
-                  {errors.lastName && <p id="lastName-error" role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.lastName}</p>}
+                  {errors.lastName && <p id="lastName-error" role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.lastName}</p>}
                 </div>
               </div>
               <div className="mt-4">
                 <label style={labelStyle()} htmlFor="phone">Phone Number *</label>
                 <Input id="phone" error={!!errors.phone} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="519-555-0100" type="tel" maxLength={MAX.phone} aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'phone-error' : undefined} />
-                {errors.phone && <p id="phone-error" role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.phone}</p>}
+                {errors.phone && <p id="phone-error" role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.phone}</p>}
               </div>
               <div className="mt-4">
                 <label style={labelStyle()} htmlFor="email">Email (optional)</label>
                 <Input id="email" error={!!errors.email} value={form.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" type="email" maxLength={MAX.email} aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined} />
-                {errors.email && <p id="email-error" role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.email}</p>}
+                {errors.email && <p id="email-error" role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.email}</p>}
               </div>
             </div>
           )}
@@ -389,7 +390,7 @@ export default function BookPage() {
           {/* Step 2 — Vehicle */}
           {step === 1 && (
             <div>
-              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vehicle Info</h2>
+              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vehicle Info</h2>
 
               {!form.useCustomVehicle ? (
                 <>
@@ -398,25 +399,25 @@ export default function BookPage() {
                       <label style={labelStyle()} htmlFor="year">Year *</label>
                       <div style={{ position: 'relative' }}>
                         <select id="year" style={{ ...inputStyle(!!errors.year), paddingRight: '36px', cursor: 'pointer' }} value={form.year} aria-invalid={!!errors.year}
-                          onChange={e => set('year', e.target.value)} onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.year ? '#FF4444' : '#3A3430')}>
+                          onChange={e => set('year', e.target.value)} onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = errors.year ? 'var(--color-danger)' : 'var(--color-border)')}>
                           <option value="">Year</option>
                           {vehicleYears.map(y => <option key={y} value={String(y)}>{y}</option>)}
                         </select>
-                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9A8E82', fontSize: '10px' }}>▼</div>
+                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-text-secondary)', fontSize: '10px' }}>▼</div>
                       </div>
-                      {errors.year && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.year}</p>}
+                      {errors.year && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.year}</p>}
                     </div>
                     <div>
                       <label style={labelStyle()} htmlFor="make">Make *</label>
                       <div style={{ position: 'relative' }}>
                         <select id="make" style={{ ...inputStyle(!!errors.make), paddingRight: '36px', cursor: 'pointer' }} value={form.make} aria-invalid={!!errors.make}
-                          onChange={e => set('make', e.target.value)} onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.make ? '#FF4444' : '#3A3430')}>
+                          onChange={e => set('make', e.target.value)} onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = errors.make ? 'var(--color-danger)' : 'var(--color-border)')}>
                           <option value="">Make</option>
                           {vehicleMakes.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9A8E82', fontSize: '10px' }}>▼</div>
+                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-text-secondary)', fontSize: '10px' }}>▼</div>
                       </div>
-                      {errors.make && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.make}</p>}
+                      {errors.make && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.make}</p>}
                     </div>
                     <div>
                       <label style={labelStyle()} htmlFor="model">Model *</label>
@@ -425,17 +426,17 @@ export default function BookPage() {
                           id="model"
                           style={{ ...inputStyle(!!errors.model), paddingRight: '36px', cursor: form.make ? 'pointer' : 'not-allowed', opacity: form.make ? 1 : 0.5 }}
                           value={form.model} onChange={e => set('model', e.target.value)} disabled={!form.make} aria-invalid={!!errors.model}
-                          onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.model ? '#FF4444' : '#3A3430')}>
+                          onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = errors.model ? 'var(--color-danger)' : 'var(--color-border)')}>
                           <option value="">Model</option>
                           {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9A8E82', fontSize: '10px' }}>▼</div>
+                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-text-secondary)', fontSize: '10px' }}>▼</div>
                       </div>
-                      {errors.model && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.model}</p>}
+                      {errors.model && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.model}</p>}
                     </div>
                   </div>
                   <button type="button" onClick={() => set('useCustomVehicle', true)}
-                    style={{ marginTop: '12px', background: 'none', border: 'none', padding: 0, color: '#FF9500', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,149,0,0.4)' }}>
+                    style={{ marginTop: '12px', background: 'none', border: 'none', padding: 0, color: 'var(--color-accent-amber)', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,149,0,0.4)' }}>
                     Don&apos;t see your vehicle? Just describe it below
                   </button>
                 </>
@@ -446,24 +447,24 @@ export default function BookPage() {
                       <label style={labelStyle()} htmlFor="year">Year *</label>
                       <div style={{ position: 'relative' }}>
                         <select id="year" style={{ ...inputStyle(!!errors.year), paddingRight: '36px', cursor: 'pointer' }} value={form.year} aria-invalid={!!errors.year}
-                          onChange={e => set('year', e.target.value)} onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.year ? '#FF4444' : '#3A3430')}>
+                          onChange={e => set('year', e.target.value)} onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = errors.year ? 'var(--color-danger)' : 'var(--color-border)')}>
                           <option value="">Year</option>
                           {vehicleYears.map(y => <option key={y} value={String(y)}>{y}</option>)}
                         </select>
-                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9A8E82', fontSize: '10px' }}>▼</div>
+                        <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-text-secondary)', fontSize: '10px' }}>▼</div>
                       </div>
-                      {errors.year && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.year}</p>}
+                      {errors.year && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.year}</p>}
                     </div>
                   </div>
                   <div>
                     <label style={labelStyle()} htmlFor="customVehicle">Vehicle Description *</label>
                     <input id="customVehicle" style={{ ...inputStyle(!!errors.customVehicle), wordBreak: 'break-word' }} value={form.customVehicle} onChange={e => set('customVehicle', e.target.value)}
                       placeholder="e.g. 2008 Ford F-150 SuperCrew" maxLength={MAX.customVehicle} aria-invalid={!!errors.customVehicle}
-                      onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = errors.customVehicle ? '#FF4444' : '#3A3430')} />
-                    {errors.customVehicle && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.customVehicle}</p>}
+                      onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = errors.customVehicle ? 'var(--color-danger)' : 'var(--color-border)')} />
+                    {errors.customVehicle && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.customVehicle}</p>}
                   </div>
                   <button type="button" onClick={() => set('useCustomVehicle', false)}
-                    style={{ marginTop: '10px', background: 'none', border: 'none', padding: 0, color: '#9A8E82', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>
+                    style={{ marginTop: '10px', background: 'none', border: 'none', padding: 0, color: 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>
                     ← Use dropdown instead
                   </button>
                 </>
@@ -477,7 +478,7 @@ export default function BookPage() {
                 <label style={labelStyle()} htmlFor="issue">Known Issues / Description</label>
                 <textarea id="issue" style={{ ...inputStyle(), resize: 'vertical', minHeight: '100px' }} value={form.issue}
                   onChange={e => set('issue', e.target.value)} placeholder="Describe any symptoms or what the car is doing..." maxLength={MAX.issue}
-                  onFocus={e => (e.target.style.borderColor = '#FF9500')} onBlur={e => (e.target.style.borderColor = '#3A3430')} />
+                  onFocus={e => (e.target.style.borderColor = 'var(--color-accent-amber)')} onBlur={e => (e.target.style.borderColor = 'var(--color-border)')} />
               </div>
             </div>
           )}
@@ -485,8 +486,8 @@ export default function BookPage() {
           {/* Step 3 — Service */}
           {step === 2 && (
             <div>
-              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select a Service</h2>
-              {errors.service && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginBottom: '12px' }}>{errors.service}</p>}
+              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select a Service</h2>
+              {errors.service && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginBottom: '12px' }}>{errors.service}</p>}
               <div className="grid gap-3 sm:grid-cols-2">
                 {SERVICES.map(svc => {
                   const selected = form.service === svc
@@ -497,10 +498,10 @@ export default function BookPage() {
                       onClick={() => set('service', svc)}
                       style={{
                         textAlign: 'left', padding: '14px 16px',
-                        background: selected ? 'rgba(255,149,0,0.1)' : '#1E1A16',
-                        border: `1px solid ${selected ? '#FF9500' : '#3A3430'}`,
+                        background: selected ? 'rgba(255,149,0,0.1)' : 'var(--color-bg-primary)',
+                        border: `1px solid ${selected ? 'var(--color-accent-amber)' : 'var(--color-border)'}`,
                         borderRadius: '3px',
-                        color: selected ? '#FF9500' : '#9A8E82',
+                        color: selected ? 'var(--color-accent-amber)' : 'var(--color-text-secondary)',
                         fontSize: '13px', fontWeight: selected ? 600 : 400,
                         cursor: 'pointer', transition: 'all 0.15s', width: '100%',
                         height: '52px', display: 'flex', alignItems: 'center',
@@ -517,23 +518,23 @@ export default function BookPage() {
           {/* Step 4 — Timing */}
           {step === 3 && (
             <div>
-              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Timing</h2>
+              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Timing</h2>
               <div className="mb-6">
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#FF9500' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', fontFamily: 'var(--font-heading), sans-serif', fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-accent-amber)' }}>
                   <CalendarDays size={16} /> Select Your Preferred Date
                 </label>
                 <Input
                   id="preferredDate"
                   error={!!errors.preferredDate}
                   aria-invalid={!!errors.preferredDate}
-                  style={{ height: '56px', fontSize: '15px', background: '#141210', paddingRight: '14px' }}
+                  style={{ height: '56px', fontSize: '15px', paddingRight: '14px' }}
                   value={form.preferredDate} onChange={e => set('preferredDate', e.target.value)} type="date" min={today} />
-                {errors.preferredDate && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginTop: '4px' }}>{errors.preferredDate}</p>}
-                <p style={{ fontSize: '12px', color: '#9A8E82', marginTop: '6px' }}>We&apos;ll confirm the exact time when we call you.</p>
+                {errors.preferredDate && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.preferredDate}</p>}
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>We&apos;ll confirm the exact time when we call you.</p>
               </div>
               <div className="mb-4">
                 <label style={labelStyle()}>Preferred Time *</label>
-                {errors.preferredTime && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginBottom: '8px' }}>{errors.preferredTime}</p>}
+                {errors.preferredTime && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginBottom: '8px' }}>{errors.preferredTime}</p>}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                   {TIME_OPTIONS.map(opt => {
                     const selected = form.preferredTime === opt.value
@@ -544,12 +545,12 @@ export default function BookPage() {
                           padding: '16px 12px', textAlign: 'center',
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                           background: selected ? 'rgba(255,149,0,0.12)' : '#1E1C18',
-                          border: `${selected ? '2px' : '1px'} solid ${selected ? '#FF9500' : '#3A3430'}`,
+                          border: `${selected ? '2px' : '1px'} solid ${selected ? 'var(--color-accent-amber)' : 'var(--color-border)'}`,
                           borderRadius: '3px', cursor: 'pointer', transition: 'background 0.2s, border-color 0.2s',
                         }}>
-                        <Icon size={28} color="#FF9500" />
-                        <div style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '14px', fontWeight: 600, color: selected ? '#FF9500' : '#F0EDE8' }}>{opt.label}</div>
-                        <div style={{ fontSize: '12px', color: '#9A8E82' }}>{opt.sub}</div>
+                        <Icon size={28} color="var(--color-accent-amber)" />
+                        <div style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '14px', fontWeight: 600, color: selected ? 'var(--color-accent-amber)' : 'var(--color-text-primary)' }}>{opt.label}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{opt.sub}</div>
                       </button>
                     )
                   })}
@@ -557,20 +558,20 @@ export default function BookPage() {
               </div>
               <div>
                 <label style={labelStyle()}>How did you hear about us? *</label>
-                {errors.source && <p role="alert" style={{ color: '#FF4444', fontSize: '12px', marginBottom: '8px' }}>{errors.source}</p>}
+                {errors.source && <p role="alert" style={{ color: 'var(--color-danger)', fontSize: '12px', marginBottom: '8px' }}>{errors.source}</p>}
                 <div className="flex flex-wrap gap-2">
                   {SOURCE_OPTIONS.map(opt => {
                     const selected = form.source === opt
                     return (
                       <button key={opt} type="button" onClick={() => set('source', opt)}
                         style={{
-                          padding: '8px 16px', fontSize: '12px',
+                          padding: '8px 16px', minHeight: '44px', fontSize: '12px',
                           fontFamily: 'var(--font-heading), sans-serif',
                           fontWeight: selected ? 600 : 500,
-                          background: selected ? 'rgba(255,149,0,0.1)' : '#1E1A16',
-                          border: `1px solid ${selected ? '#FF9500' : '#3A3430'}`,
+                          background: selected ? 'rgba(255,149,0,0.1)' : 'var(--color-bg-primary)',
+                          border: `1px solid ${selected ? 'var(--color-accent-amber)' : 'var(--color-border)'}`,
                           borderRadius: '3px',
-                          color: selected ? '#FF9500' : '#9A8E82',
+                          color: selected ? 'var(--color-accent-amber)' : 'var(--color-text-secondary)',
                           cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em', textTransform: 'uppercase',
                         }}>
                         {opt}
@@ -585,7 +586,7 @@ export default function BookPage() {
           {/* Step 5 — Confirm */}
           {step === 4 && (
             <div>
-              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: '#F0EDE8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confirm Your Booking</h2>
+              <h2 className="mb-6" style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confirm Your Booking</h2>
               <div className="space-y-4">
                 {[
                   { label: 'Name', value: `${form.firstName} ${form.lastName}` },
@@ -599,16 +600,16 @@ export default function BookPage() {
                   { label: 'Time', value: TIME_OPTIONS.find(t => t.value === form.preferredTime)?.label ?? '—' },
                   { label: 'Heard via', value: form.source },
                 ].map(row => (
-                  <div key={row.label} className="flex gap-4" style={{ borderBottom: '1px solid #2A2420', paddingBottom: '10px' }}>
-                    <span style={{ minWidth: '90px', flexShrink: 0, fontFamily: 'var(--font-heading), sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9A8E82' }}>
+                  <div key={row.label} className="flex gap-4" style={{ borderBottom: '1px solid var(--color-bg-surface)', paddingBottom: '10px' }}>
+                    <span style={{ minWidth: '90px', flexShrink: 0, fontFamily: 'var(--font-heading), sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
                       {row.label}
                     </span>
-                    <span style={{ fontSize: '14px', color: '#F0EDE8', wordBreak: 'break-word', overflowWrap: 'anywhere', minWidth: 0 }}>{row.value}</span>
+                    <span style={{ fontSize: '14px', color: 'var(--color-text-primary)', wordBreak: 'break-word', overflowWrap: 'anywhere', minWidth: 0 }}>{row.value}</span>
                   </div>
                 ))}
               </div>
               {submitError && (
-                <p role="alert" className="mt-4 rounded p-3 text-sm" style={{ background: 'rgba(255,68,68,0.1)', color: '#FF6666', border: '1px solid rgba(255,68,68,0.2)' }}>
+                <p role="alert" className="mt-4 rounded p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.2)' }}>
                   {submitError}
                 </p>
               )}
@@ -621,7 +622,7 @@ export default function BookPage() {
               <button type="button" onClick={back}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
-                  background: 'none', border: '1px solid #3A3430', color: '#9A8E82',
+                  background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)',
                   padding: '0 18px', height: 40,
                   fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '13px', borderRadius: '3px', cursor: 'pointer',
@@ -635,7 +636,7 @@ export default function BookPage() {
               <button type="submit"
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
-                  background: '#FF9500', border: 'none', color: '#111008',
+                  background: 'var(--color-accent-amber)', border: 'none', color: '#111008',
                   padding: '0 24px', height: 40,
                   fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '13px', fontWeight: 700,
@@ -647,7 +648,7 @@ export default function BookPage() {
               <button type="submit" disabled={submitting}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
-                  background: submitting ? '#CC7700' : '#FF9500', border: 'none', color: '#111008',
+                  background: submitting ? 'var(--color-accent-amber-hover)' : 'var(--color-accent-amber)', border: 'none', color: '#111008',
                   padding: '0 24px', height: 40,
                   fontFamily: 'var(--font-heading), sans-serif',
                   fontSize: '13px', fontWeight: 700,
@@ -660,9 +661,9 @@ export default function BookPage() {
           </div>
         </form>
 
-        <p className="mt-8 text-center text-sm" style={{ color: '#4A4540' }}>
+        <p className="mt-8 text-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Prefer to call?{' '}
-          <a href="tel:5194719462" style={{ color: '#FF9500', textDecoration: 'none' }}>519.471.9462</a>
+          <a href="tel:5194719462" style={{ color: 'var(--color-accent-amber)', textDecoration: 'none' }}>519.471.9462</a>
         </p>
       </div>
     </div>

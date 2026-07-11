@@ -1,13 +1,12 @@
-'use client'
-
-import { useState } from 'react'
 import Footer from "@/components/Footer"
-import { Phone, MapPin, Clock, Send } from 'lucide-react'
+import ContactForm from "@/components/ContactForm"
+import { Phone, MapPin, Clock } from 'lucide-react'
 import type { Metadata } from 'next'
 
-// Note: metadata export in 'use client' components is not supported by Next.js;
-// this is handled by the parent layout or a separate server component.
-// export const metadata: Metadata = { ... }
+export const metadata: Metadata = {
+  title: "Contact Us | FixRight Automotive London Ontario",
+  description: "Visit FixRight Automotive at 2117 Aldersbrook Rd, London ON, call 519.471.9462, or send us a message. Open Monday to Saturday.",
+}
 
 const HOURS = [
   { day: 'Monday – Friday', time: '8:00am – 5:00pm' },
@@ -16,64 +15,13 @@ const HOURS = [
 ]
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', phone: '', message: '' })
-  const [sent, setSent] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setSubmitting(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-
-      if (!res.ok) throw new Error('Request failed')
-
-      setSent(true)
-      setForm({ name: '', phone: '', message: '' })
-    } catch {
-      setError('Something went wrong. Please call us at 519.471.9462')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    background: '#1E1A16',
-    border: '1px solid #3A3430',
-    borderRadius: '3px',
-    color: '#F0EDE8',
-    padding: '12px 14px',
-    fontSize: '14px',
-    outline: 'none',
-    fontFamily: 'inherit',
-    transition: 'border-color 0.2s',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '6px',
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: '#9A8E82',
-  }
-
   return (
-    <main style={{ background: '#1E1A16' }}>
+    <main style={{ background: 'var(--color-bg-primary)' }}>
       {/* Page hero */}
       <section
         style={{
-          background: '#2A2420',
-          borderBottom: '1px solid #3A3430',
+          background: 'var(--color-bg-surface)',
+          borderBottom: '1px solid var(--color-border)',
           padding: '80px 24px 60px',
           textAlign: 'center',
         }}
@@ -81,20 +29,20 @@ export default function ContactPage() {
         <span
           style={{
             display: 'block', fontFamily: 'monospace', fontSize: '11px',
-            letterSpacing: '0.35em', textTransform: 'uppercase', color: '#FF9500', marginBottom: '16px',
+            letterSpacing: '0.35em', textTransform: 'uppercase', color: 'var(--color-accent-amber)', marginBottom: '16px',
           }}
         >
           We&apos;re here to help
         </span>
         <h1
           style={{
-            fontSize: 'clamp(2.5rem, 6vw, 56px)', fontWeight: 800,
-            color: '#F0EDE8', letterSpacing: '0.04em', marginBottom: '16px',
+            fontSize: 'clamp(2.5rem, 6vw, 56px)', fontWeight: 700,
+            color: 'var(--color-text-primary)', letterSpacing: '0.04em', marginBottom: '16px',
           }}
         >
           CONTACT US
         </h1>
-        <div style={{ width: '48px', height: '3px', background: '#FF9500', borderRadius: '2px', margin: '0 auto' }} />
+        <div style={{ width: '48px', height: '3px', background: 'var(--color-accent-amber)', margin: '0 auto' }} />
       </section>
 
       {/* Two column layout */}
@@ -102,18 +50,18 @@ export default function ContactPage() {
         <div style={{ display: 'grid', gap: '48px', alignItems: 'start' }} className="md:grid-cols-2">
           {/* Left: info */}
           <div>
-            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#F0EDE8', marginBottom: '28px', letterSpacing: '0.04em' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '28px', letterSpacing: '0.04em' }}>
               FIND US
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: '3px', padding: '10px', flexShrink: 0 }}>
-                  <MapPin size={18} color="#FF9500" />
+                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: 'var(--radius-sharp)', padding: '10px', flexShrink: 0 }}>
+                  <MapPin size={18} color="var(--color-accent-amber)" aria-hidden="true" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#F0EDE8', fontSize: '14px', marginBottom: '4px' }}>Address</div>
-                  <div style={{ color: '#9A8E82', fontSize: '14px', lineHeight: 1.6 }}>
+                  <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px', marginBottom: '4px' }}>Address</div>
+                  <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>
                     2117 Aldersbrook Rd<br />
                     (At Wonderland Rd &amp; Fanshawe Park Rd)<br />
                     London ON N6G 3X1
@@ -122,14 +70,14 @@ export default function ContactPage() {
               </div>
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: '3px', padding: '10px', flexShrink: 0 }}>
-                  <Phone size={18} color="#FF9500" />
+                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: 'var(--radius-sharp)', padding: '10px', flexShrink: 0 }}>
+                  <Phone size={18} color="var(--color-accent-amber)" aria-hidden="true" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#F0EDE8', fontSize: '14px', marginBottom: '4px' }}>Phone</div>
+                  <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px', marginBottom: '4px' }}>Phone</div>
                   <a
                     href="tel:5194719462"
-                    style={{ color: '#FF9500', textDecoration: 'none', fontSize: '16px', fontWeight: 700 }}
+                    style={{ color: 'var(--color-accent-amber)', textDecoration: 'none', fontSize: '16px', fontWeight: 700 }}
                   >
                     519.471.9462
                   </a>
@@ -137,16 +85,16 @@ export default function ContactPage() {
               </div>
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: '3px', padding: '10px', flexShrink: 0 }}>
-                  <Clock size={18} color="#FF9500" />
+                <div style={{ background: 'rgba(255,149,0,0.1)', borderRadius: 'var(--radius-sharp)', padding: '10px', flexShrink: 0 }}>
+                  <Clock size={18} color="var(--color-accent-amber)" aria-hidden="true" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: '#F0EDE8', fontSize: '14px', marginBottom: '8px' }}>Hours</div>
+                  <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px', marginBottom: '8px' }}>Hours</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {HOURS.map(h => (
                       <div key={h.day} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                        <span style={{ color: '#9A8E82', minWidth: '150px' }}>{h.day}</span>
-                        <span style={{ color: h.time === 'Closed' ? '#4A4540' : '#F0EDE8', fontWeight: h.time === 'Closed' ? 400 : 500 }}>
+                        <span style={{ color: 'var(--color-text-secondary)', minWidth: '150px' }}>{h.day}</span>
+                        <span style={{ color: h.time === 'Closed' ? 'var(--color-text-secondary)' : 'var(--color-text-primary)', fontWeight: h.time === 'Closed' ? 400 : 500, fontStyle: h.time === 'Closed' ? 'italic' : 'normal' }}>
                           {h.time}
                         </span>
                       </div>
@@ -157,7 +105,7 @@ export default function ContactPage() {
             </div>
 
             {/* Google Maps embed */}
-            <div style={{ marginTop: '36px', borderRadius: '3px', overflow: 'hidden', border: '1px solid #3A3430' }}>
+            <div style={{ marginTop: '36px', borderRadius: 'var(--radius-sharp)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
               <iframe
                 src="https://maps.google.com/maps?q=2117+Aldersbrook+Rd,+London+ON+N6G+3X1&output=embed&iwloc=B"
                 width="100%"
@@ -174,85 +122,16 @@ export default function ContactPage() {
           {/* Right: contact form */}
           <div
             style={{
-              background: '#2A2420',
-              border: '1px solid #3A3430',
-              borderRadius: '3px',
+              background: 'var(--color-bg-surface)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-sharp)',
               padding: '32px',
             }}
           >
-            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#F0EDE8', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '24px' }}>
               Send a Message
             </h2>
-
-            {sent ? (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div style={{ fontSize: '40px', marginBottom: '16px' }}>✓</div>
-                <p style={{ color: '#FF9500', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>
-                  Message sent! Omar will call you back shortly.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                <div>
-                  <label style={labelStyle}>Name</label>
-                  <input
-                    style={inputStyle}
-                    value={form.name}
-                    onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                    placeholder="Your name"
-                    required
-                    onFocus={e => (e.target.style.borderColor = '#FF9500')}
-                    onBlur={e => (e.target.style.borderColor = '#3A3430')}
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Phone</label>
-                  <input
-                    style={inputStyle}
-                    value={form.phone}
-                    onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
-                    placeholder="519-555-0100"
-                    type="tel"
-                    required
-                    onFocus={e => (e.target.style.borderColor = '#FF9500')}
-                    onBlur={e => (e.target.style.borderColor = '#3A3430')}
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Message</label>
-                  <textarea
-                    style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
-                    value={form.message}
-                    onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                    placeholder="Tell us about your vehicle or what you need..."
-                    required
-                    onFocus={e => (e.target.style.borderColor = '#FF9500')}
-                    onBlur={e => (e.target.style.borderColor = '#3A3430')}
-                  />
-                </div>
-                {error && (
-                  <p style={{ color: '#EF4444', fontSize: '13px', margin: 0 }}>{error}</p>
-                )}
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    background: '#FF9500', color: '#111008', padding: '13px 24px',
-                    fontSize: '13px', fontWeight: 700, letterSpacing: '0.12em',
-                    textTransform: 'uppercase', border: 'none', borderRadius: '3px',
-                    cursor: submitting ? 'default' : 'pointer',
-                    opacity: submitting ? 0.7 : 1,
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={e => { if (!submitting) e.currentTarget.style.background = '#E08400' }}
-                  onMouseLeave={e => { if (!submitting) e.currentTarget.style.background = '#FF9500' }}
-                >
-                  <Send size={14} />
-                  {submitting ? 'Sending...' : 'Send Message'}
-                </button>
-              </form>
-            )}
+            <ContactForm />
           </div>
         </div>
       </section>

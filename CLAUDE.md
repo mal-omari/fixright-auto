@@ -143,7 +143,6 @@ Admin portal at /workshop-portal (hidden from public, not linked anywhere on sit
 
 ## Still To Build
 - Admin page responsive fixes (mobile)
-- /impeccable polish on public site
 - QuickBooks data import (waiting for Omar to get access)
 - Service reminders / automated emails
 - Revenue/workload reporting charts in admin dashboard

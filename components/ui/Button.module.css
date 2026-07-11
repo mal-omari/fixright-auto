@@ -53,6 +53,11 @@
   font-size: 12px;
 }
 
+.large {
+  padding: 14px 36px;
+  font-size: 13px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn {
     transition: none;
