@@ -44,8 +44,6 @@ function EditableCell({ value, suffix, onSave }: EditableCellProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(String(value))
 
-  useEffect(() => { setDraft(String(value)) }, [value])
-
   function commit() {
     const parsed = parseFloat(draft)
     setEditing(false)
@@ -72,7 +70,7 @@ function EditableCell({ value, suffix, onSave }: EditableCellProps) {
 
   return (
     <button
-      onClick={() => setEditing(true)}
+      onClick={() => { setDraft(String(value)); setEditing(true) }}
       style={{
         background: 'none', border: 'none', color: '#9A8E82', cursor: 'pointer',
         padding: '4px 8px', fontSize: '13px', fontFamily: 'inherit', borderRadius: 6,

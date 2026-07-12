@@ -76,7 +76,7 @@ function NewBookingForm() {
   const [serviceAutoFilled, setServiceAutoFilled] = useState(false)
 
   const searchParams = useSearchParams()
-  const [lookupPhone, setLookupPhone] = useState('')
+  const [lookupPhone, setLookupPhone] = useState(() => searchParams.get('phone') ?? '')
   const [looking, setLooking] = useState(false)
   const [searchedOnce, setSearchedOnce] = useState(false)
   const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null)
@@ -115,7 +115,7 @@ function NewBookingForm() {
   useEffect(() => {
     const phoneParam = searchParams.get('phone')
     if (phoneParam) {
-      setLookupPhone(phoneParam)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lookupCustomer eagerly sets a loading flag before its first await
       lookupCustomer(phoneParam)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

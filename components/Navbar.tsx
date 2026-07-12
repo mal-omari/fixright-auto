@@ -44,10 +44,6 @@ export default function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [pathname])
-
   // Close the mobile menu on Escape
   useEffect(() => {
     if (!menuOpen) return
@@ -248,6 +244,7 @@ export default function Navbar() {
                 >
                   <Link
                     href={link.href}
+                    onClick={() => setMenuOpen(false)}
                     style={{
                       fontFamily: 'var(--font-heading), sans-serif',
                       fontSize: '32px',
@@ -282,7 +279,11 @@ export default function Navbar() {
               }}
             >
               <div style={{ width: '100%', height: '1px', background: 'var(--color-border)', marginBottom: '32px' }} />
-              <Button href="/book" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '16px 0', fontSize: '14px' }}>
+              <Button
+                href="/book"
+                onClick={() => setMenuOpen(false)}
+                style={{ display: 'block', width: '100%', textAlign: 'center', padding: '16px 0', fontSize: '14px' }}
+              >
                 Book Your Appointment
               </Button>
               <a

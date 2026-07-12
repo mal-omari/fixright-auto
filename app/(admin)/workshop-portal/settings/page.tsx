@@ -67,9 +67,9 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 
 export default function SettingsPage() {
   const isMobile = useIsMobile()
-  const [labourRate, setLabourRate] = useState('95')
+  const [labourRate, setLabourRate] = useState(() => localStorage.getItem('fixright_labour_rate') ?? '95')
   const [editingRate, setEditingRate] = useState(false)
-  const [rateInput, setRateInput] = useState('95')
+  const [rateInput, setRateInput] = useState(() => localStorage.getItem('fixright_labour_rate') ?? '95')
   const [rateSaved, setRateSaved] = useState(false)
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [notifSaved, setNotifSaved] = useState(false)
@@ -82,8 +82,6 @@ export default function SettingsPage() {
   const [addingMechanic, setAddingMechanic] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('fixright_labour_rate')
-    if (saved) { setLabourRate(saved); setRateInput(saved) }
     createClient().from('mechanics').select('*').order('name').then(({ data }) => {
       setMechanics(data ?? [])
     })

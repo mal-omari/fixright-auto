@@ -25,9 +25,8 @@ function getPageTitle(pathname: string): string {
 const MOBILE_BREAKPOINT = 1024
 
 function useDateTime() {
-  const [dt, setDt] = useState<Date | null>(null)
+  const [dt, setDt] = useState<Date>(() => new Date())
   useEffect(() => {
-    setDt(new Date())
     const id = setInterval(() => setDt(new Date()), 60_000)
     return () => clearInterval(id)
   }, [])
@@ -40,8 +39,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === '/workshop-portal'
   const [checking, setChecking] = useState(true)
   const [isAuth, setIsAuth] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT)
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === 'undefined' || window.innerWidth < MOBILE_BREAKPOINT) return false
+    const saved = localStorage.getItem('fixright_sidebar_open')
+    return saved !== null ? saved === 'true' : true
+  })
   const dt = useDateTime()
 
   useEffect(() => {
@@ -68,15 +71,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         }
       }
     )
-
-    const mobile = window.innerWidth < MOBILE_BREAKPOINT
-    setIsMobile(mobile)
-    if (mobile) {
-      setSidebarOpen(false)
-    } else {
-      const saved = localStorage.getItem('fixright_sidebar_open')
-      if (saved !== null) setSidebarOpen(saved === 'true')
-    }
 
     function handleResize() {
       const m = window.innerWidth < MOBILE_BREAKPOINT

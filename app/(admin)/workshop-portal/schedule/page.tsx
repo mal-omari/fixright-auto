@@ -90,7 +90,6 @@ export default function SchedulePage() {
     : [0, 1, 2, 3, 4, 5]
 
   useEffect(() => {
-    setLoading(true)
     createClient()
       .from('bookings')
       .select(`
@@ -119,9 +118,9 @@ export default function SchedulePage() {
       })
   }, [weekFrom, weekTo])
 
-  function prevWeek() { setWeekStart(d => addDaysStr(d, -7)); setMobilePage(0) }
-  function nextWeek() { setWeekStart(d => addDaysStr(d, 7)); setMobilePage(0) }
-  function goToday() { setWeekStart(getWeekStart(getTodayEastern())); setMobilePage(0) }
+  function prevWeek() { setLoading(true); setWeekStart(d => addDaysStr(d, -7)); setMobilePage(0) }
+  function nextWeek() { setLoading(true); setWeekStart(d => addDaysStr(d, 7)); setMobilePage(0) }
+  function goToday() { setLoading(true); setWeekStart(getWeekStart(getTodayEastern())); setMobilePage(0) }
 
   const dayBookings = (dateStr: string) => bookings.filter(b =>
     b.confirmed_date === dateStr || (!b.confirmed_date && b.preferred_date === dateStr)

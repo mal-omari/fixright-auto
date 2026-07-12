@@ -36,27 +36,19 @@ function BookingsContent() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const statusParam = searchParams.get('status')
+    return statusParam && STATUS_PILLS.some(p => p.key === statusParam) ? statusParam : 'All'
+  })
+  const [dateFrom, setDateFrom] = useState(() =>
+    searchParams.get('date') === 'today' ? new Date().toISOString().split('T')[0] : ''
+  )
+  const [dateTo, setDateTo] = useState(() =>
+    searchParams.get('date') === 'today' ? new Date().toISOString().split('T')[0] : ''
+  )
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(1)
-
-  useEffect(() => {
-    const statusParam = searchParams.get('status')
-    const dateParam = searchParams.get('date')
-
-    if (statusParam) {
-      const match = STATUS_PILLS.find(p => p.key === statusParam)
-      if (match) setStatusFilter(statusParam)
-    }
-    if (dateParam === 'today') {
-      const today = new Date().toISOString().split('T')[0]
-      setDateFrom(today)
-      setDateTo(today)
-    }
-  }, [searchParams])
 
   useEffect(() => {
     createClient()

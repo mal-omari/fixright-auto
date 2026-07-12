@@ -1,5 +1,6 @@
 import Hero from "@/components/hero/Hero";
 import TrustBar from "@/components/TrustBar";
+import ServicesTeaser from "@/components/ServicesTeaser";
 import WhyFixRight from "@/components/WhyFixRight";
 import AboutPreview from "@/components/AboutPreview";
 import BookingCTA from "@/components/BookingCTA";
@@ -10,6 +11,7 @@ export default function HomePage() {
     <main style={{ background: 'var(--color-bg-primary)' }}>
       <Hero />
       <TrustBar />
+      <ServicesTeaser />
       <WhyFixRight />
       <AboutPreview />
       <BookingCTA />
