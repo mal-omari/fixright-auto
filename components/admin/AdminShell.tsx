@@ -5,6 +5,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import { AdminSidebar } from './AdminSidebar'
 import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { DemoAdminPortal } from './DemoAdminPortal'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 const TITLE_MAP: Record<string, string> = {
   '/workshop-portal/dashboard':   'Dashboard',
@@ -37,17 +39,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const isLoginPage = pathname === '/workshop-portal'
-  const [checking, setChecking] = useState(true)
-  const [isAuth, setIsAuth] = useState(false)
+  const isDemoMode = SITE_CONFIG.demo.enabled
+  const [checking, setChecking] = useState(!isDemoMode)
+  const [isAuth, setIsAuth] = useState(isDemoMode)
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT)
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window === 'undefined' || window.innerWidth < MOBILE_BREAKPOINT) return false
-    const saved = localStorage.getItem('fixright_sidebar_open')
+    const saved = localStorage.getItem('garage_platform_sidebar_open')
     return saved !== null ? saved === 'true' : true
   })
   const dt = useDateTime()
 
   useEffect(() => {
+    if (isDemoMode) return
     const supabase = createClient()
 
     const checkAuth = async () => {
@@ -82,15 +86,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       window.removeEventListener('resize', handleResize)
       subscription.unsubscribe()
     }
-  }, [pathname, router, isLoginPage])
+  }, [pathname, router, isLoginPage, isDemoMode])
 
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => {
       const next = !prev
-      if (window.innerWidth >= MOBILE_BREAKPOINT) localStorage.setItem('fixright_sidebar_open', String(next))
+      if (window.innerWidth >= MOBILE_BREAKPOINT) localStorage.setItem('garage_platform_sidebar_open', String(next))
       return next
     })
   }, [])
+
+  if (isDemoMode) return <DemoAdminPortal />
 
   if (checking) {
     return (
@@ -181,7 +187,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 fontSize: '13px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
               }}
             >
-              O
+              {SITE_CONFIG.business.ownerInitials.slice(0, 1)}
             </div>
           </div>
         </header>

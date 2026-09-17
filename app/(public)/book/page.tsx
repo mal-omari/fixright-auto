@@ -6,6 +6,7 @@ import { Phone, CheckCircle, ArrowLeft, ArrowRight, Sun, Clock, CalendarDays } f
 import { vehicleMakes, vehicleModels, vehicleYears } from '@/lib/vehicleData'
 import { createClient } from '@/lib/supabase'
 import { Input } from '@/components/ui/Input'
+import { DEFAULT_SERVICE_HOURS, SITE_CONFIG } from '@/lib/site-config'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -132,11 +133,13 @@ export default function BookPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [demoSubmission, setDemoSubmission] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [serviceHours, setServiceHours] = useState<Record<string, number>>({})
+  const [serviceHours, setServiceHours] = useState<Record<string, number>>(DEFAULT_SERVICE_HOURS)
 
   // Fetch service hours on mount
   useEffect(() => {
+    if (SITE_CONFIG.demo.enabled) return
     createClient()
       .from('services')
       .select('name, estimated_hours')
@@ -241,16 +244,17 @@ export default function BookPage() {
           status: 'pending',
         }),
       })
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
         throw new Error(data.error ?? 'Something went wrong. Please call us directly.')
       }
+      setDemoSubmission(data.demo === true)
       setSubmitted(true)
     } catch (e) {
       if (e instanceof TypeError) {
-        setSubmitError('Network error — check your connection and try again, or call us at 519.471.9462.')
+        setSubmitError(`Network error — check your connection and try again, or call us at ${SITE_CONFIG.business.phoneDisplay}.`)
       } else {
-        setSubmitError(e instanceof Error ? e.message : 'Something went wrong. Please call us at 519.471.9462.')
+        setSubmitError(e instanceof Error ? e.message : `Something went wrong. Please call us at ${SITE_CONFIG.business.phoneDisplay}.`)
       }
     } finally {
       setSubmitting(false)
@@ -265,20 +269,22 @@ export default function BookPage() {
             <CheckCircle size={72} color="var(--color-accent-amber)" strokeWidth={1} />
           </div>
           <h1 className="mb-4 text-3xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-heading), sans-serif', fontWeight: 700 }}>
-            BOOKING RECEIVED!
+            {demoSubmission ? 'DEMO COMPLETE!' : 'BOOKING RECEIVED!'}
           </h1>
           <p className="mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-            Thanks {form.firstName}! We&apos;ll call you within the hour to confirm your appointment.
+            {demoSubmission
+              ? `Thanks ${form.firstName}! This demonstrated the booking experience. Nothing was stored and no notification was sent.`
+              : `Thanks ${form.firstName}! We'll call you within the hour to confirm your appointment.`}
           </p>
           <div className="mb-8 rounded p-4" style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Questions? Call us directly:</p>
             <a
-              href="tel:5194719462"
+              href={SITE_CONFIG.business.phoneHref}
               className="mt-1 flex items-center justify-center gap-2 text-xl font-bold"
               style={{ color: 'var(--color-accent-amber)', textDecoration: 'none' }}
             >
               <Phone size={20} />
-              519.471.9462
+              {SITE_CONFIG.business.phoneDisplay}
             </a>
           </div>
           <Link
@@ -308,10 +314,10 @@ export default function BookPage() {
         <div className="mb-10 text-center">
           <Link href="/" style={{ textDecoration: 'none' }}>
             <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: 'var(--color-accent-amber)', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
-              FIXRIGHT{' '}
+              {SITE_CONFIG.business.wordmarkPrimary}{' '}
             </span>
             <span style={{ fontFamily: 'var(--font-heading), sans-serif', color: 'var(--color-text-primary)', fontSize: '13px', fontWeight: 400, letterSpacing: '0.2em' }}>
-              AUTOMOTIVE
+              {SITE_CONFIG.business.wordmarkSecondary}
             </span>
           </Link>
           <h1 className="mt-6" style={{
@@ -321,7 +327,7 @@ export default function BookPage() {
             Book a Service
           </h1>
           <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Fill in the form below — we&apos;ll confirm by phone within the hour.
+            Try the full booking flow — demo details are never stored or sent.
           </p>
         </div>
 
@@ -663,7 +669,7 @@ export default function BookPage() {
 
         <p className="mt-8 text-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Prefer to call?{' '}
-          <a href="tel:5194719462" style={{ color: 'var(--color-accent-amber)', textDecoration: 'none' }}>519.471.9462</a>
+          <a href={SITE_CONFIG.business.phoneHref} style={{ color: 'var(--color-accent-amber)', textDecoration: 'none' }}>{SITE_CONFIG.business.phoneDisplay}</a>
         </p>
       </div>
     </div>

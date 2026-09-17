@@ -5,7 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { yearsInBusiness } from '@/lib/utils'
+import { SITE_CONFIG, configuredYearsInBusiness } from '@/lib/site-config'
 
 export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -46,14 +46,14 @@ export default function AboutPreview() {
           MEET YOUR MECHANIC
         </h2>
         <p className="about-preview-item mx-auto mb-4 max-w-2xl text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-          Hi, I&apos;m Omar — owner of FixRight Automotive. With over {yearsInBusiness()} years of combined experience, our team treats every vehicle like it&apos;s our own. We built this garage on a simple promise: honest work, fair prices, and respect for our customers.
+          Meet {SITE_CONFIG.business.ownerName}, the fictional owner used in this product demo. This sample story shows how a real garage can explain its experience, values, and approach in its own voice.
         </p>
         <p className="about-preview-item mb-8 text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
           No pressure. No runaround. Just results you can count on.
         </p>
         <div className="about-preview-item flex items-center justify-center gap-3 mb-8">
           <span style={{ color: 'var(--color-accent-amber)', fontSize: '18px' }}>★★★★★</span>
-          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Trusted by 6,000+ London families</span>
+          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{configuredYearsInBusiness()} sample years · fictional reviews and team</span>
         </div>
         <Link
           href="/about"

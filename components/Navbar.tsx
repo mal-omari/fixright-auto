@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Phone, Menu, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -78,7 +79,7 @@ export default function Navbar() {
       <header
         style={{
           position: 'fixed',
-          top: 0,
+          top: SITE_CONFIG.demo.enabled ? 30 : 0,
           left: 0,
           right: 0,
           zIndex: 100,
@@ -115,13 +116,13 @@ export default function Navbar() {
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '20px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--color-accent-amber)', lineHeight: 1,
             }}>
-              FIXRIGHT
+              {SITE_CONFIG.business.wordmarkPrimary}
             </span>
             <span style={{
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '11px', fontWeight: 400, letterSpacing: '0.2em', color: 'var(--color-text-primary)', lineHeight: 1,
             }}>
-              AUTOMOTIVE
+              {SITE_CONFIG.business.wordmarkSecondary}
             </span>
           </Link>
 
@@ -158,7 +159,7 @@ export default function Navbar() {
           {/* Desktop right */}
           <div className="hidden lg:flex" style={{ alignItems: 'center', gap: '20px' }}>
             <a
-              href="tel:5194719462"
+              href={SITE_CONFIG.business.phoneHref}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -172,7 +173,7 @@ export default function Navbar() {
               }}
             >
               <Phone size={13} />
-              519.471.9462
+              {SITE_CONFIG.business.phoneDisplay}
             </a>
             <div style={{ width: '1px', height: '18px', background: 'var(--color-border)' }} />
             <Button ref={bookBtnRef} href="/book" size="compact">
@@ -287,7 +288,7 @@ export default function Navbar() {
                 Book Your Appointment
               </Button>
               <a
-                href="tel:5194719462"
+                href={SITE_CONFIG.business.phoneHref}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -301,7 +302,7 @@ export default function Navbar() {
                 }}
               >
                 <Phone size={16} />
-                519.471.9462
+                {SITE_CONFIG.business.phoneDisplay}
               </a>
             </motion.div>
           </motion.div>

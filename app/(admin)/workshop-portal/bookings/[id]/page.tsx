@@ -151,7 +151,7 @@ export default function BookingDetailPage() {
     if (!booking) return
     setCreatingInvoice(true)
     const supabase = createClient()
-    const labourRate = parseFloat(localStorage.getItem('fixright_labour_rate') ?? '95')
+    const labourRate = parseFloat(localStorage.getItem('garage_platform_labour_rate') ?? '95')
     const hrs = estimatedHours ? parseFloat(estimatedHours) : 1
 
     const { data: invoiceNum } = await supabase.rpc('next_invoice_number')

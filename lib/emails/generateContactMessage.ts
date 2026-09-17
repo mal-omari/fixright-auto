@@ -1,4 +1,5 @@
 import { escapeHtml } from './escapeHtml'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 interface ContactMessageData {
   name: string
@@ -13,7 +14,7 @@ export function generateContactMessageEmail(data: ContactMessageData): string {
     <head><meta charset="utf-8"></head>
     <body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4;">
       <div style="background:#1A1714;padding:32px;text-align:center;">
-        <div style="color:#FF9500;font-size:24px;font-weight:bold;letter-spacing:2px;">FIXRIGHT AUTOMOTIVE</div>
+        <div style="color:#FF9500;font-size:24px;font-weight:bold;letter-spacing:2px;">${escapeHtml(SITE_CONFIG.business.name.toUpperCase())}</div>
         <div style="color:#F0EDE8;font-size:16px;margin-top:8px;">New Contact Message</div>
       </div>
       <div style="background:#ffffff;padding:32px;max-width:600px;margin:0 auto;">
@@ -25,7 +26,7 @@ export function generateContactMessageEmail(data: ContactMessageData): string {
         <p style="color:#1A1714;white-space:pre-line;">${escapeHtml(data.message)}</p>
       </div>
       <div style="background:#1A1714;padding:24px;text-align:center;color:#9A8E82;font-size:12px;">
-        FixRight Automotive — 519.471.9462 — 2117 Aldersbrook Rd, London ON
+        ${escapeHtml(SITE_CONFIG.business.name)} — ${escapeHtml(SITE_CONFIG.business.phoneDisplay)} — ${escapeHtml(SITE_CONFIG.business.addressLine1)}, ${escapeHtml(SITE_CONFIG.business.city)} ON
       </div>
     </body>
     </html>

@@ -1,7 +1,7 @@
 import Hero from "@/components/hero/Hero";
 import TrustBar from "@/components/TrustBar";
 import ServicesTeaser from "@/components/ServicesTeaser";
-import WhyFixRight from "@/components/WhyFixRight";
+import WhyThisGarage from "@/components/WhyThisGarage";
 import AboutPreview from "@/components/AboutPreview";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
@@ -12,7 +12,7 @@ export default function HomePage() {
       <Hero />
       <TrustBar />
       <ServicesTeaser />
-      <WhyFixRight />
+      <WhyThisGarage />
       <AboutPreview />
       <BookingCTA />
       <Footer />

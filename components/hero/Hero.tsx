@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from '
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone } from 'lucide-react'
+import { SITE_CONFIG, configuredYearsInBusiness } from '@/lib/site-config'
 import Link from 'next/link'
-import { yearsInBusiness } from '@/lib/utils'
 
 // ── Dust particles ──────────────────────────────────────────────────────────
 const generateDust = (count: number) => Array.from({ length: count }, (_, i) => ({
@@ -329,7 +329,7 @@ export default function Hero() {
             fontSize: '11px', fontWeight: 500, letterSpacing: '0.2em',
             textTransform: 'uppercase', color: 'var(--color-accent-amber)',
           }}>
-            LONDON ONTARIO&apos;S TRUSTED GARAGE
+            FICTIONAL GARAGE EXPERIENCE · PRODUCT DEMO
           </span>
           <div style={{ flex: 1, maxWidth: 60, height: 1, background: 'var(--color-accent-amber)', opacity: 0.5 }} />
         </div>
@@ -348,7 +348,7 @@ export default function Hero() {
               textTransform: 'uppercase',
             }}
           >
-            FIXRIGHT
+            {SITE_CONFIG.business.wordmarkPrimary}
           </div>
           <div
             className="hero-title-2"
@@ -363,7 +363,7 @@ export default function Hero() {
               marginBottom: 24,
             }}
           >
-            AUTOMOTIVE
+            {SITE_CONFIG.business.wordmarkSecondary}
           </div>
         </h1>
 
@@ -375,7 +375,7 @@ export default function Hero() {
             marginBottom: 8,
           }}
         >
-          {yearsInBusiness()} Years. 6,000+ Vehicles. One Promise.
+          {configuredYearsInBusiness()} Sample Years. One Complete Workflow.
         </p>
 
         <p
@@ -418,7 +418,7 @@ export default function Hero() {
           </Link>
 
           <a
-            href="tel:5194719462"
+            href={SITE_CONFIG.business.phoneHref}
             className="hero-cta-2"
             style={{
               display: 'inline-flex',
@@ -448,7 +448,7 @@ export default function Hero() {
             }}
           >
             <Phone size={15} />
-            Call 519.471.9462
+            Call {SITE_CONFIG.business.phoneDisplay}
           </a>
         </div>
       </div>

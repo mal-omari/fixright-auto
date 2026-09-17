@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-07-03T19:59:00Z",
-  "title": "Design System: FixRight Automotive",
+  "title": "Design System: Garage Platform Demo",
   "extensions": {
     "colorMeta": {
       "accent-amber": {
@@ -88,7 +88,7 @@
       "kind": "button",
       "refersTo": "button-ghost",
       "description": "Phone number / underlined text link, secondary action.",
-      "html": "<a href=\"tel:5194719462\" class=\"ds-link-ghost\">519.471.9462</a>",
+      "html": "<a href=\"tel:5195550147\" class=\"ds-link-ghost\">519-555-0147</a>",
       "css": ".ds-link-ghost { color: #FF9500; text-decoration: underline; text-decoration-color: rgba(255,149,0,0.4); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 0.06em; font-weight: 500; } .ds-link-ghost:hover { text-decoration-color: #FF9500; }"
     },
     {
@@ -134,7 +134,7 @@
   ],
   "narrative": {
     "northStar": "The Night Shift Garage",
-    "overview": "FixRight's public site is a garage bay that's still lit and working after the sun's gone down — warm charcoal darkness (#1E1A16) pierced by amber shop-light (#FF9500), with the occasional cyan flicker of a diagnostic scanner. It reads as rugged and precise at once: a shop that's been doing this for 28 years and still runs its diagnostics exactly right. The admin panel is the same garage from the inside — same palette, same materials — but built as a working tool rather than a storefront: rounder corners, denser information, no glow-and-tilt flourish, because Omar and his mechanics need speed, not seduction.\n\nThe system explicitly rejects the generic \"local auto shop\" template look: no stock blue-on-white palettes, no default Bootstrap card grids, no icon-pack-and-stock-photo assembly. Every surface should feel like it was built for this specific shop's specific workflow (phone-in bookings, mechanic assignment, HST invoicing) — not a repurposed CRM or website builder theme.",
+    "overview": "The fictional demo's public site is a garage bay still lit after sundown — warm charcoal darkness (#1E1A16) pierced by amber shop-light (#FF9500), with the occasional cyan flicker of a diagnostic scanner. It reads as rugged and precise while remaining clearly labelled as sample content. The admin panel uses the same palette and materials as a working tool: rounder corners, denser information, and a permanent read-only demo notice.\n\nThe system rejects the generic \"local auto shop\" template look while keeping every identity, contact detail, customer, booking, and invoice fictional until configured for an authorized client deployment.",
     "keyCharacteristics": [
       "Dark, warm charcoal base with amber as the dominant signal color — never a light theme",
       "Flat surfaces at rest; depth communicated through border + glow on interaction, not drop shadows",
@@ -154,7 +154,7 @@
       "Do reserve diagnostic cyan (#00D4FF) for HUD/scan-line/diagnostic-icon moments only.",
       "Do set uppercase/tracked text in Barlow Condensed, never Inter.",
       "Do communicate depth via tonal layering + interactive amber glow, never a resting-state drop shadow.",
-      "Do keep Omar's real phone number (519.471.9462) and shop address specific and visible."
+      "Do keep demo contact details fictional and label them clearly; use verified client details only in isolated live deployments."
     ],
     "donts": [
       "Don't ship a generic \"local auto shop\" template look.",

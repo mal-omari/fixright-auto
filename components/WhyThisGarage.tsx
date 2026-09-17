@@ -23,7 +23,7 @@ const features = [
   },
 ]
 
-export default function WhyFixRight() {
+export default function WhyThisGarage() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function WhyFixRight() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-14 text-center">
           <h2 className="text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            WHY CHOOSE FIXRIGHT?
+            WHY CHOOSE THIS GARAGE?
           </h2>
           <div className="mx-auto mt-4 h-1 w-16" style={{ background: 'var(--color-accent-amber)' }} />
         </div>

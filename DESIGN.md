@@ -1,6 +1,6 @@
 ---
-name: FixRight Automotive
-description: A night-shift garage lit in amber, running diagnostic-precision UI for booking and shop management.
+name: Demo Motorworks
+description: A fictional night-shift garage demonstrating a configurable booking and shop-management platform.
 colors:
   bg-primary: "#1E1A16"
   bg-surface: "#2A2420"
@@ -82,13 +82,13 @@ components:
     padding: "24px"
 ---
 
-# Design System: FixRight Automotive
+# Design System: Garage Platform Demo
 
 ## 1. Overview
 
 **Creative North Star: "The Night Shift Garage"**
 
-FixRight's public site is a garage bay that's still lit and working after the sun's gone down — warm charcoal darkness (#1E1A16) pierced by amber shop-light (#FF9500), with the occasional cyan flicker of a diagnostic scanner. It reads as rugged and precise at once: a shop that's been doing this for 28 years and still runs its diagnostics exactly right. The admin panel is the same garage from the inside — same palette, same materials — but built as a working tool rather than a storefront: rounder corners, denser information, no glow-and-tilt flourish, because Omar and his mechanics need speed, not seduction.
+The fictional demo's public site is a garage bay that's still lit and working after the sun's gone down — warm charcoal darkness (#1E1A16) pierced by amber shop-light (#FF9500), with the occasional cyan flicker of a diagnostic scanner. It reads as rugged and precise while remaining visibly labelled as sample content. The admin panel is the same garage from the inside — same palette, same materials — but built as a working tool rather than a storefront: rounder corners, denser information, and a permanent read-only demo notice.
 
 The system explicitly rejects the generic "local auto shop" template look: no stock blue-on-white palettes, no default Bootstrap card grids, no icon-pack-and-stock-photo assembly. Every surface should feel like it was built for this specific shop's specific workflow (phone-in bookings, mechanic assignment, HST invoicing) — not a repurposed CRM or website builder theme.
 
@@ -190,7 +190,7 @@ A horizontal bar gauge used on the admin dashboard to show per-mechanic workload
 - **Do** reserve diagnostic cyan (`#00D4FF`) for HUD/scan-line/diagnostic-icon moments only.
 - **Do** set uppercase/tracked text in Barlow Condensed, never Inter.
 - **Do** communicate depth via tonal layering + interactive amber glow, never a resting-state drop shadow.
-- **Do** keep Omar's real phone number (519.471.9462) and shop address specific and visible — the brand's credibility comes from specificity, not generic "quality service" marketing copy.
+- **Do** keep all demo contact details fictional and clearly labelled; use verified details only in isolated, authorized client deployments.
 
 ### Don't:
 - **Don't** ship a generic "local auto shop" template look — no stock blue-on-white palettes, no default icon-pack-plus-stock-photo card grids.

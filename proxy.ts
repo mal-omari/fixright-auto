@@ -2,7 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
+  // Demo deployments never contact Supabase or require a production session.
+  // Both variables must be explicitly set to "live" for real operations.
+  if (process.env.NEXT_PUBLIC_APP_MODE !== 'live' || process.env.APP_MODE !== 'live') {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Phone, MapPin, Clock } from 'lucide-react'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 function FacebookIcon() {
   return (
@@ -50,17 +51,17 @@ export default function Footer() {
           <div>
             <div className="mb-4">
               <span style={{ fontFamily: 'var(--font-heading), sans-serif', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--color-accent-amber)' }}>
-                FIXRIGHT
+                {SITE_CONFIG.business.wordmarkPrimary}
               </span>
               <span style={{ display: 'block', fontFamily: 'var(--font-heading), sans-serif', fontSize: '11px', fontWeight: 500, letterSpacing: '0.25em', color: 'var(--color-text-primary)', marginTop: '2px' }}>
-                AUTOMOTIVE
+                {SITE_CONFIG.business.wordmarkSecondary}
               </span>
             </div>
             <p className="mb-4 text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-              London Ontario&apos;s trusted independent garage since 1996.
+              A configurable storefront and workshop workflow for an independent garage.
             </p>
             <p className="mb-6 text-sm italic font-medium" style={{ color: 'var(--color-accent-amber)' }}>
-              &quot;Honest work. Fair prices. Every time.&quot;
+              &quot;{SITE_CONFIG.business.tagline}&quot;
             </p>
             {/* Social placeholders — non-interactive until real profiles exist */}
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -110,20 +111,20 @@ export default function Footer() {
               <div className="flex items-start gap-3">
                 <MapPin size={14} color="var(--color-text-secondary)" style={{ marginTop: '2px', flexShrink: 0 }} />
                 <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  2117 Aldersbrook Rd<br />
-                  (At Wonderland Rd &amp; Fanshawe Park Rd)<br />
-                  London ON N6G 3X1
+                  {SITE_CONFIG.business.addressLine1}<br />
+                  {SITE_CONFIG.business.addressLine2}<br />
+                  {SITE_CONFIG.business.city}, {SITE_CONFIG.business.region}
                 </div>
               </div>
               <a
-                href="tel:5194719462"
+                href={SITE_CONFIG.business.phoneHref}
                 className="flex items-center gap-3 text-sm transition-colors"
                 style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
                 onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-accent-amber)')}
                 onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-text-secondary)')}
               >
                 <Phone size={14} />
-                519.471.9462
+                {SITE_CONFIG.business.phoneDisplay}
               </a>
             </div>
           </div>
@@ -163,10 +164,10 @@ export default function Footer() {
           style={{ borderColor: 'var(--color-bg-surface)' }}
         >
           <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            © {new Date().getFullYear()} FixRight Automotive. All rights reserved.
+            © {new Date().getFullYear()} {SITE_CONFIG.business.name}. Fictional demonstration.
           </p>
           <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            London, Ontario · Est. 1996
+            {SITE_CONFIG.business.city}, {SITE_CONFIG.business.region} · Demo content only
           </p>
         </div>
       </div>

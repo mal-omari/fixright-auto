@@ -1,4 +1,5 @@
 import { escapeHtml } from './escapeHtml'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 interface BookingConfirmedData {
   customerName: string
@@ -35,7 +36,7 @@ export function generateBookingConfirmedEmail(data: BookingConfirmedData): strin
     <head><meta charset="utf-8"></head>
     <body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4;">
       <div style="background:#1A1714;padding:32px;text-align:center;">
-        <div style="color:#FF9500;font-size:24px;font-weight:bold;letter-spacing:2px;">FIXRIGHT AUTOMOTIVE</div>
+        <div style="color:#FF9500;font-size:24px;font-weight:bold;letter-spacing:2px;">${escapeHtml(SITE_CONFIG.business.name.toUpperCase())}</div>
         <div style="color:#F0EDE8;font-size:16px;margin-top:8px;">Your Appointment is Confirmed &#10003;</div>
       </div>
       <div style="background:#ffffff;padding:32px;max-width:600px;margin:0 auto;">
@@ -43,7 +44,7 @@ export function generateBookingConfirmedEmail(data: BookingConfirmedData): strin
           <span style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:rgba(255,149,0,0.12);color:#FF9500;font-size:28px;font-weight:bold;">&#10003;</span>
         </div>
         <p style="color:#1A1714;font-size:15px;">Hi ${escapeHtml(data.customerName)},</p>
-        <p style="color:#1A1714;font-size:15px;">Great news! We've confirmed your appointment at FixRight Automotive.</p>
+        <p style="color:#1A1714;font-size:15px;">Great news! We've confirmed your appointment at ${escapeHtml(SITE_CONFIG.business.name)}.</p>
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Appointment Details</h2>
         <p style="color:#1A1714;"><strong>Service:</strong> ${escapeHtml(data.serviceName) || '—'}</p>
@@ -57,11 +58,11 @@ export function generateBookingConfirmedEmail(data: BookingConfirmedData): strin
         <p style="color:#1A1714;">We'll call you if we need anything before your appointment.</p>
 
         <h2 style="color:#1A1714;border-bottom:2px solid #FF9500;padding-bottom:8px;margin-top:24px;">Our Location</h2>
-        <p style="color:#1A1714;">2117 Aldersbrook Rd (At Wonderland Rd &amp; Fanshawe Park Rd)<br>London, Ontario N6G 3X1<br>519.471.9462</p>
+        <p style="color:#1A1714;">${escapeHtml(SITE_CONFIG.business.addressLine1)}<br>${escapeHtml(SITE_CONFIG.business.city)}, ${escapeHtml(SITE_CONFIG.business.region)}<br>${escapeHtml(SITE_CONFIG.business.phoneDisplay)}</p>
       </div>
       <div style="background:#1A1714;padding:24px;text-align:center;color:#9A8E82;font-size:12px;">
-        Questions? Call us at 519.471.9462<br>
-        FixRight Automotive — Honest work. Fair prices. Every time.
+        Questions? Call us at ${escapeHtml(SITE_CONFIG.business.phoneDisplay)}<br>
+        ${escapeHtml(SITE_CONFIG.business.name)} — ${escapeHtml(SITE_CONFIG.business.tagline)}
       </div>
     </body>
     </html>

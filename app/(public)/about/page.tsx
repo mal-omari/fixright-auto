@@ -2,26 +2,26 @@ import GarageScene from "@/components/GarageScene";
 import Footer from "@/components/Footer";
 import BookingCTA from "@/components/BookingCTA";
 import { Button } from "@/components/ui/Button";
-import { yearsInBusiness } from "@/lib/utils";
+import { SITE_CONFIG, configuredYearsInBusiness } from "@/lib/site-config";
 import { Heart, Star, DollarSign, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Us | FixRight Automotive London Ontario",
-  description: `Meet Omar and the FixRight team — ${yearsInBusiness()} years of honest auto care in London Ontario. Family owned, Ontario certified, no pressure.`,
+  title: `About Us | ${SITE_CONFIG.business.name} Demo`,
+  description: "Fictional team and garage story content used to demonstrate a configurable automotive website.",
 };
 
 const values = [
   { icon: Heart, label: 'Honest', desc: 'We tell you exactly what your vehicle needs — nothing more, nothing less.' },
-  { icon: Star, label: 'Experienced', desc: `${yearsInBusiness()}+ years of hands-on expertise across all makes and models.` },
+  { icon: Star, label: 'Experienced', desc: `${configuredYearsInBusiness()} sample years of hands-on expertise across all makes and models.` },
   { icon: DollarSign, label: 'Fair', desc: 'Dealership-level work at independent shop prices. Always transparent.' },
   { icon: ShieldCheck, label: 'Reliable', desc: 'Every repair backed by our workmanship guarantee. We stand behind our work.' },
 ]
 
 const team = [
-  { initials: 'OM', name: 'Omar', role: 'Owner & Head Mechanic', years: `${yearsInBusiness()} yrs experience` },
-  { initials: 'TM', name: 'Team Member', role: 'Senior Technician', years: '12 yrs experience' },
-  { initials: 'TM', name: 'Team Member', role: 'Service Technician', years: '8 yrs experience' },
+  { initials: SITE_CONFIG.business.ownerInitials, name: SITE_CONFIG.business.ownerName, role: 'Sample Owner & Head Mechanic', years: `${configuredYearsInBusiness()} sample yrs` },
+  { initials: 'AS', name: 'Alex Smith', role: 'Sample Senior Technician', years: '12 sample yrs' },
+  { initials: 'RP', name: 'Riley Park', role: 'Sample Service Technician', years: '8 sample yrs' },
 ]
 
 export default function AboutPage() {
@@ -42,7 +42,7 @@ export default function AboutPage() {
             letterSpacing: '0.35em', textTransform: 'uppercase', color: 'var(--color-accent-amber)', marginBottom: '16px',
           }}
         >
-          Est. 1996 · London, Ontario
+          Fictional garage · {SITE_CONFIG.business.city}, {SITE_CONFIG.business.region}
         </span>
         <h1
           style={{
@@ -50,12 +50,12 @@ export default function AboutPage() {
             color: 'var(--color-text-primary)', letterSpacing: '0.04em', marginBottom: '16px',
           }}
         >
-          ABOUT FIXRIGHT
+          ABOUT {SITE_CONFIG.business.wordmarkPrimary}
         </h1>
         <div style={{ width: '48px', height: '3px', background: 'var(--color-accent-amber)', margin: '0 auto' }} />
       </section>
 
-      {/* Omar story */}
+      {/* Fictional owner story */}
       <section style={{ padding: '80px 24px', background: 'var(--color-bg-primary)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gap: '64px', alignItems: 'center' }} className="md:grid-cols-2">
           <div>
@@ -67,18 +67,18 @@ export default function AboutPage() {
             </h2>
             <div style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8, fontSize: '15px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <p>
-                Hi, I&apos;m Omar — owner of FixRight Automotive. I started this garage over two decades ago with one belief: people deserve an auto shop they can actually trust.
+                Hi, I&apos;m {SITE_CONFIG.business.ownerName} — the fictional owner in this product demo. This section is where a real garage can tell customers why it exists and what makes its service different.
               </p>
               <p>
-                With over {yearsInBusiness()} years of combined experience, our team treats every vehicle like it&apos;s our own. We&apos;ve built lasting relationships with thousands of London families because we do what we say, charge what we quote, and stand behind every repair.
+                The sample copy demonstrates how experience, transparent quoting, and workmanship guarantees can be presented without relying on generic stock claims.
               </p>
               <p style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>
-                No pressure. No runaround. Just results you can count on — for {yearsInBusiness()} years and counting.
+                Every name, review, statistic, and location on this site is fictional and can be replaced for each client garage.
               </p>
             </div>
             <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: 'var(--color-accent-amber)', fontSize: '18px' }}>★★★★★</span>
-              <span style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Trusted by 6,000+ London families</span>
+              <span style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Sample review display · no real endorsement</span>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '32px' }}>
               {[{ icon: ShieldCheck, head: 'Ontario Certified', sub: 'MTO Safety Inspections' }, { icon: DollarSign, head: 'Fair & Transparent', sub: 'No surprise charges' }].map(item => {
@@ -176,7 +176,7 @@ export default function AboutPage() {
           Ready to experience the difference?
         </h2>
         <p style={{ color: 'var(--color-text-secondary)', marginBottom: '28px', maxWidth: '400px', margin: '0 auto 28px' }}>
-          Book your service today and see why thousands of London families trust FixRight.
+          Try the booking flow to see the customer experience. Demo submissions are never stored or sent.
         </p>
         <Button href="/book" size="large">
           Book Your Service

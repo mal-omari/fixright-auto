@@ -3,10 +3,11 @@ import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Our Services | FixRight Automotive London Ontario",
-  description: "Full automotive services in London Ontario — oil changes, brakes, engine repair, A/C, electrical diagnostics, safety certifications, and more.",
+  title: `Our Services | ${SITE_CONFIG.business.name} Demo`,
+  description: "Fictional automotive service catalogue demonstrating a configurable garage website.",
 };
 
 export default function ServicesPage() {
@@ -32,7 +33,7 @@ export default function ServicesPage() {
             marginBottom: '16px',
           }}
         >
-          London, Ontario
+          Fictional service catalogue
         </span>
         <h1
           style={{
@@ -68,7 +69,7 @@ export default function ServicesPage() {
           Not sure what you need?
         </h2>
         <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
-          Book a diagnostic and we&apos;ll tell you exactly what&apos;s going on — no charge for the assessment.
+          Try the fictional booking flow. Nothing entered in demo mode is stored or sent.
         </p>
         <Button href="/book" size="large">
           Book a Diagnostic

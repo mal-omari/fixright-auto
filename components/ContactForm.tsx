@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Send } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
@@ -19,6 +20,7 @@ const labelStyle: React.CSSProperties = {
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', phone: '', message: '' })
   const [sent, setSent] = useState(false)
+  const [demoSubmission, setDemoSubmission] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,12 +36,14 @@ export default function ContactForm() {
         body: JSON.stringify(form),
       })
 
-      if (!res.ok) throw new Error('Request failed')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error ?? 'Request failed')
 
+      setDemoSubmission(data.demo === true)
       setSent(true)
       setForm({ name: '', phone: '', message: '' })
     } catch {
-      setError('Something went wrong. Please call us at 519.471.9462')
+      setError(`Something went wrong. Please call us at ${SITE_CONFIG.business.phoneDisplay}`)
     } finally {
       setSubmitting(false)
     }
@@ -50,8 +54,13 @@ export default function ContactForm() {
       <div role="status" style={{ textAlign: 'center', padding: '40px 0' }}>
         <div aria-hidden="true" style={{ fontSize: '40px', marginBottom: '16px', color: 'var(--color-accent-amber)' }}>✓</div>
         <p style={{ color: 'var(--color-accent-amber)', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>
-          Message sent! Omar will call you back shortly.
+          {demoSubmission ? 'Demo complete — nothing was sent.' : 'Message sent! We will call you back shortly.'}
         </p>
+        {demoSubmission && (
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', lineHeight: 1.6 }}>
+            This form demonstrated the customer experience without storing your details or emailing anyone.
+          </p>
+        )}
       </div>
     )
   }

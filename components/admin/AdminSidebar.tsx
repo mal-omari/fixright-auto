@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 const NAV = [
   { href: '/workshop-portal/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -108,13 +109,13 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '28px', fontWeight: 700, color: '#FF9500', letterSpacing: '0.05em', lineHeight: 1,
             }}>
-              FIXRIGHT
+              {SITE_CONFIG.business.wordmarkPrimary}
             </div>
             <div style={{
               fontFamily: 'var(--font-heading), sans-serif',
               fontSize: '12px', color: '#9A8E82', letterSpacing: '0.15em', fontWeight: 400, marginTop: 2,
             }}>
-              AUTOMOTIVE
+              {SITE_CONFIG.business.wordmarkSecondary}
             </div>
             <span
               style={{
@@ -133,7 +134,7 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
             fontFamily: 'var(--font-heading), sans-serif',
             fontSize: '15px', fontWeight: 700, color: '#FF9500', letterSpacing: '0.05em',
           }}>
-            FR
+            {SITE_CONFIG.business.shortMark}
           </div>
         )}
 
@@ -275,14 +276,14 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
                 fontSize: '14px', fontWeight: 700, color: '#0D0B08', flexShrink: 0,
               }}
             >
-              O
+              {SITE_CONFIG.business.ownerInitials.slice(0, 1)}
             </div>
             <div>
               <div style={{
                 fontFamily: 'var(--font-heading), sans-serif',
                 fontSize: '14px', fontWeight: 600, color: '#F0EDE8',
               }}>
-                Omar
+                {SITE_CONFIG.business.ownerName}
               </div>
               <div style={{ fontSize: '11px', color: '#6B6560' }}>Owner</div>
             </div>

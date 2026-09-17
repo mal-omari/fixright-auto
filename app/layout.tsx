@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Inter } from "next/font/google";
-import { yearsInBusiness } from "@/lib/utils";
+import { SITE_CONFIG } from "@/lib/site-config";
 import "./globals.css";
 
 const barlowCondensed = Barlow_Condensed({
@@ -15,9 +15,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FixRight Automotive | London Ontario's Most Trusted Independent Garage",
-  description:
-    `${yearsInBusiness()} years of honest, expert auto repair in London, Ontario. Safety certifications, engine repair, electrical diagnostics, and more. No surprises — fair pricing.`,
+  title: `${SITE_CONFIG.business.name} | Fictional Garage Website & Workshop Portal Demo`,
+  description: 'A fictional demonstration of a configurable garage website, booking flow, and workshop management portal.',
+  robots: {
+    index: !SITE_CONFIG.demo.enabled,
+    follow: !SITE_CONFIG.demo.enabled,
+  },
 };
 
 export default function RootLayout({

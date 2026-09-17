@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -53,7 +54,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>
             <div style={{ fontSize: '20px', fontWeight: 800, color: '#FF9500', letterSpacing: '0.12em' }}>
-              FIXRIGHT AUTOMOTIVE
+              {SITE_CONFIG.business.name.toUpperCase()}
             </div>
             <div style={{ fontSize: '11px', color: '#3A3430', letterSpacing: '0.2em', marginTop: '8px', fontWeight: 600 }}>
               SHOP MANAGEMENT PORTAL

@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Plus, Trash2, Download, Check, Loader2, Send } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 import { useIsMobile } from '@/lib/hooks'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
@@ -264,7 +265,7 @@ export default function InvoiceDetailPage() {
   }, [total])
 
   function addLabourItem() {
-    const labourRate = parseFloat(localStorage.getItem('fixright_labour_rate') ?? '95')
+    const labourRate = parseFloat(localStorage.getItem('garage_platform_labour_rate') ?? '95')
     setLabourItems(prev => [...prev, { id: newId(), type: 'labour', description: '', quantity: 1, unit_price: labourRate, sort_order: prev.length }])
   }
 
@@ -342,7 +343,7 @@ export default function InvoiceDetailPage() {
 
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(22)
-      doc.text('FIXRIGHT AUTOMOTIVE', margin, y)
+      doc.text(SITE_CONFIG.business.name.toUpperCase(), margin, y)
 
       doc.setFontSize(20)
       doc.text('INVOICE', pageW - margin, y, { align: 'right' })
@@ -351,10 +352,10 @@ export default function InvoiceDetailPage() {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
       doc.setTextColor(100, 100, 100)
-      doc.text('2117 Aldersbrook Rd, London ON N6G 3X1', margin, y)
-      doc.text('519.471.9462', pageW - margin, y, { align: 'right' })
+      doc.text(`${SITE_CONFIG.business.addressLine1}, ${SITE_CONFIG.business.city} ON`, margin, y)
+      doc.text(SITE_CONFIG.business.phoneDisplay, pageW - margin, y, { align: 'right' })
       y += 4
-      doc.text('fixrightauto.ca', margin, y)
+      doc.text(process.env.NEXT_PUBLIC_SITE_URL || 'example.invalid', margin, y)
       doc.text(invoice.invoice_number, pageW - margin, y, { align: 'right' })
       y += 3
       doc.text(`Date: ${new Date(invoice.created_at).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' })}`, pageW - margin, y, { align: 'right' })
@@ -488,7 +489,7 @@ export default function InvoiceDetailPage() {
       doc.setFont('helvetica', 'italic')
       doc.setFontSize(9)
       doc.setTextColor(120, 120, 120)
-      doc.text('Thank you for choosing FixRight Automotive', pageW / 2, footerY + 6, { align: 'center' })
+      doc.text(`Thank you for choosing ${SITE_CONFIG.business.name}`, pageW / 2, footerY + 6, { align: 'center' })
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
       doc.text('All workmanship warranted for 90 days or 5,000km', pageW / 2, footerY + 10, { align: 'center' })
@@ -622,9 +623,9 @@ export default function InvoiceDetailPage() {
           </div>
           <div style={{ paddingTop: 16, borderTop: '1px solid #2A2420' }}>
             <span style={metaLabel}>Billed By</span>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#F0EDE8' }}>FixRight Automotive</div>
-            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>2117 Aldersbrook Rd, London ON N6G 3X1</div>
-            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 1 }}>519.471.9462</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#F0EDE8' }}>{SITE_CONFIG.business.name}</div>
+            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 2 }}>{SITE_CONFIG.business.addressLine1}, {SITE_CONFIG.business.city}, {SITE_CONFIG.business.region}</div>
+            <div style={{ fontSize: '12px', color: '#6B6560', marginTop: 1 }}>{SITE_CONFIG.business.phoneDisplay}</div>
           </div>
         </div>
 

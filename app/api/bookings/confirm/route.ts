@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateBookingConfirmedEmail } from '@/lib/emails/generateBookingConfirmed'
+import { SITE_CONFIG } from '@/lib/site-config'
+import { DEMO_API_RESPONSE, LIVE_OPERATIONS_ENABLED } from '@/lib/server-mode'
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <bookings@fixrightautomotive.com>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || `${SITE_CONFIG.business.name} <onboarding@resend.dev>`
 
 export async function POST(req: NextRequest) {
+  if (!LIVE_OPERATIONS_ENABLED) {
+    return NextResponse.json(DEMO_API_RESPONSE, { status: 200 })
+  }
+
   try {
     const auth = await requireAdmin(req)
     if (auth.response) return auth.response
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [booking.customer_email],
-      subject: 'Your Appointment is Confirmed — FixRight Automotive',
+      subject: `Your Appointment is Confirmed — ${SITE_CONFIG.business.name}`,
       html: generateBookingConfirmedEmail({
         customerName: booking.customer_name,
         serviceName,

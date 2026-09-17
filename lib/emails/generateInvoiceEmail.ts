@@ -1,5 +1,6 @@
 import type { Tables } from '@/types/database.types'
 import { escapeHtml } from './escapeHtml'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
@@ -14,9 +15,9 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
   <body style="margin:0;padding:0;font-family:Arial,sans-serif;">
     <div style="background:#1A1714;padding:32px;text-align:center;">
       <div style="color:#FF9500;font-size:24px;font-weight:bold;
-        letter-spacing:2px;">FIXRIGHT AUTOMOTIVE</div>
+        letter-spacing:2px;">${escapeHtml(SITE_CONFIG.business.name.toUpperCase())}</div>
       <div style="color:#F0EDE8;font-size:14px;margin-top:4px;">
-        2117 Aldersbrook Rd, London ON N6G 3X1 | 519.471.9462</div>
+        ${escapeHtml(SITE_CONFIG.business.addressLine1)}, ${escapeHtml(SITE_CONFIG.business.city)} ON | ${escapeHtml(SITE_CONFIG.business.phoneDisplay)}</div>
     </div>
     <div style="background:#fff;padding:32px;max-width:600px;margin:0 auto;">
       <table width="100%">
@@ -122,7 +123,7 @@ export function generateInvoiceEmail(invoice: Invoice, lineItems: LineItem[]): s
     </div>
     <div style="background:#1A1714;padding:24px;text-align:center;
       color:#9A8E82;font-size:12px;">
-      <div style="color:#FF9500;margin-bottom:8px;">Thank you for choosing FixRight Automotive</div>
+      <div style="color:#FF9500;margin-bottom:8px;">Thank you for choosing ${escapeHtml(SITE_CONFIG.business.name)}</div>
       All workmanship warranted for 90 days or 5,000km
     </div>
   </body>

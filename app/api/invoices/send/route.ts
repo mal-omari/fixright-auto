@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/api-auth'
 import { resend } from '@/lib/resend'
 import { generateInvoiceEmail } from '@/lib/emails/generateInvoiceEmail'
+import { SITE_CONFIG } from '@/lib/site-config'
+import { DEMO_API_RESPONSE, LIVE_OPERATIONS_ENABLED } from '@/lib/server-mode'
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'FixRight Auto <bookings@fixrightautomotive.com>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || `${SITE_CONFIG.business.name} <onboarding@resend.dev>`
 
 export async function POST(req: NextRequest) {
+  if (!LIVE_OPERATIONS_ENABLED) {
+    return NextResponse.json(DEMO_API_RESPONSE, { status: 200 })
+  }
+
   try {
     const auth = await requireAdmin(req)
     if (auth.response) return auth.response
@@ -33,7 +39,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [invoice.customer_email],
-      subject: `Your Invoice ${invoice.invoice_number} from FixRight Automotive — $${invoice.total.toFixed(2)} due`,
+      subject: `Your Invoice ${invoice.invoice_number} from ${SITE_CONFIG.business.name} — $${invoice.total.toFixed(2)} due`,
       html: generateInvoiceEmail(invoice, lineItems ?? []),
     })
 

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Phone } from 'lucide-react'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 export default function BookingCTA() {
   return (
@@ -17,7 +18,7 @@ export default function BookingCTA() {
           READY TO BOOK?
         </h2>
         <p className="mx-auto mb-10 max-w-md text-base" style={{ color: 'rgba(0,0,0,0.7)' }}>
-          Tell us what your car needs. We&apos;ll get back to you within the hour.
+          Try the customer journey. Demo submissions are not stored and no one will be contacted.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
@@ -41,7 +42,7 @@ export default function BookingCTA() {
             Book Online
           </Link>
           <a
-            href="tel:5194719462"
+            href={SITE_CONFIG.business.phoneHref}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px',
               color: '#111008', fontSize: '15px', fontWeight: 600,
@@ -52,7 +53,7 @@ export default function BookingCTA() {
             onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.textDecorationColor = 'rgba(17,16,8,0.35)')}
           >
             <Phone size={18} />
-            Or call us: 519.471.9462
+            Demo phone: {SITE_CONFIG.business.phoneDisplay}
           </a>
         </div>
       </div>

@@ -3,14 +3,14 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { yearsInBusiness } from '@/lib/utils'
+import { configuredYearsInBusiness } from '@/lib/site-config'
 
 const stats = [
-  { value: yearsInBusiness(), suffix: '', label: 'Years Experience' },
-  { value: 6000, suffix: '+', label: 'Vehicles Serviced' },
+  { value: configuredYearsInBusiness(), suffix: '', label: 'Sample Years' },
+  { value: 1200, suffix: '+', label: 'Sample Work Orders' },
   { value: 3, suffix: '', label: 'Certified Mechanics' },
-  { value: yearsInBusiness(), suffix: '', label: 'Years in London' },
-  { value: null, display: 'FAMILY', label: 'Owned & Operated' },
+  { value: configuredYearsInBusiness(), suffix: '', label: 'Sample History' },
+  { value: null, display: 'LOCAL', label: 'Garage Ready' },
 ]
 
 export default function TrustBar() {

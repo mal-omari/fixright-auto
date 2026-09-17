@@ -2,10 +2,11 @@ import Footer from "@/components/Footer"
 import ContactForm from "@/components/ContactForm"
 import { Phone, MapPin, Clock } from 'lucide-react'
 import type { Metadata } from 'next'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 export const metadata: Metadata = {
-  title: "Contact Us | FixRight Automotive London Ontario",
-  description: "Visit FixRight Automotive at 2117 Aldersbrook Rd, London ON, call 519.471.9462, or send us a message. Open Monday to Saturday.",
+  title: `Contact Us | ${SITE_CONFIG.business.name} Demo`,
+  description: 'Fictional contact page demonstrating configurable garage hours, location, phone, and lead capture.',
 }
 
 const HOURS = [
@@ -62,9 +63,9 @@ export default function ContactPage() {
                 <div>
                   <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px', marginBottom: '4px' }}>Address</div>
                   <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>
-                    2117 Aldersbrook Rd<br />
-                    (At Wonderland Rd &amp; Fanshawe Park Rd)<br />
-                    London ON N6G 3X1
+                    {SITE_CONFIG.business.addressLine1}<br />
+                    {SITE_CONFIG.business.addressLine2}<br />
+                    {SITE_CONFIG.business.city}, {SITE_CONFIG.business.region}
                   </div>
                 </div>
               </div>
@@ -76,10 +77,10 @@ export default function ContactPage() {
                 <div>
                   <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '14px', marginBottom: '4px' }}>Phone</div>
                   <a
-                    href="tel:5194719462"
+                    href={SITE_CONFIG.business.phoneHref}
                     style={{ color: 'var(--color-accent-amber)', textDecoration: 'none', fontSize: '16px', fontWeight: 700 }}
                   >
-                    519.471.9462
+                    {SITE_CONFIG.business.phoneDisplay}
                   </a>
                 </div>
               </div>
@@ -104,18 +105,21 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Google Maps embed */}
-            <div style={{ marginTop: '36px', borderRadius: 'var(--radius-sharp)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-              <iframe
-                src="https://maps.google.com/maps?q=2117+Aldersbrook+Rd,+London+ON+N6G+3X1&output=embed&iwloc=B"
-                width="100%"
-                height="280"
-                style={{ border: 0, display: 'block', filter: 'grayscale(0.3) invert(0.9) hue-rotate(180deg)' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="FixRight Automotive location"
-              />
+            {/* A real client deployment replaces this with its verified map. */}
+            <div
+              style={{
+                marginTop: '36px', minHeight: 280, borderRadius: 'var(--radius-sharp)',
+                border: '1px solid var(--color-border)', background: 'var(--color-bg-surface)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center',
+              }}
+            >
+              <div>
+                <MapPin size={32} color="var(--color-accent-amber)" style={{ margin: '0 auto 16px' }} aria-hidden="true" />
+                <p style={{ color: 'var(--color-text-primary)', fontWeight: 700, marginBottom: 8 }}>Map placeholder</p>
+                <p style={{ color: 'var(--color-text-secondary)', fontSize: 13, lineHeight: 1.6, maxWidth: 320 }}>
+                  Client deployments use the garage&apos;s verified address and map listing. This demo does not point to a real business.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -129,7 +133,7 @@ export default function ContactPage() {
             }}
           >
             <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '24px' }}>
-              Send a Message
+              Try the Contact Form
             </h2>
             <ContactForm />
           </div>

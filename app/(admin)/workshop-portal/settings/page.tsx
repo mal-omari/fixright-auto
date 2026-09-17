@@ -6,13 +6,14 @@ import { createClient } from '@/lib/supabase'
 import { Check, Building2, DollarSign, Wrench, Bell } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 import { useIsMobile } from '@/lib/hooks'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 type Mechanic = Tables<'mechanics'>
 
 const SHOP_INFO = {
-  name: 'FixRight Automotive',
-  address: '123 Industrial Rd, London, ON N6A 2W5',
-  phone: '519.471.9462',
+  name: SITE_CONFIG.business.name,
+  address: `${SITE_CONFIG.business.addressLine1}, ${SITE_CONFIG.business.city}, ${SITE_CONFIG.business.region}`,
+  phone: SITE_CONFIG.business.phoneDisplay,
 }
 
 const iStyle: React.CSSProperties = {
@@ -67,9 +68,9 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 
 export default function SettingsPage() {
   const isMobile = useIsMobile()
-  const [labourRate, setLabourRate] = useState(() => localStorage.getItem('fixright_labour_rate') ?? '95')
+  const [labourRate, setLabourRate] = useState(() => localStorage.getItem('garage_platform_labour_rate') ?? '95')
   const [editingRate, setEditingRate] = useState(false)
-  const [rateInput, setRateInput] = useState(() => localStorage.getItem('fixright_labour_rate') ?? '95')
+  const [rateInput, setRateInput] = useState(() => localStorage.getItem('garage_platform_labour_rate') ?? '95')
   const [rateSaved, setRateSaved] = useState(false)
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [notifSaved, setNotifSaved] = useState(false)
@@ -88,7 +89,7 @@ export default function SettingsPage() {
   }, [])
 
   function saveRate() {
-    localStorage.setItem('fixright_labour_rate', rateInput)
+    localStorage.setItem('garage_platform_labour_rate', rateInput)
     setLabourRate(rateInput)
     setEditingRate(false)
     setRateSaved(true)

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Book a Service | FixRight Automotive London Ontario",
-  description: "Book your auto service online at FixRight Automotive in London Ontario. Tell us about your vehicle and we'll confirm your appointment by phone within the hour.",
+  title: `Booking Flow | ${SITE_CONFIG.business.name} Demo`,
+  description: "Try a fictional garage booking flow. Demo submissions are not stored and no emails are sent.",
 };
 
 export default function BookLayout({ children }: { children: React.ReactNode }) {

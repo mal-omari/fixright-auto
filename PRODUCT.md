@@ -1,20 +1,22 @@
 # Product
 
+> **Current product direction (2026-09-16):** This is a reusable garage website and workshop-management demonstration, not the website of the garage named in the historical material below. The active demo identity is fictional, all sample people and records are fictional, and demo mode must never contact a production database or send email. See `DEMO-MODE.md` and `lib/site-config.ts`.
+
 ## Register
 
 brand
 
-Public marketing site is the primary register. The `/workshop-portal` admin panel is a secondary **product** surface (design serves Omar's and his mechanics' daily workflow) — override to `product` when working specifically inside `/workshop-portal`.
+Public marketing site is the primary register. The `/workshop-portal` admin panel is a secondary **product** surface demonstrating a garage team's daily workflow — override to `product` when working specifically inside `/workshop-portal`.
 
 ## Users
 
-**Public site**: Prospective and returning customers in London, Ontario searching for auto service — from first-time visitors sizing up whether FixRight is trustworthy, to the shop's 6,000+ existing customers rebooking. The job to be done is fast: understand FixRight is credible and experienced, then book a service through the 5-step `/book` flow with minimal friction.
+**Public site**: Garage owners evaluating the platform and prospective customers testing the fictional storefront. The job to be done is fast: understand the garage's value proposition, then complete the 5-step `/book` flow with minimal friction.
 
-**Admin portal** (secondary): Omar and his 3 mechanics, managing bookings, schedules, invoices, and customer history during the workday. The job is operational speed and accuracy, not persuasion.
+**Admin portal** (secondary): Garage owners, service advisors, and mechanics evaluating bookings, schedules, invoices, and customer-history workflows. The job is operational speed and accuracy, not persuasion.
 
 ## Product Purpose
 
-FixRight Automotive is a real, family-owned auto shop (28 years experience, 3 mechanics, 6,000+ customers) in London, Ontario. The public site exists to convert visitors into booked appointments and to project the credibility of an established, trustworthy shop. The admin portal exists to let Omar run the shop's day-to-day operations — bookings, scheduling, invoicing — without needing a third-party tool. Success on the public site is booking conversions; success in the admin portal is Omar and his mechanics moving through their daily workflow without friction.
+The product is a configurable garage storefront and workshop-management platform. The public site demonstrates customer acquisition and booking; the read-only admin portal demonstrates bookings, scheduling, invoicing, services, and customer history. In demo mode, success means communicating the workflow without accessing or changing real data. In isolated client deployments, success means converting visitors and helping the garage team complete daily work accurately.
 
 ## Brand Personality
 
