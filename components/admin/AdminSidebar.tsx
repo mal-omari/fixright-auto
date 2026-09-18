@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Calendar, Plus, Clock, Settings,
-  LogOut, FileText, ChevronLeft, ChevronRight, Wrench, BarChart2, Users,
+  LogOut, FileText, ChevronLeft, ChevronRight, Wrench, BarChart2, Users, RotateCcw,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { resetDemoData } from '@/lib/demo-supabase'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { clearDemoLabourRate } from '@/lib/labour-rate'
 
 const NAV = [
   { href: '/workshop-portal/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -32,7 +34,14 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
   const router = useRouter()
   const [tooltip, setTooltip] = useState<{ label: string; y: number } | null>(null)
 
-  async function logout() {
+  async function handleSessionAction() {
+    if (SITE_CONFIG.demo.enabled) {
+      resetDemoData(window.sessionStorage)
+      clearDemoLabourRate(window.sessionStorage)
+      window.location.reload()
+      return
+    }
+
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/workshop-portal')
@@ -126,7 +135,7 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
                 padding: '2px 6px', borderRadius: 4,
               }}
             >
-              ADMIN
+              {SITE_CONFIG.demo.enabled ? 'FICTIONAL DEMO' : 'ADMIN'}
             </span>
           </div>
         ) : (
@@ -291,7 +300,9 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
         )}
 
         <button
-          onClick={logout}
+          onClick={handleSessionAction}
+          aria-label={SITE_CONFIG.demo.enabled ? 'Reset fictional demo data' : 'Sign out'}
+          title={!isOpen ? (SITE_CONFIG.demo.enabled ? 'Reset Demo' : 'Sign Out') : undefined}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -318,8 +329,8 @@ export function AdminSidebar({ isOpen, onToggle }: Props) {
             e.currentTarget.style.color = '#6B6560'
           }}
         >
-          <LogOut size={14} />
-          {isOpen && <span>Sign Out</span>}
+          {SITE_CONFIG.demo.enabled ? <RotateCcw size={14} /> : <LogOut size={14} />}
+          {isOpen && <span>{SITE_CONFIG.demo.enabled ? 'Reset Demo' : 'Sign Out'}</span>}
         </button>
       </div>
     </aside>

@@ -1,4 +1,10 @@
 import type { NextConfig } from "next";
+import { resolveLiveOperationsMode } from './lib/deployment-mode'
+
+const liveOperationsEnabled = resolveLiveOperationsMode(
+  process.env.NEXT_PUBLIC_APP_MODE,
+  process.env.APP_MODE,
+)
 
 const securityHeaders = [
   {
@@ -28,6 +34,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  env: {
+    // This immutable browser-visible value is derived from both requested modes.
+    NEXT_PUBLIC_LIVE_OPERATIONS_ENABLED: liveOperationsEnabled ? 'true' : 'false',
+  },
   async headers() {
     return [
       {

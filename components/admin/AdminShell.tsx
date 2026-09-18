@@ -5,13 +5,15 @@ import { useRouter, usePathname } from 'next/navigation'
 import { AdminSidebar } from './AdminSidebar'
 import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { DemoAdminPortal } from './DemoAdminPortal'
 import { SITE_CONFIG } from '@/lib/site-config'
 
 const TITLE_MAP: Record<string, string> = {
   '/workshop-portal/dashboard':   'Dashboard',
+  '/workshop-portal/analytics':   'Analytics',
   '/workshop-portal/bookings':    'Bookings',
+  '/workshop-portal/customers':   'Customers',
   '/workshop-portal/new-booking': 'New Booking',
+  '/workshop-portal/services':    'Services',
   '/workshop-portal/invoices':    'Invoices',
   '/workshop-portal/schedule':    'Schedule',
   '/workshop-portal/settings':    'Settings',
@@ -20,6 +22,7 @@ const TITLE_MAP: Record<string, string> = {
 function getPageTitle(pathname: string): string {
   if (TITLE_MAP[pathname]) return TITLE_MAP[pathname]
   if (/\/bookings\/[^/]+/.test(pathname)) return 'Booking Detail'
+  if (/\/customers\/[^/]+/.test(pathname)) return 'Customer Detail'
   if (/\/invoices\/[^/]+/.test(pathname)) return 'Invoice'
   return 'Workshop Portal'
 }
@@ -42,16 +45,33 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const isDemoMode = SITE_CONFIG.demo.enabled
   const [checking, setChecking] = useState(!isDemoMode)
   const [isAuth, setIsAuth] = useState(isDemoMode)
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT)
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === 'undefined' || window.innerWidth < MOBILE_BREAKPOINT) return false
-    const saved = localStorage.getItem('garage_platform_sidebar_open')
-    return saved !== null ? saved === 'true' : true
-  })
+  const [isMobile, setIsMobile] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const dt = useDateTime()
 
   useEffect(() => {
-    if (isDemoMode) return
+    function handleResize() {
+      const mobile = window.innerWidth < MOBILE_BREAKPOINT
+      setIsMobile(mobile)
+      if (mobile) {
+        setSidebarOpen(false)
+        return
+      }
+
+      const saved = window.localStorage.getItem('garage_platform_sidebar_open')
+      setSidebarOpen(saved !== null ? saved === 'true' : true)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
+    if (isDemoMode) {
+      if (isLoginPage) router.replace('/workshop-portal/dashboard')
+      return
+    }
     const supabase = createClient()
 
     const checkAuth = async () => {
@@ -76,14 +96,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       }
     )
 
-    function handleResize() {
-      const m = window.innerWidth < MOBILE_BREAKPOINT
-      setIsMobile(m)
-      if (m) setSidebarOpen(false)
-    }
-    window.addEventListener('resize', handleResize)
     return () => {
-      window.removeEventListener('resize', handleResize)
       subscription.unsubscribe()
     }
   }, [pathname, router, isLoginPage, isDemoMode])
@@ -96,12 +109,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  if (isDemoMode) return <DemoAdminPortal />
-
   if (checking) {
     return (
       <div style={{ background: '#1A1714', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ color: '#3A3430', fontSize: '13px' }}>Loading…</div>
+      </div>
+    )
+  }
+
+  if (isDemoMode && isLoginPage) {
+    return (
+      <div style={{ background: '#1A1714', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#9A8E82', fontSize: '13px' }}>Opening fictional demo…</div>
       </div>
     )
   }
@@ -191,6 +210,29 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
+
+        {isDemoMode && (
+          <div
+            role="status"
+            style={{
+              minHeight: 36,
+              padding: '8px 20px',
+              background: '#2B1D08',
+              borderBottom: '1px solid rgba(255,149,0,0.35)',
+              color: '#FFB347',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              fontSize: '11px',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              lineHeight: 1.4,
+            }}
+          >
+            FICTIONAL DEMO · Enter fictional data only. No real emails, texts, receipts, or payments are sent.
+          </div>
+        )}
 
         {/* Page content */}
         <main style={{ flex: 1, overflow: 'auto', overflowX: 'hidden', maxWidth: '100%', background: '#1A1714' }}>

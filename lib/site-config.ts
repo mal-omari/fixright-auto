@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
     establishedYear: 2008,
   },
   demo: {
-    enabled: process.env.NEXT_PUBLIC_APP_MODE !== 'live',
+    enabled: process.env.NEXT_PUBLIC_LIVE_OPERATIONS_ENABLED !== 'true',
     label: 'Fictional product demo',
     notice: 'No real garage, customers, bookings, or payments are represented.',
   },

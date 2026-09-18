@@ -9,6 +9,14 @@ import { useIsMobile } from '@/lib/hooks'
 
 type Invoice = Tables<'invoices'>
 
+function getTodayEastern(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
 const STATUS_PILLS = [
   { key: 'All',     label: 'All',     color: '#9A8E82' },
   { key: 'draft',   label: 'Draft',   color: '#6B6560' },
@@ -81,7 +89,7 @@ export default function InvoicesPage() {
   const overdueCount = invoices.filter(inv => inv.status === 'overdue').length
 
   async function markPaid(id: string) {
-    const paidDate = new Date().toISOString().split('T')[0]
+    const paidDate = getTodayEastern()
     await createClient().from('invoices').update({ status: 'paid', paid_date: paidDate }).eq('id', id)
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, status: 'paid', paid_date: paidDate } : inv))
   }

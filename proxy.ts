@@ -5,7 +5,11 @@ import type { NextRequest } from 'next/server'
 export async function proxy(request: NextRequest) {
   // Demo deployments never contact Supabase or require a production session.
   // Both variables must be explicitly set to "live" for real operations.
-  if (process.env.NEXT_PUBLIC_APP_MODE !== 'live' || process.env.APP_MODE !== 'live') {
+  if (
+    process.env.NEXT_PUBLIC_LIVE_OPERATIONS_ENABLED !== 'true' ||
+    process.env.NEXT_PUBLIC_APP_MODE !== 'live' ||
+    process.env.APP_MODE !== 'live'
+  ) {
     return NextResponse.next({ request })
   }
 

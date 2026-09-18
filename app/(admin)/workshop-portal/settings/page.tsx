@@ -7,6 +7,7 @@ import { Check, Building2, DollarSign, Wrench, Bell } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 import { useIsMobile } from '@/lib/hooks'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { MAX_LABOUR_RATE, readLabourRate, writeLabourRate } from '@/lib/labour-rate'
 
 type Mechanic = Tables<'mechanics'>
 
@@ -68,9 +69,9 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 
 export default function SettingsPage() {
   const isMobile = useIsMobile()
-  const [labourRate, setLabourRate] = useState(() => localStorage.getItem('garage_platform_labour_rate') ?? '95')
+  const [labourRate, setLabourRate] = useState('95')
   const [editingRate, setEditingRate] = useState(false)
-  const [rateInput, setRateInput] = useState(() => localStorage.getItem('garage_platform_labour_rate') ?? '95')
+  const [rateInput, setRateInput] = useState('95')
   const [rateSaved, setRateSaved] = useState(false)
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [notifSaved, setNotifSaved] = useState(false)
@@ -83,14 +84,28 @@ export default function SettingsPage() {
   const [addingMechanic, setAddingMechanic] = useState(false)
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const savedRate = String(readLabourRate())
+      setLabourRate(savedRate)
+      setRateInput(savedRate)
+    })
+
     createClient().from('mechanics').select('*').order('name').then(({ data }) => {
       setMechanics(data ?? [])
     })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [])
 
   function saveRate() {
-    localStorage.setItem('garage_platform_labour_rate', rateInput)
-    setLabourRate(rateInput)
+    const savedRate = writeLabourRate(rateInput)
+    if (savedRate === null) {
+      toast.error(`Enter a labour rate between $0 and $${MAX_LABOUR_RATE}.`)
+      return
+    }
+    const displayRate = String(savedRate)
+    setRateInput(displayRate)
+    setLabourRate(displayRate)
     setEditingRate(false)
     setRateSaved(true)
     setTimeout(() => setRateSaved(false), 2500)
@@ -166,7 +181,7 @@ export default function SettingsPage() {
               <div style={{ position: 'relative', width: isMobile ? '100%' : 180 }}>
                 <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#6B6560', fontSize: '14px' }}>$</span>
                 <input
-                  type="number" min="0" step="5"
+                  type="number" min="0" max={MAX_LABOUR_RATE} step="5"
                   value={rateInput}
                   onChange={e => setRateInput(e.target.value)}
                   style={{ ...iStyle, paddingLeft: 26 }}
@@ -202,7 +217,7 @@ export default function SettingsPage() {
             </div>
           )}
           <p style={{ fontSize: '11px', color: '#4A4540', marginTop: 8 }}>
-            Stored locally. Used when generating invoices.
+            Stored in this demo tab and used when generating fictional invoices.
           </p>
         </div>
       </div>
@@ -374,7 +389,7 @@ export default function SettingsPage() {
           ))}
         </div>
         <p style={{ fontSize: '11px', color: '#3A3430', marginBottom: 16 }}>
-          Email delivery requires Resend integration. These toggles are placeholders.
+          Demo preferences are stored for presentation only. No real notification is sent.
         </p>
         <SaveBtn onClick={saveNotifs} saved={notifSaved} label="Save Preferences" />
       </div>

@@ -26,7 +26,7 @@ Read these files before changing behaviour or UI:
 ## Non-negotiable demo rules
 
 1. Demo mode is the default. Missing mode variables must fail closed.
-2. Real operations require both `NEXT_PUBLIC_APP_MODE=live` and `APP_MODE=live`.
+2. Real operations require both `NEXT_PUBLIC_APP_MODE=live` and `APP_MODE=live`; split or invalid mode values must fail the build.
 3. Demo mode must not query Supabase, require a production auth session, store records, mutate records, send email, or process payments.
 4. All displayed people, bookings, customers, invoices, contact details, reviews, statistics, and addresses must be fictional and labelled as such.
 5. The public demo may not link to a live client's private admin portal. The fictional read-only portal may be shared directly for sales demonstrations.
@@ -58,7 +58,7 @@ Read these files before changing behaviour or UI:
 - `/workshop-portal/schedule`
 - `/workshop-portal/settings`
 
-In demo mode, `components/admin/DemoAdminPortal.tsx` owns these routes and renders seeded fictional data without mounting the production Supabase pages.
+In demo mode, the original portal routes use the browser-local adapter in `lib/demo-supabase.ts` and render linked fictional data without contacting Supabase.
 
 ## Client configuration
 

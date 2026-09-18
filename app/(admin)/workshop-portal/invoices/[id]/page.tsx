@@ -9,6 +9,7 @@ import { ArrowLeft, Plus, Trash2, Download, Check, Loader2, Send } from 'lucide-
 import type { Tables } from '@/types/database.types'
 import { useIsMobile } from '@/lib/hooks'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { readLabourRate } from '@/lib/labour-rate'
 
 type Invoice = Tables<'invoices'>
 type LineItem = Tables<'invoice_line_items'>
@@ -35,8 +36,26 @@ function fmtAmount(n: number) {
   return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+function getTodayEastern(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
 let _idCounter = 0
 function newId() { return `draft-${++_idCounter}` }
+
+function lineItemSignature(labourItems: DraftItem[], partsItems: DraftItem[]): string {
+  return JSON.stringify([...labourItems, ...partsItems].map(item => ({
+    type: item.type,
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    sort_order: item.sort_order,
+  })))
+}
 
 const iBase: React.CSSProperties = {
   background: 'transparent',
@@ -206,8 +225,10 @@ export default function InvoiceDetailPage() {
   const [saving, setSaving] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [downloading, setDownloading] = useState(false)
+  const [downloadingReceipt, setDownloadingReceipt] = useState(false)
   const [sending, setSending] = useState(false)
   const [showPaidConfirm, setShowPaidConfirm] = useState(false)
+  const [savedLineItemsSignature, setSavedLineItemsSignature] = useState('')
 
   const [status, setStatus] = useState('draft')
   const [dueDate, setDueDate] = useState('')
@@ -237,8 +258,11 @@ export default function InvoiceDetailPage() {
           unit_price: item.unit_price,
           sort_order: item.sort_order,
         }))
-        setLabourItems(allItems.filter(i => i.type === 'labour'))
-        setPartsItems(allItems.filter(i => i.type === 'parts'))
+        const loadedLabourItems = allItems.filter(i => i.type === 'labour')
+        const loadedPartsItems = allItems.filter(i => i.type === 'parts')
+        setLabourItems(loadedLabourItems)
+        setPartsItems(loadedPartsItems)
+        setSavedLineItemsSignature(lineItemSignature(loadedLabourItems, loadedPartsItems))
       }
       setLoading(false)
     }
@@ -250,6 +274,13 @@ export default function InvoiceDetailPage() {
   const subtotal = labourSubtotal + partsSubtotal
   const hstAmount = subtotal * hstRate
   const total = subtotal + hstAmount
+  const invoiceIsDirty = Boolean(invoice && (
+    status !== invoice.status ||
+    dueDate !== (invoice.due_date ?? '') ||
+    notes !== (invoice.notes ?? '') ||
+    lineItemSignature(labourItems, partsItems) !== savedLineItemsSignature ||
+    Math.abs(total - invoice.total) > 0.005
+  ))
 
   // Flash total on change
   useEffect(() => {
@@ -265,7 +296,7 @@ export default function InvoiceDetailPage() {
   }, [total])
 
   function addLabourItem() {
-    const labourRate = parseFloat(localStorage.getItem('garage_platform_labour_rate') ?? '95')
+    const labourRate = readLabourRate()
     setLabourItems(prev => [...prev, { id: newId(), type: 'labour', description: '', quantity: 1, unit_price: labourRate, sort_order: prev.length }])
   }
 
@@ -305,6 +336,7 @@ export default function InvoiceDetailPage() {
       await supabase.from('invoice_line_items').insert(allItems)
     }
 
+    const nextPaidDate = status === 'paid' ? (invoice.paid_date || getTodayEastern()) : null
     const { error } = await supabase.from('invoices').update({
       status,
       due_date: dueDate || null,
@@ -315,13 +347,14 @@ export default function InvoiceDetailPage() {
       hst_rate: hstRate,
       hst_amount: hstAmount,
       total,
-      paid_date: status === 'paid' ? (invoice.paid_date || new Date().toISOString().split('T')[0]) : null,
+      paid_date: nextPaidDate,
       updated_at: new Date().toISOString(),
     }).eq('id', id)
 
     setSaving(false)
     if (!error) {
-      setInvoice(prev => prev ? { ...prev, status, labour_subtotal: labourSubtotal, parts_subtotal: partsSubtotal, subtotal, hst_amount: hstAmount, total, due_date: dueDate || null, notes: notes || null } : prev)
+      setInvoice(prev => prev ? { ...prev, status, paid_date: nextPaidDate, labour_subtotal: labourSubtotal, parts_subtotal: partsSubtotal, subtotal, hst_amount: hstAmount, total, due_date: dueDate || null, notes: notes || null } : prev)
+      setSavedLineItemsSignature(lineItemSignature(labourItems, partsItems))
       setSaveState('saved')
       setTimeout(() => setSaveState('idle'), 2000)
       toast.success('Invoice saved')
@@ -504,6 +537,10 @@ export default function InvoiceDetailPage() {
 
   async function sendInvoiceEmail() {
     if (!invoice) return
+    if (invoiceIsDirty) {
+      toast.error('Save invoice changes before sending it.')
+      return
+    }
     setSending(true)
     try {
       const res = await fetch('/api/invoices/send', {
@@ -511,11 +548,24 @@ export default function InvoiceDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invoiceId: invoice.id }),
       })
-      const data = await res.json()
+      const data: { demo?: boolean; error?: string } = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to send invoice')
+
+      // The demo API intentionally never writes. Persist the simulated workflow
+      // through the demo client so the status remains visible during the demo.
+      if (data.demo) {
+        const { error } = await createClient().from('invoices').update({
+          status: 'sent',
+          updated_at: new Date().toISOString(),
+        }).eq('id', invoice.id)
+        if (error) throw new Error('Failed to update the demo invoice status')
+      }
+
       setInvoice(prev => prev ? { ...prev, status: 'sent' } : prev)
       setStatus('sent')
-      toast.success('Invoice sent to customer')
+      toast.success(data.demo
+        ? 'SIMULATED: Invoice email was not sent.'
+        : 'Invoice sent to customer')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to send invoice')
     }
@@ -523,21 +573,126 @@ export default function InvoiceDetailPage() {
   }
 
   async function confirmMarkPaid(sendReceipt: boolean) {
+    if (!invoice) return
+    if (invoiceIsDirty) {
+      setShowPaidConfirm(false)
+      toast.error('Save invoice changes before marking it paid.')
+      return
+    }
+
+    const paidDate = invoice.paid_date || getTodayEastern()
+    const { error } = await createClient().from('invoices').update({
+      status: 'paid',
+      paid_date: paidDate,
+      updated_at: new Date().toISOString(),
+    }).eq('id', invoice.id)
+
+    if (error) {
+      toast.error('Failed to mark invoice as paid')
+      return
+    }
+
     setStatus('paid')
+    setInvoice(prev => prev ? { ...prev, status: 'paid', paid_date: paidDate } : prev)
     setShowPaidConfirm(false)
-    if (sendReceipt && invoice) {
+    toast.success('Invoice marked as paid')
+
+    if (sendReceipt) {
       try {
         const res = await fetch('/api/invoices/receipt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ invoiceId: invoice.id }),
         })
-        if (!res.ok) throw new Error()
-        toast.success('Receipt sent to customer')
+        const data: { demo?: boolean; error?: string } = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Failed to send receipt')
+        toast.success(data.demo
+          ? 'SIMULATED: Receipt email was not sent.'
+          : 'Receipt sent to customer')
       } catch {
-        toast.error('Failed to send receipt')
+        toast.error('Invoice was marked paid, but the receipt failed to send')
       }
     }
+  }
+
+  async function downloadReceiptPDF() {
+    if (!invoice || invoice.status !== 'paid' || !invoice.paid_date) return
+    if (invoiceIsDirty) {
+      toast.error('Save invoice changes before generating a receipt.')
+      return
+    }
+    setDownloadingReceipt(true)
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+      const pageW = 210
+      const margin = 20
+      const paidDate = invoice.paid_date
+      const vehicle = [invoice.vehicle_year, invoice.vehicle_make, invoice.vehicle_model].filter(Boolean).join(' ') || '—'
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(22)
+      doc.setTextColor(0, 0, 0)
+      doc.text(SITE_CONFIG.business.name.toUpperCase(), margin, 22)
+      doc.setFontSize(20)
+      doc.text('PAYMENT RECEIPT', pageW - margin, 22, { align: 'right' })
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(100, 100, 100)
+      doc.text(`${SITE_CONFIG.business.addressLine1}, ${SITE_CONFIG.business.city} ON`, margin, 29)
+      doc.text(SITE_CONFIG.business.phoneDisplay, pageW - margin, 29, { align: 'right' })
+      doc.text(`Invoice: ${invoice.invoice_number}`, pageW - margin, 34, { align: 'right' })
+
+      doc.setDrawColor(200, 200, 200)
+      doc.line(margin, 42, pageW - margin, 42)
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(100, 100, 100)
+      doc.text('RECEIVED FROM', margin, 54)
+      doc.text('VEHICLE', 120, 54)
+      doc.setFontSize(12)
+      doc.setTextColor(0, 0, 0)
+      doc.text(invoice.customer_name ?? '—', margin, 61)
+      doc.text(vehicle, 120, 61)
+
+      doc.setFillColor(236, 253, 245)
+      doc.roundedRect(margin, 76, pageW - margin * 2, 44, 3, 3, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(40, 150, 80)
+      doc.text('PAID IN FULL', margin + 8, 88)
+      doc.setFontSize(24)
+      doc.text(fmtAmount(invoice.total), margin + 8, 104)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(70, 100, 80)
+      doc.text(`Payment recorded ${new Date(paidDate + 'T00:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' })}`, pageW - margin - 8, 102, { align: 'right' })
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(70, 70, 70)
+      doc.text(`Labour: ${fmtAmount(invoice.labour_subtotal)}`, margin, 137)
+      doc.text(`Parts: ${fmtAmount(invoice.parts_subtotal)}`, margin, 144)
+      doc.text(`HST: ${fmtAmount(invoice.hst_amount)}`, margin, 151)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(0, 0, 0)
+      doc.text(`Total paid: ${fmtAmount(invoice.total)}`, margin, 161)
+
+      doc.setDrawColor(200, 200, 200)
+      doc.line(margin, 270, pageW - margin, 270)
+      doc.setFont('helvetica', 'italic')
+      doc.setFontSize(9)
+      doc.setTextColor(120, 120, 120)
+      doc.text('Thank you. Please retain this receipt for your records.', pageW / 2, 277, { align: 'center' })
+
+      doc.save(`${invoice.invoice_number}-receipt.pdf`)
+    } catch (err) {
+      console.error('Receipt PDF generation failed:', err)
+      toast.error('Failed to generate receipt PDF')
+    }
+    setDownloadingReceipt(false)
   }
 
   if (loading) {
@@ -642,7 +797,17 @@ export default function InvoiceDetailPage() {
                 return (
                   <button
                     key={s}
-                    onClick={() => setStatus(s)}
+                    onClick={() => {
+                      if (s === 'paid' && invoice.status !== 'paid') {
+                        if (invoiceIsDirty) {
+                          toast.error('Save invoice changes before marking it paid.')
+                          return
+                        }
+                        setShowPaidConfirm(true)
+                        return
+                      }
+                      setStatus(s)
+                    }}
                     style={{
                       padding: '5px 12px', borderRadius: 6,
                       fontFamily: 'var(--font-heading), sans-serif',
@@ -707,16 +872,37 @@ export default function InvoiceDetailPage() {
               <Download size={14} />
               {downloading ? 'Generating…' : 'Download PDF'}
             </button>
-            {invoice.customer_email ? (
+            {invoice.status === 'paid' && Boolean(invoice.paid_date) && (
+              <button
+                onClick={downloadReceiptPDF}
+                disabled={downloadingReceipt || invoiceIsDirty}
+                title={invoiceIsDirty ? 'Save invoice changes before generating a receipt' : undefined}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'rgba(40,200,80,0.1)', color: '#28C850',
+                  border: '1px solid rgba(40,200,80,0.3)', borderRadius: 8,
+                  padding: '10px 16px', fontSize: '12px', fontWeight: 600,
+                  cursor: downloadingReceipt || invoiceIsDirty ? 'not-allowed' : 'pointer',
+                  opacity: invoiceIsDirty ? 0.55 : 1,
+                  fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
+                }}
+              >
+                <Download size={14} />
+                {downloadingReceipt ? 'Generating…' : 'Download Receipt PDF'}
+              </button>
+            )}
+            {invoice.status !== 'paid' && (invoice.customer_email ? (
               <button
                 onClick={sendInvoiceEmail}
-                disabled={sending}
+                disabled={sending || invoiceIsDirty}
+                title={invoiceIsDirty ? 'Save invoice changes before sending' : undefined}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   background: 'rgba(59,130,246,0.1)', color: '#3B82F6',
                   border: '1px solid rgba(59,130,246,0.3)', borderRadius: 8,
                   padding: '10px 16px', fontSize: '12px', fontWeight: 600,
-                  cursor: sending ? 'not-allowed' : 'pointer',
+                  cursor: sending || invoiceIsDirty ? 'not-allowed' : 'pointer',
+                  opacity: invoiceIsDirty ? 0.55 : 1,
                   fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
                 }}
               >
@@ -738,23 +924,26 @@ export default function InvoiceDetailPage() {
               >
                 <Send size={14} /> No Customer Email
               </button>
-            )}
-            {status !== 'paid' && !showPaidConfirm && (
+            ))}
+            {invoice.status !== 'paid' && !showPaidConfirm && (
               <button
                 onClick={() => setShowPaidConfirm(true)}
+                disabled={invoiceIsDirty}
+                title={invoiceIsDirty ? 'Save invoice changes before marking paid' : undefined}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   background: 'rgba(40,200,80,0.1)', color: '#28C850',
                   border: '1px solid rgba(40,200,80,0.3)', borderRadius: 8,
                   padding: '10px 16px', fontSize: '12px', fontWeight: 600,
-                  cursor: 'pointer',
+                  cursor: invoiceIsDirty ? 'not-allowed' : 'pointer',
+                  opacity: invoiceIsDirty ? 0.55 : 1,
                   fontFamily: 'var(--font-heading), sans-serif', letterSpacing: '0.06em',
                 }}
               >
-                <Check size={14} /> Mark as Paid
+                <Check size={14} /> {invoiceIsDirty ? 'Save Changes Before Payment' : 'Mark as Paid'}
               </button>
             )}
-            {status !== 'paid' && showPaidConfirm && (
+            {invoice.status !== 'paid' && showPaidConfirm && (
               <div style={{
                 background: 'rgba(40,200,80,0.06)', border: '1px solid rgba(40,200,80,0.25)',
                 borderRadius: 8, padding: 12,

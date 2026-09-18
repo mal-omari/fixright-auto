@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:demo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/demo-supabase.test.mjs",
+    "test:demo:coverage": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-test-coverage tests/demo-supabase.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

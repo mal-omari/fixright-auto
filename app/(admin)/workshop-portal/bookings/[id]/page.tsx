@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { ArrowLeft, Car, User, FileText } from 'lucide-react'
 import type { Tables } from '@/types/database.types'
 import { useIsMobile } from '@/lib/hooks'
+import { readLabourRate } from '@/lib/labour-rate'
 
 type Booking = Tables<'bookings'>
 type Mechanic = Tables<'mechanics'>
@@ -135,8 +136,11 @@ export default function BookingDetailPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bookingId: booking.id }),
           })
+          const data: { demo?: boolean } = await res.json()
           if (res.ok) {
-            toast.success('Confirmation email sent to customer')
+            toast.success(data.demo
+              ? 'SIMULATED: Confirmation email was not sent.'
+              : 'Confirmation email sent to customer')
           } else {
             toast.error('Booking saved, but confirmation email failed to send')
           }
@@ -151,7 +155,7 @@ export default function BookingDetailPage() {
     if (!booking) return
     setCreatingInvoice(true)
     const supabase = createClient()
-    const labourRate = parseFloat(localStorage.getItem('garage_platform_labour_rate') ?? '95')
+    const labourRate = readLabourRate()
     const hrs = estimatedHours ? parseFloat(estimatedHours) : 1
 
     const { data: invoiceNum } = await supabase.rpc('next_invoice_number')
@@ -227,7 +231,10 @@ export default function BookingDetailPage() {
   }
 
   const vehicle = [booking.vehicle_year, booking.vehicle_make, booking.vehicle_model].filter(Boolean).join(' ') || '—'
-  const breadcrumb = `#${booking.id.slice(0, 8).toUpperCase()} — ${booking.customer_name}`
+  const bookingReference = /^bookings?-/.test(booking.id)
+    ? 'Fictional booking'
+    : `#${booking.id.slice(0, 8).toUpperCase()}`
+  const breadcrumb = `${bookingReference} — ${booking.customer_name}`
 
   const card: React.CSSProperties = {
     background: '#1E1C18', border: '1px solid #2A2420',
