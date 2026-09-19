@@ -8,6 +8,7 @@ The identity used by the garage for which the prototype was first created is arc
 
 Read these files before changing behaviour or UI:
 
+- `/Users/farouq/Projects/portfolio/company/sales/fixright/HANDOFF-2026-09-16.md` — canonical cross-session product and sales state; update it before ending meaningful work.
 - `DEMO-MODE.md` — safety boundary and live activation requirements.
 - `PRODUCT.md` — users, product purpose, and interaction principles.
 - `DESIGN.md` — visual language and accessibility requirements.
